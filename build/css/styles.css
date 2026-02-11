@@ -159,6 +159,21 @@ body {
     pointer-events: auto;
 }
 
+.contact-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 11, 14, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 50;
+}
+
+.contact-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 .contact-panel__body {
     display: grid;
     gap: 10px;
@@ -554,6 +569,17 @@ body {
     .row__item {
         padding-bottom: 110%;
     }
+
+    .contact-backdrop {
+        display: none;
+    }
+
+    .contact-panel__body a {
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
+    }
+
 }
 
 @media (max-width: 600px) {

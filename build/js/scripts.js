@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const items = Array.from(document.querySelectorAll(".row__item"));
     const contactPanel = document.querySelector(".contact-panel");
+    const contactBackdrop = document.querySelector(".contact-backdrop");
     const contactClose = document.querySelector(".contact-panel__close");
     const contactTriggers = Array.from(document.querySelectorAll(".stat--interactive"));
     const hints = Array.from(document.querySelectorAll(".hint"));
@@ -38,6 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeContact = () => {
         if (!contactPanel) return;
         contactPanel.classList.remove("is-open");
+        if (contactBackdrop) {
+            contactBackdrop.classList.remove("is-open");
+        }
     };
 
     const rowContainer = document.querySelector(".row");
@@ -63,7 +67,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (contactPanel && contactTriggers.length) {
         const toggleContact = (trigger) => {
             positionContactPanel(trigger);
-            contactPanel.classList.toggle("is-open");
+            const willOpen = !contactPanel.classList.contains("is-open");
+            contactPanel.classList.toggle("is-open", willOpen);
+            if (contactBackdrop) {
+                contactBackdrop.classList.toggle("is-open", willOpen);
+            }
         };
 
         contactTriggers.forEach((trigger) => {
