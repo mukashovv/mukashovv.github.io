@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Курс по Супер Таблице — видеокурс</title>
+    <meta name="description" content="Видеокурс по Супер Таблице: настройка, автоматизация, отчёты и контроль бюджета.">
+    <link rel="icon" href="../assets/img/super_tablica_logo.jpg" type="image/jpeg">
+    <link rel="icon" href="../assets/img/super_tablica_logo.jpg" type="image/jpeg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" href="../build/css/styles.css">
+    <style>
+        :root {
+            --course-bg: #0f1014;
+            --course-ink: #ffffff;
+            --course-muted: rgba(255,255,255,0.68);
+            --course-accent: #e4372b;
+            --course-accent-2: #ff7b2c;
+            --course-card: rgba(255,255,255,0.06);
+            --course-stroke: rgba(255,255,255,0.08);
+        }
+        body {
+            background: var(--course-bg);
+            color: var(--course-ink);
+        }
+        .course-page {
+            min-height: 100vh;
+            background: radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 40%),
+                radial-gradient(circle at 40% 20%, rgba(255,255,255,0.04), transparent 45%),
+                var(--course-bg);
+        }
+        .course-header {
+            padding: 26px 0 10px;
+            position: relative;
+            z-index: 1001;
+        }
+        .course-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        .course-brand {
+            font-family: "Unbounded", sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 16px;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .course-brand span:first-child {
+            line-height: 1.1;
+        }
+        .course-brand span:last-child {
+            font-family: "Manrope", sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.55);
+            font-weight: 300;
+            line-height: 1;
+        }
+        .course-menu {
+            display: flex;
+            gap: 18px;
+            font-size: 12px;
+        }
+        .burger {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .burger span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: #fff;
+            position: relative;
+        }
+        .burger span::before,
+        .burger span::after {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 2px;
+            background: #fff;
+            left: 0;
+        }
+        .burger span::before { top: -6px; }
+        .burger span::after { top: 6px; }
+        .course-menu a {
+            color: var(--course-muted);
+            text-decoration: none;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .course-menu a:hover {
+            color: #fff;
+        }
+        .course-cta {
+            background: var(--course-accent);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            box-shadow: 0 14px 30px rgba(228,55,43,0.35);
+        }
+        .hero {
+            padding: 32px 0 80px;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 26px;
+            align-items: center;
+        }
+        .hero h1 {
+            font-family: "Unbounded", sans-serif;
+            font-size: clamp(32px, 4vw, 52px);
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .hero p {
+            color: var(--course-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .hero-actions a {
+            text-decoration: none;
+        }
+        .btn-buy {
+            background: linear-gradient(180deg, #ff4b3b, #c52a21);
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 999px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-size: 12px;
+            box-shadow: 0 18px 38px rgba(228,55,43,0.35);
+        }
+        .btn-ghost {
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 999px;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .hero-media {
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            min-height: 420px;
+            background: #1b1b22 center/cover no-repeat;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .hero-media::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+        }
+        .hero-media__content {
+            position: absolute;
+            inset: 0;
+            padding: 26px;
+            display: grid;
+            align-content: end;
+            z-index: 1;
+        }
+        .hero-media__content strong {
+            font-size: 22px;
+            font-family: "Unbounded", sans-serif;
+        }
+        .hero-media__content span {
+            color: var(--course-muted);
+        }
+        .section {
+            padding: 50px 0 70px;
+        }
+        .section-title {
+            font-family: "Unbounded", sans-serif;
+            font-size: 26px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .video-block {
+            background: rgba(255,255,255,0.04);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.08);
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
+            gap: 18px;
+            padding: 20px;
+            align-items: center;
+        }
+        .video-frame {
+            aspect-ratio: 16 / 9;
+            border-radius: 24px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .video-text h3 {
+            font-family: "Unbounded", sans-serif;
+            margin-bottom: 12px;
+        }
+        .video-text p {
+            color: var(--course-muted);
+            line-height: 1.6;
+        }
+        .result-block {
+            text-align: center;
+            padding: 60px 20px;
+            border-radius: 30px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.06), transparent 70%);
+        }
+        .result-block h2 {
+            font-family: "Unbounded", sans-serif;
+            font-size: clamp(28px, 3.5vw, 44px);
+        }
+        .result-block p {
+            color: var(--course-muted);
+            font-size: 18px;
+            margin-top: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .card {
+            background: var(--course-card);
+            border: 1px solid var(--course-stroke);
+            border-radius: 22px;
+            padding: 16px;
+            display: grid;
+            gap: 10px;
+        }
+        .card strong {
+            font-family: "Unbounded", sans-serif;
+            font-size: 16px;
+        }
+        .card p {
+            color: var(--course-muted);
+            margin: 0;
+        }
+        .price-block {
+            display: grid;
+            grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 0.7fr);
+            gap: 18px;
+            align-items: center;
+            background: rgba(255,255,255,0.04);
+            border-radius: 30px;
+            padding: 28px 30px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .price-info .section-title {
+            margin-bottom: 12px;
+        }
+        .price-tag {
+            font-family: "Unbounded", sans-serif;
+            font-size: clamp(28px, 4vw, 48px);
+        }
+        .price-note {
+            color: var(--course-muted);
+            margin: 0;
+        }
+        .price-cta {
+            display: grid;
+            align-items: center;
+            gap: 18px;
+            justify-items: end;
+            text-align: right;
+        }
+        .price-cta__content {
+            display: grid;
+            gap: 12px;
+            justify-items: end;
+        }
+        .course-preview {
+            width: min(360px, 100%);
+            aspect-ratio: 16 / 9;
+            border-radius: 20px;
+            background: url("../assets/img/cards/super_course.png") center/cover no-repeat;
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+        }
+        .price-preview-wrap {
+            display: grid;
+            justify-items: center;
+            margin-top: 0;
+        }
+        .teacher {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 18px;
+            align-items: center;
+        }
+        .teacher-card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 22px;
+        }
+        .teacher-card h3 {
+            font-family: "Unbounded", sans-serif;
+            margin-bottom: 12px;
+        }
+        .teacher-card p {
+            color: var(--course-muted);
+            line-height: 1.6;
+        }
+        .teacher-photo {
+            border-radius: 28px;
+            min-height: 380px;
+            background: #1b1b22 center/cover no-repeat;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .timeline {
+            display: grid;
+            gap: 12px;
+        }
+        .timeline-item {
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.04);
+        }
+        .timeline-item strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+        .faq {
+            display: grid;
+            gap: 14px;
+        }
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding: 14px 0;
+        }
+        .faq-question {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: #fff;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .faq-question span {
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1;
+            margin-left: 12px;
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+            color: var(--course-muted);
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+        .faq-item.is-open .faq-answer {
+            max-height: 240px;
+        }
+        .cta-final {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .cta-final p {
+            color: var(--course-muted);
+            margin-bottom: 18px;
+        }
+        .footer {
+            padding: 30px 0 50px;
+            color: var(--course-muted);
+            text-align: center;
+            font-size: 13px;
+        }
+        @media (max-width: 980px) {
+            .hero-grid,
+            .video-block,
+            .price-block,
+            .teacher {
+                grid-template-columns: 1fr;
+            }
+            .price-preview-wrap {
+                order: 1;
+            }
+            .price-info {
+                order: 2;
+            }
+            .price-cta {
+                order: 3;
+            }
+            .price-cta {
+                justify-items: start;
+                text-align: left;
+                margin-top: 6px;
+            }
+            .price-cta__content {
+                justify-items: start;
+            }
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .course-menu {
+                position: absolute;
+                top: 72px;
+                right: 20px;
+                flex-direction: column;
+                gap: 12px;
+                background: rgba(0,0,0,0.85);
+                border: 1px solid rgba(255,255,255,0.12);
+                border-radius: 16px;
+                padding: 14px 16px;
+                display: none;
+                z-index: 1000;
+                pointer-events: auto;
+            }
+            .course-menu.is-open {
+                display: flex;
+            }
+            .burger {
+                display: inline-flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="course-page">
+        <header class="course-header">
+            <div class="container">
+                <div class="course-brand">
+                    <span>Супер Таблица</span>
+                    <span>курс по Супер Таблице</span>
+                </div>
+                <nav class="course-menu">
+                    <a href="#video">Видео</a>
+                    <a href="#program">Программа</a>
+                    <a href="#price">Стоимость</a>
+                    <a href="#faq">FAQ</a>
+                </nav>
+                <button class="burger" type="button" aria-label="Открыть меню">
+                    <span></span>
+                </button>
+                <a class="course-cta" href="#buy">Купить курс</a>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero" id="top">
+                <div class="container hero-grid">
+                    <div>
+                        <h1>Как выстроить систему учёта и контроля денег в одной таблице</h1>
+                        <p>Видеокурс о том, как навести порядок в финансах, видеть картину целиком и принимать решения быстрее. Всё на базе Супер Таблицы — без хаоса и ручной рутины.</p>
+                        <div class="hero-actions">
+                            <a class="btn-buy" href="#buy">Купить курс</a>
+                            <a class="btn-ghost" href="#video">Смотреть фрагмент</a>
+                        </div>
+                    </div>
+                    <div class="hero-media" style="background-image:url('../assets/img/cards/super_course.png')">
+                        <div class="hero-media__content">
+                            <strong>Жаныбек Мукаш</strong>
+                            <span>основатель Супер Таблицы, предприниматель</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="video">
+                <div class="container">
+                    <h2 class="section-title">Посмотрите вводное видео</h2>
+                    <div class="video-block">
+                        <div class="video-frame">
+                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/ysz5S6PUM-U" title="Видео о курсе" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <div class="video-text">
+                            <h3>Зачем нужна Супер Таблица</h3>
+                            <p>Короткий фрагмент о том, как системный учёт помогает экономить деньги и время. Основа курса — работающие шаблоны и простая логика.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="container">
+                    <div class="result-block">
+                        <h2>Вы научитесь видеть отклонения от идеальной картины</h2>
+                        <p>Вы уверенно освоите Супер Таблицу — без сложности, с понятными шагами и ясной системой.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="program">
+                <div class="container">
+                    <h2 class="section-title">Что будет внутри</h2>
+                    <div class="grid-3">
+                        <div class="card"><strong>Сценарии учёта</strong><p>Доходы, расходы, цели и проекты — всё в одной системе.</p></div>
+                        <div class="card"><strong>Автоматизация</strong><p>Формулы, сводные таблицы, готовые шаблоны.</p></div>
+                        <div class="card"><strong>Контроль</strong><p>План‑факт, отчёты и прозрачность в цифрах.</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="price">
+                <div class="container">
+                    <div class="price-block">
+                        <div class="price-preview-wrap">
+                            <div class="course-preview" aria-hidden="true"></div>
+                        </div>
+                        <div class="price-info">
+                            <h2 class="section-title" style="text-align:left;">Курс уже записан</h2>
+                            <p class="price-note">Доступ открывается сразу после оплаты. Формат — 3,5 часа видео без воды.</p>
+                        </div>
+                        <div class="price-cta">
+                            <div class="price-cta__content">
+                                <div class="price-tag">20 000 <u>с</u></div>
+                                <a class="btn-buy" href="#buy">Купить курс</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="container teacher">
+                    <div class="teacher-photo" style="background-image:url('../assets/img/author_.jpg')"></div>
+                    <div class="teacher-card">
+                        <h3>Автор курса</h3>
+                        <p>Жаныбек Мукаш — основатель Супер Таблицы и предприниматель. В курсе показывает, как выстроить систему учёта и превратить таблицу в инструмент управления деньгами и проектами.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="buy">
+                <div class="container">
+                    <h2 class="section-title">Купить курс</h2>
+                    <div class="timeline">
+                        <div class="timeline-item"><strong>1. Оплата</strong>Оплатите банковской картой или переводом.</div>
+                        <div class="timeline-item"><strong>2. Доступ</strong>Получите ссылку на уроки сразу после оплаты.</div>
+                        <div class="timeline-item"><strong>3. Практика</strong>Настройте таблицу под себя за 1–2 вечера.</div>
+                    </div>
+                    <div style="margin-top:18px;">
+                        <a class="btn-buy" href="https://wa.me/996709139603" target="_blank" rel="noopener">Купить курс</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="faq">
+                <div class="container">
+                    <h2 class="section-title">Частые вопросы</h2>
+                    <div class="faq">
+                        <div class="faq-item">
+                            <button class="faq-question" type="button">Подойдёт ли курс новичкам?<span>+</span></button>
+                            <div class="faq-answer">Да, начинаем с базовой структуры и шаг за шагом усложняем.</div>
+                        </div>
+                        <div class="faq-item">
+                            <button class="faq-question" type="button">Сколько длится доступ?<span>+</span></button>
+                            <div class="faq-answer">6 месяцев после покупки.</div>
+                        </div>
+                        <div class="faq-item">
+                            <button class="faq-question" type="button">Можно ли пройти курс с телефона?<span>+</span></button>
+                            <div class="faq-answer">Да, но удобнее с ноутбука.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-final">
+                <div class="container">
+                    <p>Готовы начать? Доступ открывается сразу после оплаты.</p>
+                    <a class="btn-buy" href="https://wa.me/996709139603" target="_blank" rel="noopener">Купить курс</a>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">Курс по Супер Таблице — порядок в финансах и проектах.</footer>
+    </div>
+    <script>
+        const burger = document.querySelector(".burger");
+        const courseMenu = document.querySelector(".course-menu");
+        if (burger && courseMenu) {
+            burger.addEventListener("click", () => {
+                courseMenu.classList.toggle("is-open");
+            });
+            courseMenu.querySelectorAll("a").forEach((link) => {
+                link.addEventListener("click", () => {
+                    courseMenu.classList.remove("is-open");
+                });
+            });
+        }
+        document.querySelectorAll(".faq-item").forEach((item) => {
+            const btn = item.querySelector(".faq-question");
+            if (!btn) return;
+            btn.addEventListener("click", () => {
+                const isOpen = item.classList.toggle("is-open");
+                const icon = btn.querySelector("span");
+                if (icon) icon.textContent = isOpen ? "–" : "+";
+            });
+        });
+    </script>
+</body>
+</html>
