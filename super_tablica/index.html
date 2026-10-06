@@ -64,25 +64,11 @@
             color: #fff;
             font-weight: 700;
             font-family: var(--font-title);
+            object-fit: cover;
         }
         .brand__name {
             font-family: var(--font-title);
             font-size: 18px;
-        }
-        .site-actions a {
-            width: 40px;
-            height: 40px;
-            display: grid;
-            place-items: center;
-            border-radius: 10px;
-            background: var(--paper-strong);
-            border: 1px solid var(--line);
-            color: var(--ink);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .site-actions a:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
         }
         .landing {
             flex: 1;
@@ -251,9 +237,11 @@
         .sheet-grid {
             padding: 14px 18px 20px;
             background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+            overflow-x: auto;
         }
         .sheet-grid table {
             width: 100%;
+            min-width: 540px;
             border-collapse: collapse;
             font-size: 13px;
         }
@@ -434,16 +422,15 @@
         }
         .objection-media {
             width: 100%;
-            aspect-ratio: 4 / 3;
             border-radius: 18px;
-            background: linear-gradient(135deg, #d9f2e3 0%, #f2f7ff 50%, #fff3d6 100%);
             border: 1px solid var(--line);
-            display: grid;
-            place-items: center;
-            color: var(--ink-faint);
-            font-size: 13px;
-            text-align: center;
-            padding: 18px;
+            background: var(--paper-strong);
+            overflow: hidden;
+        }
+        .objection-media img {
+            display: block;
+            width: 100%;
+            height: auto;
         }
         .features {
             margin-top: 28px;
@@ -629,6 +616,44 @@
             border-bottom: 1px dashed var(--ink-faint);
             padding-bottom: 2px;
         }
+        .purchase-strip {
+            margin-top: 22px;
+            padding: 22px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            border: 1px solid #cce8d7;
+            border-radius: 18px;
+            background: linear-gradient(115deg, #e8f6ee 0%, #f4faf6 55%, #ffffff 100%);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        }
+        .purchase-strip__copy h3 {
+            font-family: var(--font-title);
+            font-size: 19px;
+            line-height: 1.25;
+            margin: 0 0 5px;
+        }
+        .purchase-strip__copy p {
+            color: var(--ink-soft);
+            font-size: 14px;
+            line-height: 1.45;
+            margin: 0;
+        }
+        .purchase-strip__button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex: 0 0 auto;
+            min-height: 50px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
         .modal {
             position: fixed;
             inset: 0;
@@ -672,14 +697,312 @@
             color: var(--ink-faint);
             font-size: 13px;
         }
+        .site-footer {
+            border-top: 1px solid var(--line);
+        }
+        .site-footer .container {
+            gap: 18px;
+            flex-wrap: nowrap;
+        }
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 0;
+            white-space: nowrap;
+        }
+        .footer-brand__identity {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .footer-brand__icon {
+            display: block;
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        .site-footer .footer-brand__text {
+            color: var(--ink-faint);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .payment-methods {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .payment-methods img {
+            display: block;
+            height: 30px;
+            width: auto;
+            flex: 0 0 auto;
+            object-fit: contain;
+        }
+        .footer-support {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .footer-support__copy {
+            min-width: 0;
+        }
+        .footer-support__copy p {
+            margin: 0;
+            white-space: nowrap;
+        }
+        .footer-support__button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .footer-social {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .footer-social__link {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--paper-strong);
+            color: var(--ink);
+            font-size: 19px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .footer-social__link:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        .footer-social__link svg {
+            width: 20px;
+            height: 20px;
+            color: #f15f2c;
+        }
         @media (max-width: 980px) {
             .intro-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
             .objections-grid,
             .features,
             .ai-helper {
                 grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+        @media (max-width: 1120px) {
+            .site-footer .container {
+                flex-wrap: wrap;
+            }
+            .footer-support {
+                flex: 1 1 100%;
+                justify-content: flex-end;
+            }
+        }
+        @media (max-width: 640px) {
+            .container {
+                width: calc(100% - 32px);
+            }
+            .site-header {
+                padding: 0;
+            }
+            .site-header .container {
+                padding: 14px 0 8px;
+            }
+            .landing {
+                padding: 18px 0 36px;
+            }
+            .brand {
+                gap: 10px;
+            }
+            .brand__name {
+                font-size: 16px;
+            }
+            .headline {
+                font-size: clamp(28px, 8vw, 36px);
+                line-height: 1.12;
+                margin-bottom: 12px;
+            }
+            .lead {
+                font-size: 15px;
+                line-height: 1.5;
+                margin-bottom: 18px;
+            }
+            .pill-row {
+                gap: 8px;
+                margin-bottom: 18px;
+            }
+            .pill {
+                padding: 7px 10px;
+                font-size: 12px;
+            }
+            .cta-row {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 18px;
+            }
+            .cta-row .button {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+            .sheet-card {
+                border-radius: 16px;
+            }
+            .sheet-topbar {
+                padding: 12px 14px;
+            }
+            .doc-title {
+                flex-wrap: wrap;
+                gap: 4px 8px;
+                font-size: 14px;
+            }
+            .doc-title span {
+                font-size: 12px;
+            }
+            .sheet-toolbar {
+                gap: 7px;
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+            .tool-pill {
+                padding: 5px 8px;
+            }
+            .sheet-grid {
+                padding: 10px 12px 14px;
+            }
+            .sheet-grid table {
+                font-size: 12px;
+            }
+            .sheet-grid th,
+            .sheet-grid td {
+                padding: 7px 8px;
+            }
+            .sheet-footer {
+                gap: 7px;
+                padding: 10px 12px;
+                overflow-x: auto;
+            }
+            .sheet-tab {
+                flex: 0 0 auto;
+                padding: 5px 9px;
+            }
+            .trust,
+            .objections,
+            .feature-card,
+            .feature-graph,
+            .ai-helper,
+            .policy {
+                padding: 16px;
+                border-radius: 16px;
+            }
+            .trust-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .reviews,
+            .features,
+            .ai-helper,
+            .objections,
+            .policy {
+                margin-top: 22px;
+            }
+            .objections h3,
+            .feature-card h3,
+            .ai-helper h3 {
+                font-size: 18px;
+            }
+            .objection-card {
+                padding: 14px;
+            }
+            .objection-media {
+                border-radius: 14px;
+            }
+            .feature-stats {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .stat-card {
+                padding: 12px;
+            }
+            .feature-graph,
+            .ai-card {
+                padding: 14px;
+            }
+            .purchase-strip {
+                align-items: stretch;
+                flex-direction: column;
+                gap: 14px;
+                margin-top: 18px;
+                padding: 18px;
+                border-radius: 16px;
+            }
+            .purchase-strip__copy h3 {
+                font-size: 17px;
+            }
+            .purchase-strip__copy p {
+                font-size: 13px;
+            }
+            .purchase-strip__button {
+                width: 100%;
+                min-height: 50px;
+            }
+            .site-footer .container {
+                padding: 14px 0;
+                gap: 14px;
+            }
+            .site-footer .container,
+            .footer-support {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .footer-brand__identity {
+                gap: 10px;
+            }
+            .site-footer .footer-brand__text {
+                white-space: normal;
+            }
+            .footer-support {
+                gap: 12px;
+            }
+            .footer-support__copy p {
+                font-size: 13px;
+                white-space: normal;
+            }
+            .footer-support__button {
+                width: 100%;
+                justify-content: center;
+            }
+            .footer-brand {
+                flex-wrap: wrap;
+            }
+            .payment-methods {
+                gap: 7px;
+                margin-left: 52px;
+            }
+            .payment-methods img {
+                height: 26px;
+            }
+            .modal-card {
+                max-height: calc(100vh - 32px);
+                overflow-y: auto;
+                padding: 20px 16px;
             }
         }
     </style>
@@ -689,16 +1012,11 @@
         <header class="site-header">
             <div class="container">
                 <div class="brand">
-                    <div class="brand__mark">С</div>
+                    <img class="brand__mark" src="../assets/img/super_tablica_logo_darker.jpg" alt="" aria-hidden="true">
                     <div class="brand__text">
                         <span class="brand__name">Супер Таблица</span>
                     </div>
                 </div>
-                <nav class="site-actions">
-                    <a class="soc-icon" href="https://mukashov.com" aria-label="На главную">
-                        <i class="fas fa-arrow-left"></i>
-                    </a>
-                </nav>
             </div>
         </header>
 
@@ -715,8 +1033,8 @@
                             <h1 class="headline">Супер Таблица — система финансового контроля, где всё по полочкам и под вашим контролем</h1>
                             <p class="lead">Соберите все доходы и расходы в одном умном файле. Минималистичный интерфейс, быстрые расчеты и аккуратные отчеты без сложных формул.</p>
                             <div class="cta-row">
-                                <a class="button button--primary-green" href="https://wa.me/996709139603?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BA%D1%83%D0%BF%D0%B8%D1%82%D1%8C%20%D0%A1%D1%83%D0%BF%D0%B5%D1%80%20%D0%A2%D0%B0%D0%B1%D0%BB%D0%B8%D1%86%D1%83" target="_blank" rel="noopener">Начать вести свою таблицу уже сегодня</a>
-                                <a class="button button--ghost" href="mailto:support@mukashov.com">Задать вопрос</a>
+                                <a class="button button--primary-green" href="https://boosty.to/super_tablica" target="_blank" rel="noopener">Начать вести свою таблицу уже сегодня</a>
+                                <a class="button button--ghost" href="https://wa.me/996709139603" target="_blank" rel="noopener">Задать вопрос</a>
                             </div>
                         </div>
                         <div class="sheet-card">
@@ -867,7 +1185,7 @@
                                 </div>
                             </div>
                             <div class="objection-media">
-                                Здесь можно поставить фото как в примере<br>или скриншот таблицы
+                                <img src="../assets/img/super_tablica_image.jpg" alt="Девушка ведет Супер Таблицу за ноутбуком дома">
                             </div>
                         </div>
                     </div>
@@ -984,6 +1302,15 @@
                             <p>Сразу после оплаты получите ссылку на скачивание и инструкцию в WhatsApp или на почту.</p>
                         </div>
                     </div>
+                    <div class="purchase-strip">
+                        <div class="purchase-strip__copy">
+                            <h3>Купить таблицу сейчас</h3>
+                            <p>Начните наводить порядок в финансах уже сегодня — настройка займёт всего 10–15 минут.</p>
+                        </div>
+                        <a class="button button--primary-green purchase-strip__button" href="https://boosty.to/super_tablica" target="_blank" rel="noopener">
+                            Купить таблицу <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
                     <div class="policy">
                         <a class="policy-link" href="#" data-modal-open>Политика конфиденциальности</a>
                     </div>
@@ -993,7 +1320,32 @@
 
         <footer class="site-footer">
             <div class="container">
-                <p>Супер Таблица. Финансы под контролем.</p>
+                <div class="footer-brand">
+                    <div class="footer-brand__identity">
+                        <img class="footer-brand__icon" src="../assets/img/super_tablica_logo.jpg" alt="Супер Таблица">
+                        <p class="footer-brand__text">Супер Таблица. Финансы под контролем.</p>
+                    </div>
+                    <div class="payment-methods" role="group" aria-label="Принимаем оплату картами МИР, Visa и Mastercard, а также через СБП">
+                        <img src="../assets/img/visa_mastercard.png" alt="МИР, Visa и Mastercard">
+                        <img src="../assets/img/sbp.png" alt="Система быстрых платежей">
+                    </div>
+                </div>
+                <div class="footer-support">
+                    <div class="footer-support__copy">
+                        <p>Мы рядом и готовы поддержать — задавайте любые вопросы.</p>
+                    </div>
+                    <a class="button button--primary-green footer-support__button" href="https://wa.me/996709139603" target="_blank" rel="noopener">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>Служба заботы
+                    </a>
+                    <nav class="footer-social" aria-label="Мы в социальных сетях">
+                        <a class="footer-social__link" href="https://boosty.to/super_tablica" target="_blank" rel="noopener" aria-label="Boosty">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M2.661 14.337 6.801 0h6.362L11.88 4.444l-.038.077-3.378 11.733h3.15c-1.321 3.289-2.35 5.867-3.086 7.733-5.816-.063-7.442-4.228-6.02-9.155M8.554 24l7.67-11.035h-3.25l2.83-7.073c4.852.508 7.137 4.33 5.791 8.952C20.16 19.81 14.344 24 8.68 24h-.127z"/></svg>
+                        </a>
+                        <a class="footer-social__link" href="https://instagram.com/super_tablica" target="_blank" rel="noopener" aria-label="Instagram">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
+                    </nav>
+                </div>
             </div>
         </footer>
     </div>
