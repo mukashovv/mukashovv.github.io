@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Супер Таблица — таблица для учета доходов и расходов</title>
+<meta name="description" content="Супер Таблица: простая техника управления деньгами. Учет доходов и расходов, цели и накопления.">
+<link rel="icon" href="images/logo-header.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&amp;family=Golos+Text:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;family=IBM+Plex+Sans:ital,wght@1,400;1,500;1,600&amp;display=swap">
+<style>
+:root{--ink:#0A1A13;--forest:#0F3B29;--emerald:#10A55E;--lime:#82D000;--paper:#F3F8EC;--lime-tint:#E6F4CB;--text-green:#0B7A44;--soft-dark:#A9CDB8;--soft-light:#46604F}
+body{margin:0;background:#0A1A13;font-family:'Golos Text',system-ui,sans-serif}
+a{text-decoration:none}
+.lead{font-family:'IBM Plex Sans','Golos Text',system-ui,sans-serif;font-style:italic}
+.btn{transition:transform .15s ease}
+.btn:hover{transform:translateY(-2px)}
+a:focus-visible,summary:focus-visible{outline:3px solid #82D000;outline-offset:3px}
+summary{cursor:pointer}
+summary::-webkit-details-marker{display:none}
+.chev{transition:transform .15s ease}
+details[open]>summary .chev{transform:rotate(180deg)}
+::selection{background:#82D000;color:#0A1A13}
+@media (max-width:760px){.nav-links{display:none!important}.swipe{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px!important;padding-bottom:8px;-webkit-overflow-scrolling:touch}.swipe>*{flex:0 0 80%!important;scroll-snap-align:start;min-width:0}}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}.btn:hover{transform:none}}
+html{scroll-behavior:smooth}
+.st-row{display:grid;grid-template-columns:1fr clamp(30px,9vw,150px) 1fr;align-items:center}
+.st-line{height:3px;background:linear-gradient(90deg,#E5333F,#82D000);border-radius:3px;position:relative;transform-origin:left center}
+.st-line::after{content:"";position:absolute;right:-2px;top:50%;width:13px;height:13px;margin-top:-6.5px;border-radius:50%;background:#82D000;box-shadow:0 0 0 5px rgba(130,208,0,.25)}
+.lf-row{display:grid;grid-template-columns:clamp(130px,20vw,260px) 1fr;gap:16px;align-items:center}
+.lf-fill{transform-origin:left center;box-sizing:border-box;max-width:100%}
+.st-row>*,.lf-row>*{min-width:0}
+.st-vline{animation:none}
+
+#story,#choice,#story+section{overflow-x:clip;max-width:100%;box-sizing:border-box}
+#story h2,#choice h2{overflow-wrap:anywhere}
+.px{position:absolute;border-radius:50%;pointer-events:none}
+.pill{position:absolute;display:flex;flex-direction:column;align-items:center;gap:10px;transform:translate(-50%,-50%);text-align:center}
+.choice-fig{position:relative;aspect-ratio:1280/576;border-radius:28px;overflow:hidden;background:#000}
+@media (max-width:760px){
+.lf-row{grid-template-columns:1fr;gap:8px}
+}
+@media (prefers-reduced-motion:no-preference){
+@keyframes st-rise{from{opacity:0;transform:translateY(46px)}to{opacity:1;transform:none}}
+@keyframes st-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes st-growy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes st-par{from{transform:translateY(80px)}to{transform:translateY(-80px)}}
+@keyframes st-par2{from{transform:translateY(-60px)}to{transform:translateY(60px)}}
+@keyframes st-zoom{from{transform:scale(1.14)}to{transform:scale(1)}}
+@keyframes st-glow{0%,100%{box-shadow:0 0 0 0 rgba(130,208,0,.55),0 10px 40px rgba(130,208,0,.35)}50%{box-shadow:0 0 0 16px rgba(130,208,0,0),0 10px 50px rgba(130,208,0,.6)}}
+@keyframes st-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.st-glow{animation:st-glow 2.2s ease-in-out infinite}
+.st-bob{animation:st-bob 3s ease-in-out infinite}
+@supports (animation-timeline:view()){
+.st-rise{animation:st-rise linear both;animation-timeline:view();animation-range:entry 0% entry 55%}
+.st-rise.d2{animation-range:entry 8% entry 63%}
+.st-rise.d3{animation-range:entry 16% entry 71%}
+.st-line{animation:st-grow linear both;animation-timeline:view();animation-range:entry 20% entry 80%}
+.st-vline{animation:st-growy linear both;animation-timeline:view();animation-range:entry 20% entry 90%}
+.lf-fill{animation:st-grow linear both;animation-timeline:view();animation-range:entry 10% entry 90%}
+.px.a{animation:st-par linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+.px.b{animation:st-par2 linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+.choice-fig>img{animation:st-zoom linear both;animation-timeline:view();animation-range:entry 0% cover 50%}
+}
+}
+
+
+@media (max-width:1100px){
+.choice-fig{display:grid;grid-template-columns:1fr 1fr;aspect-ratio:auto;background:#0A1A13}
+.choice-fig>img{position:static!important;grid-column:1/-1;width:100%;height:auto!important;aspect-ratio:1280/576}
+.pill{position:static!important;transform:none!important;padding:18px 10px;min-width:0}
+.pill>div{flex-wrap:wrap;justify-content:center}
+.pill a.btn{max-width:100%!important}
+}
+@media (max-width:1024px){
+.st-line{height:2.5px}
+.st-line::after{width:9px;height:9px;margin-top:-4.5px;box-shadow:none}
+.st-vline{width:2px!important;box-shadow:none!important}
+.st-row>div:not(.st-line){border-radius:16px!important;border-width:1px!important}
+.st-row>div:not(.st-line)>div>div:first-child,.lf-row>div:first-child{font-weight:600!important}
+.lf-row>div:nth-child(2){padding:3px!important}
+.lf-fill{padding:6px 14px!important;font-size:15px!important;font-weight:500!important}
+}
+@media (max-width:760px){
+section{padding-top:28px!important;padding-bottom:28px!important}
+section h2{font-size:clamp(24px,7vw,32px)!important;line-height:1.15!important}
+section .lead{line-height:1.45!important}
+.st-row>div:not(.st-line){flex-direction:column;text-align:center;padding:10px 6px!important;gap:6px!important}
+.st-row>div:not(.st-line) img{width:52px!important;height:52px!important;border-width:2px!important}
+.st-row>div:not(.st-line)>span{width:42px!important;height:42px!important}
+.st-row>div:not(.st-line)>span svg{width:21px;height:21px}
+.st-row>div:not(.st-line)>div>div:first-child{font-size:14px!important;line-height:1.2}
+.st-row>div:not(.st-line)>div>div:nth-child(2){font-size:13px!important;line-height:1.25}
+.pill{padding:12px 4px!important;gap:8px}
+.pill>span:first-child{font-size:10px!important;line-height:1.2}
+.pill a.btn{font-size:13px!important;padding:11px 12px!important;gap:6px!important;line-height:1.2!important}
+.pill a.btn svg{width:14px;height:14px}
+.pill>div{flex-wrap:nowrap!important;gap:6px!important}
+.pill .st-bob{width:38px!important;height:38px!important;border-radius:12px!important}
+.pill .st-bob svg{width:20px;height:20px}
+.pill>span:last-child{font-size:12px!important;line-height:1.25}
+#top a.btn{flex:1 1 100%;box-sizing:border-box;text-align:center}
+.hero-mock>div{padding:10px!important;gap:6px!important;border-radius:16px!important;transform:none!important;box-shadow:0 12px 28px rgba(0,0,0,.3)!important}
+.hero-mock>div>div:nth-child(2){display:none}
+.hero-mock>div>div:last-child{display:none}
+.hero-mock span{font-size:12px!important}
+.hero-mock table{min-width:0!important;font-size:11px!important}
+.hero-mock th,.hero-mock td{padding:4px 6px!important;font-size:11px!important}
+.hero-mock>div>div:nth-child(3){border-radius:10px!important}
+}
+@media (max-width:380px){
+.pill .st-bob{width:34px!important;height:34px!important}
+.pill>div{gap:5px!important}
+.pill a.btn{font-size:12px!important;padding:10px!important}
+}
+@media (max-width:760px){
+.head-buy{display:none!important}
+.hero-in{gap:36px!important}
+#life h2{font-size:min(34px,calc((100vw - 72px)/12.6))!important;overflow-wrap:normal!important}
+}
+@media (prefers-reduced-motion:no-preference){@supports (animation-timeline:view()){
+.lf-row.st-rise,.lf-row.st-rise.d2,.lf-row.st-rise.d3{animation-range:entry 0% entry 30%}
+.lf-row .lf-fill{animation-range:entry 0% entry 40%}
+}}
+</style>
+
+</head>
+<body>
+
+
+<div style="background:#0A1A13;padding:16px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;font-family:'Golos Text',system-ui,sans-serif;color:#0A1A13;font-size:18px;line-height:1.55">
+
+<!-- HERO -->
+<section style="background:#0F3B29;border-radius:36px;padding:clamp(20px,4vw,48px) clamp(20px,4vw,64px) clamp(28px,4vw,56px);color:#EAF7EE">
+<div class="hero-in" style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(36px,5vw,64px)">
+
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<a href="#top" style="display:flex;align-items:center;gap:14px;color:#EAF7EE">
+<img src="images/logo-header.jpg" alt="Логотип Супер Таблицы" width="44" height="44" style="display:block;width:44px;height:44px;border-radius:15%">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.01em">Супер Таблица</span>
+</a>
+<nav class="nav-links" style="display:flex;gap:32px;font-size:16px;font-weight:500">
+<a href="#features" style="color:#D9F2C0">Что внутри</a>
+<a href="#reviews" style="color:#D9F2C0">Отзывы</a>
+<a href="#pay" style="color:#D9F2C0">Оплата</a>
+</nav>
+<a class="btn head-buy" href="https://boosty.to/super_tablica" target="_blank" rel="noopener" style="background:#82D000;color:#0A1A13;font-weight:600;font-size:16px;padding:12px 22px;border-radius:999px">Купить таблицу</a>
+</div>
+
+<div id="top" style="display:flex;flex-wrap:wrap;gap:clamp(32px,5vw,64px);align-items:center">
+
+<div style="flex:1 1 480px;min-width:0;display:flex;flex-direction:column;gap:28px">
+<h1 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(30px,4.5vw,60px);line-height:1.12;letter-spacing:-0.025em;color:#FFFFFF;text-wrap:balance">Таблица для учета <mark style="background:#82D000;color:#0A1A13;padding:0 .16em;border-radius:12px;-webkit-box-decoration-break:clone;box-decoration-break:clone">доходов и расходов</mark></h1>
+<p class="lead" style="margin:0;font-size:clamp(26px,3vw,40px);line-height:1.25;font-weight:500;color:#D6EDDF;max-width:16em;text-wrap:balance">Простая техника управления деньгами</p>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<a class="btn" href="https://boosty.to/super_tablica" target="_blank" rel="noopener" style="background:#82D000;color:#0A1A13;font-weight:600;font-size:18px;padding:18px 32px;border-radius:999px;line-height:1.25">Начать вести таблицу</a>
+<a class="btn" href="https://wa.me/996709139603" target="_blank" rel="noopener" style="border:1.5px solid rgba(217,242,192,.55);color:#EAF7EE;font-weight:600;font-size:18px;padding:16px 28px;border-radius:999px;line-height:1.25">Задать вопрос</a>
+</div>
+</div>
+
+<div class="hero-mock" style="flex:1 1 420px;min-width:0">
+<div style="background:#F3F8EC;color:#0A1A13;border-radius:28px;padding:clamp(16px,2.4vw,26px);box-shadow:0 36px 70px rgba(0,0,0,.4);transform:rotate(-1.5deg);display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:17px">Супер Таблица</span>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:14px;color:#46604F">Финансы 2026</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<span style="background:#E6F4CB;border-radius:8px;padding:4px 10px;font-size:14px;font-weight:500">Формат</span>
+<span style="background:#E6F4CB;border-radius:8px;padding:4px 10px;font-size:14px;font-weight:500">Категории</span>
+<span style="background:#E6F4CB;border-radius:8px;padding:4px 10px;font-size:14px;font-weight:500">Фильтр</span>
+<span style="background:#E6F4CB;border-radius:8px;padding:4px 10px;font-size:14px;font-weight:500">Диаграммы</span>
+<span style="background:#E6F4CB;border-radius:8px;padding:4px 10px;font-size:14px;font-weight:500">Сводка</span>
+</div>
+<div style="overflow-x:auto;background:#FFFFFF;border-radius:16px">
+<table style="width:100%;border-collapse:collapse;font-size:15px;min-width:340px">
+<thead>
+<tr style="text-align:left;color:#46604F;font-size:13px;letter-spacing:.06em;text-transform:uppercase">
+<th style="padding:12px 12px 10px;font-weight:600">Дата</th>
+<th style="padding:12px 8px 10px;font-weight:600">Категория</th>
+<th style="padding:12px 8px 10px;font-weight:600">Описание</th>
+<th style="padding:12px 12px 10px;font-weight:600;text-align:right">Сумма</th>
+</tr>
+</thead>
+<tbody style="font-variant-numeric:tabular-nums">
+<tr style="border-top:1px solid #E3EFE7"><td style="padding:12px;font-family:'JetBrains Mono',monospace">05.02</td><td style="padding:12px 8px">Доход</td><td style="padding:12px 8px">Зарплата</td><td style="padding:12px;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:#0B7A44">+120 000</td></tr>
+<tr style="border-top:1px solid #E3EFE7"><td style="padding:12px;font-family:'JetBrains Mono',monospace">06.02</td><td style="padding:12px 8px">Дом</td><td style="padding:12px 8px">Аренда</td><td style="padding:12px;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700">−45 000</td></tr>
+<tr style="border-top:1px solid #E3EFE7"><td style="padding:12px;font-family:'JetBrains Mono',monospace">06.02</td><td style="padding:12px 8px">Продукты</td><td style="padding:12px 8px">Супермаркет</td><td style="padding:12px;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700">−9 800</td></tr>
+<tr style="border-top:1px solid #E3EFE7"><td style="padding:12px;font-family:'JetBrains Mono',monospace">07.02</td><td style="padding:12px 8px">Транспорт</td><td style="padding:12px 8px">Такси</td><td style="padding:12px;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700">−1 600</td></tr>
+<tr style="background:#DDF2B0;font-weight:700"><td style="padding:14px 12px">Итого</td><td style="padding:14px 8px" colspan="2">За неделю</td><td style="padding:14px 12px;text-align:right;font-family:'JetBrains Mono',monospace">+63 600</td></tr>
+</tbody>
+</table>
+</div>
+<div style="display:flex;gap:4px;background:#E6F4CB;border-radius:999px;padding:4px;flex-wrap:wrap">
+<span style="flex:1 1 auto;text-align:center;background:#0A1A13;color:#82D000;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600">Доходы</span>
+<span style="flex:1 1 auto;text-align:center;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;color:#2F4A3A">Расходы</span>
+<span style="flex:1 1 auto;text-align:center;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;color:#2F4A3A">Планы</span>
+</div>
+</div>
+</div>
+
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px 32px;border-top:1px solid rgba(217,242,192,.25);padding-top:28px">
+<div style="display:flex;gap:12px;align-items:center">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg>
+<span style="font-weight:600;color:#FFFFFF;font-size:17px">100% безопасная сделка</span>
+</div>
+<div style="display:flex;gap:12px;align-items:center">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M4 12a8 8 0 1 0 2.5-5.8"></path><path d="M4 4v4h4"></path></svg>
+<span style="font-weight:600;color:#FFFFFF;font-size:17px">Вернем деньги в течение <span style="font-weight:700;color:#82D000">7 дней*</span></span>
+</div>
+<div style="display:flex;gap:12px;align-items:center">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M13 3L5 14h6l-1 7 8-11h-6z"></path></svg>
+<span style="font-weight:600;color:#FFFFFF;font-size:17px">Доступ сразу после оплаты</span>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- PAIN -->
+<section id="story" style="position:relative;overflow:hidden;background:#FFFFFF;border-radius:36px;padding:clamp(32px,min(5vw,7vh),80px) clamp(20px,4vw,64px);color:#0A1A13">
+<div class="px a" style="width:360px;height:360px;right:-120px;top:8%;background:radial-gradient(circle,#E6F4CB 0%,rgba(230,244,203,0) 70%)"></div>
+<div class="px b" style="width:300px;height:300px;left:-110px;bottom:10%;background:radial-gradient(circle,rgba(229,51,63,.14) 0%,rgba(229,51,63,0) 70%)"></div>
+<div style="position:relative;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(22px,4vh,44px)">
+<div class="st-rise" style="display:flex;flex-direction:column;gap:14px;text-align:center;align-items:center">
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#0B7A44">01 · Вопрос</span>
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(28px,min(4.2vw,6.5vh),58px);line-height:1.12;letter-spacing:-0.025em;text-wrap:balance">Сумку, машину, айфон в кредит можете. А <mark style="background:#82D000;color:#0A1A13;padding:0 .16em;border-radius:12px;-webkit-box-decoration-break:clone;box-decoration-break:clone">таблицу</mark> для жизни — нет?</h2>
+<p class="lead" style="margin:0;font-size:clamp(18px,1.7vw,22px);color:#2A4A38;max-width:34em">Всё дело в упаковке. Машина — роскошь, сумка — кайф, айфон — статус. А за каждой вещью стоит то, что вы не видите.</p>
+</div>
+
+<div class="st-rise" style="display:grid;grid-template-columns:1fr clamp(30px,9vw,150px) 1fr;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase">
+<span style="color:#E5333F">Что видите вы</span><span></span><span style="color:#0B7A44;text-align:right">Что видит бизнес</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:clamp(14px,2.4vh,26px)">
+<div class="st-row st-rise">
+<div style="display:flex;align-items:center;gap:16px;background:#FDECEE;border:1px solid #F6C9CD;border-radius:24px;padding:18px 22px">
+<img src="images/car.jpg" alt="" style="flex:none;width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #E5333F;display:block">
+<div><div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(20px,2vw,26px)">Машина</div><div style="color:#7A2A30;font-size:17px">роскошь</div></div>
+</div>
+<div class="st-line"></div>
+<div style="display:flex;align-items:center;gap:16px;background:#0F3B29;border-radius:24px;padding:18px 22px;color:#FFFFFF">
+<span style="flex:none;width:56px;height:56px;border-radius:50%;background:#82D000;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0A1A13" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4h-4"/></svg></span>
+<div><div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(18px,1.8vw,24px)">Кайдзен-системы</div><div style="color:#A9CDB8;font-size:17px">улучшают производство каждый день</div></div>
+</div>
+</div>
+
+<div class="st-row st-rise d2">
+<div style="display:flex;align-items:center;gap:16px;background:#FDECEE;border:1px solid #F6C9CD;border-radius:24px;padding:18px 22px">
+<img src="images/bag.jpg" alt="" style="flex:none;width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #E5333F;display:block">
+<div><div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(20px,2vw,26px)">Сумка</div><div style="color:#7A2A30;font-size:17px">кайф</div></div>
+</div>
+<div class="st-line"></div>
+<div style="display:flex;align-items:center;gap:16px;background:#0F3B29;border-radius:24px;padding:18px 22px;color:#FFFFFF">
+<span style="flex:none;width:56px;height:56px;border-radius:50%;background:#82D000;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0A1A13" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1.5"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/></svg></span>
+<div><div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(18px,1.8vw,24px)">Замеры и статистика</div><div style="color:#A9CDB8;font-size:17px">знают, какая модель приносит больше</div></div>
+</div>
+</div>
+
+<div class="st-row st-rise d3">
+<div style="display:flex;align-items:center;gap:16px;background:#FDECEE;border:1px solid #F6C9CD;border-radius:24px;padding:18px 22px">
+<img src="images/iphone.jpg" alt="" style="flex:none;width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #E5333F;display:block">
+<div><div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(20px,2vw,26px)">Айфон</div><div style="color:#7A2A30;font-size:17px">статус</div></div>
+</div>
+<div class="st-line"></div>
+<div style="display:flex;align-items:center;gap:16px;background:#0F3B29;border-radius:24px;padding:18px 22px;color:#FFFFFF">
+<span style="flex:none;width:56px;height:56px;border-radius:50%;background:#82D000;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0A1A13" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/></svg></span>
+<div><div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(18px,1.8vw,24px)">Метрики</div><div style="color:#A9CDB8;font-size:17px">каждое решение проверено цифрами</div></div>
+</div>
+</div>
+</div>
+
+<div class="st-conn" style="display:grid;grid-template-columns:1fr clamp(30px,9vw,150px) 1fr;height:calc(2*clamp(22px,4vh,44px));margin:calc(-1*clamp(22px,4vh,44px)) 0;pointer-events:none"><span></span><span></span><div style="position:relative;display:flex;justify-content:center"><div class="st-vline" style="width:5px;height:100%;background:#82D000;border-radius:5px;box-shadow:0 0 0 4px rgba(130,208,0,.22);transform-origin:center top"></div><svg width="22" height="14" viewBox="0 0 22 14" style="position:absolute;bottom:-1px;left:50%;margin-left:-11px"><path d="M1 1l10 11L21 1z" fill="#82D000"/></svg></div></div>
+
+<div class="st-rise" style="background:#82D000;border-radius:24px;padding:clamp(18px,3vh,28px) clamp(20px,3vw,36px);text-align:center">
+<p style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(18px,2vw,26px);line-height:1.3;color:#0A1A13;text-wrap:balance">Это сложно, но именно цифры приносят деньги, и бизнес знает, на чём зарабатывает.</p>
+</div>
+</div>
+</section>
+
+<section id="life" style="position:relative;overflow:hidden;background:#E6F4CB;border-radius:36px;padding:clamp(32px,min(5vw,7vh),80px) clamp(20px,4vw,64px);color:#0A1A13">
+<div class="px b" style="width:340px;height:340px;left:-100px;top:5%;background:radial-gradient(circle,rgba(130,208,0,.35) 0%,rgba(130,208,0,0) 70%)"></div>
+<div style="position:relative;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(20px,3.5vh,38px)">
+<div class="st-rise" style="display:flex;flex-direction:column;gap:14px;text-align:center;align-items:center">
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#0B7A44">02 · Что остаётся</span>
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(28px,min(4.2vw,6.5vh),58px);line-height:1.12;letter-spacing:-0.025em;text-wrap:balance">Покупки проходят.<br><mark style="background:#82D000;color:#0A1A13;padding:0 .16em;border-radius:12px;-webkit-box-decoration-break:clone;box-decoration-break:clone">Система</mark> остаётся.</h2>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:clamp(12px,2vh,20px)">
+<div class="lf-row st-rise">
+<div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(18px,1.8vw,24px)">Сумка</div>
+<div style="background:#FFFFFF;border-radius:999px;padding:6px"><div class="lf-fill" style="width:24%;min-width:150px;background:#E5333F;color:#FFFFFF;border-radius:999px;padding:10px 18px;font-weight:600;font-size:17px">на сезон</div></div>
+</div>
+<div class="lf-row st-rise d2">
+<div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(18px,1.8vw,24px)">Айфон</div>
+<div style="background:#FFFFFF;border-radius:999px;padding:6px"><div class="lf-fill" style="width:55%;min-width:210px;background:#E5333F;color:#FFFFFF;border-radius:999px;padding:10px 18px;font-weight:600;font-size:17px;">до выхода следующего</div></div>
+</div>
+<div class="lf-row st-rise d3">
+<div style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(18px,1.8vw,24px)">Машина</div>
+<div style="background:#FFFFFF;border-radius:999px;padding:6px"><div class="lf-fill" style="width:100%;background:#E5333F;color:#FFFFFF;border-radius:999px;padding:10px 18px;font-weight:600;font-size:17px">это расходы: бензин, страховка, ремонт</div></div>
+</div>
+<div class="lf-row st-rise d3">
+<div style="font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(18px,1.8vw,24px);color:#0B7A44">Таблица</div>
+<div style="background:#0F3B29;border-radius:999px;padding:6px"><div class="lf-fill" style="width:100%;background:#82D000;color:#0A1A13;border-radius:999px;padding:10px 18px;font-weight:600;font-size:17px">работает, пока вы её ведёте: деньги под контролем</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="choice" style="position:relative;overflow:hidden;background:#0A1A13;border-radius:36px;padding:clamp(32px,min(5vw,7vh),80px) clamp(16px,4vw,64px);color:#FFFFFF">
+<div class="px a" style="width:420px;height:420px;right:-140px;top:-80px;background:radial-gradient(circle,rgba(130,208,0,.22) 0%,rgba(130,208,0,0) 70%)"></div>
+<div style="position:relative;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(18px,3vh,34px)">
+<div class="st-rise" style="display:flex;flex-direction:column;gap:14px;text-align:center;align-items:center">
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#82D000">03 · Выбор</span>
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(28px,min(4.2vw,6.5vh),58px);line-height:1.12;letter-spacing:-0.025em;text-wrap:balance">Ты всё ещё выбираешь <mark style="background:#E5333F;color:#FFFFFF;padding:0 .16em;border-radius:12px;-webkit-box-decoration-break:clone;box-decoration-break:clone">первое</mark>?</h2>
+<p class="lead" style="margin:0;font-size:clamp(18px,1.7vw,22px);color:#D6EDDF;max-width:34em">Определи свой выбор:</p>
+</div>
+
+<div class="choice-fig st-rise">
+<img src="images/choice-matrix.jpg" alt="Выбор: привычные покупки или развитие" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block">
+<div class="pill" style="left:14%;top:70%">
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#82D000;text-shadow:0 2px 8px #000">Путь предпринимателя</span>
+<a class="btn st-glow" href="#features" style="display:inline-flex;align-items:center;gap:10px;background:#82D000;color:#0A1A13;text-decoration:none;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(15px,1.4vw,18px);line-height:1.2;padding:16px 22px;border-radius:999px;max-width:250px">Я хочу развиваться<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A1A13" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 4v16M5 13l7 7 7-7"/></svg></a>
+</div>
+<div class="pill" style="left:84%;top:70%">
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#FF6B76;text-shadow:0 2px 8px #000">Привычный путь</span>
+<div style="display:flex;gap:10px">
+<span class="st-bob" style="width:60px;height:60px;border-radius:18px;background:#E5333F;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(229,51,63,.5)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l1 12H4L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>
+<span class="st-bob" style="width:60px;height:60px;border-radius:18px;background:#E5333F;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(229,51,63,.5);animation-delay:.4s"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2-5h14l2 5v5h-2"/><path d="M3 12h18"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/></svg></span>
+<span class="st-bob" style="width:60px;height:60px;border-radius:18px;background:#E5333F;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(229,51,63,.5);animation-delay:.8s"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18.5h2"/></svg></span>
+</div>
+<span style="color:#FFFFFF;font-weight:600;font-size:16px;text-shadow:0 2px 8px #000">сумка · машина · айфон</span>
+</div>
+</div>
+
+<p class="lead st-rise" style="margin:0;text-align:center;font-size:clamp(19px,1.9vw,24px);line-height:1.5;color:#D6EDDF;max-width:32em;align-self:center;text-wrap:balance">Таблицы — это сложно. Но именно с них люди переходят на новый уровень — <span style="color:#82D000;font-weight:600">уровень предпринимателя</span>.</p>
+</div>
+</section>
+
+<!-- FEATURE: YEARS -->
+<section id="features" style="background:#E6F4CB;border-radius:36px;padding:clamp(28px,min(4vw,6vh),64px) clamp(20px,4vw,64px)">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,4vw,48px)">
+<div style="display:flex;flex-direction:column;gap:20px;max-width:820px">
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(28px,3.8vw,52px);line-height:1.1;letter-spacing:-0.02em;color:#0A1A13;text-wrap:balance">Статистика по годам</h2>
+<p class="lead" style="margin:0;font-size:clamp(18px,1.6vw,21px);color:#14301F;max-width:32em">Таблица сама собирает данные за год: сколько вы заработали, в каком месяце был пик и когда случилась просадка.</p>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:stretch">
+<div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<div style="background:#0A1A13;color:#FFFFFF;border-radius:24px;padding:clamp(22px,3vw,32px);display:flex;flex-direction:column;gap:6px">
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(32px,4vw,52px);letter-spacing:-0.02em;color:#82D000;font-variant-numeric:tabular-nums">+1 420 000</span>
+<span style="font-size:18px;color:#D6EDDF">Доход за год</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:16px;flex:1">
+<div style="background:#FFFFFF;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:4px">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.02em;color:#0B7A44">Март</span>
+<span style="font-size:16px;color:#46604F">Пик заработка</span>
+</div>
+<div style="background:#FFFFFF;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:4px">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.02em;color:#0A1A13">Август</span>
+<span style="font-size:16px;color:#46604F">Просадка</span>
+</div>
+</div>
+</div>
+
+<div style="flex:1.3 1 400px;min-width:0;background:#FFFFFF;border-radius:28px;padding:clamp(22px,3vw,36px);display:flex;flex-direction:column;gap:24px">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:18px">По месяцам</span>
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:grid;grid-template-columns:76px minmax(0,1fr) 104px;align-items:center;gap:12px">
+<span style="font-weight:600">Январь</span>
+<div style="height:24px;background:#EAF3DF;border-radius:999px;overflow:hidden"><div style="width:62%;height:100%;background:#8AD3AE;border-radius:999px"></div></div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px">62%</span>
+</div>
+<div style="display:grid;grid-template-columns:76px minmax(0,1fr) 104px;align-items:center;gap:12px">
+<span style="font-weight:600">Март</span>
+<div style="height:24px;background:#EAF3DF;border-radius:999px;overflow:hidden"><div style="width:95%;height:100%;background:#10A55E;border-radius:999px"></div></div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:#0B7A44">95% пик</span>
+</div>
+<div style="display:grid;grid-template-columns:76px minmax(0,1fr) 104px;align-items:center;gap:12px">
+<span style="font-weight:600">Июнь</span>
+<div style="height:24px;background:#EAF3DF;border-radius:999px;overflow:hidden"><div style="width:48%;height:100%;background:#8AD3AE;border-radius:999px"></div></div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px">48%</span>
+</div>
+<div style="display:grid;grid-template-columns:76px minmax(0,1fr) 104px;align-items:center;gap:12px">
+<span style="font-weight:600">Август</span>
+<div style="height:24px;background:#EAF3DF;border-radius:999px;overflow:hidden"><div style="width:32%;height:100%;background:#FFFFFF;border:2px solid #0A1A13;border-radius:999px;box-sizing:border-box"></div></div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px">32% спад</span>
+</div>
+<div style="display:grid;grid-template-columns:76px minmax(0,1fr) 104px;align-items:center;gap:12px">
+<span style="font-weight:600">Декабрь</span>
+<div style="height:24px;background:#EAF3DF;border-radius:999px;overflow:hidden"><div style="width:76%;height:100%;background:#8AD3AE;border-radius:999px"></div></div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px">76%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FEATURE: TODAY -->
+<section style="background:#F3F8EC;border-radius:36px;padding:clamp(28px,min(4vw,6vh),64px) clamp(20px,4vw,64px)">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:clamp(28px,5vw,64px);align-items:center">
+<div style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:24px">
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(28px,3.8vw,52px);line-height:1.1;letter-spacing:-0.02em;color:#0A1A13;text-wrap:balance">Умный фокус на сегодняшнюю дату</h2>
+<p class="lead" style="margin:0;font-size:clamp(18px,1.6vw,21px);color:#1E3B2B;max-width:28em">Не нужно листать месяцы и искать сегодняшнее число. Таблица сама откроет нужный лист и подсветит день.</p>
+</div>
+
+<div style="flex:1 1 360px;min-width:0">
+<div style="background:#0F3B29;color:#EAF7EE;border-radius:28px;padding:clamp(20px,3vw,32px);display:flex;flex-direction:column;gap:20px;transform:rotate(1.2deg);box-shadow:0 30px 60px rgba(10,26,19,.25)">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:17px">Февраль</span>
+<span style="background:#82D000;color:#0A1A13;border-radius:999px;padding:5px 14px;font-size:14px;font-weight:700">AI-подсказки</span>
+</div>
+<table style="width:100%;border-collapse:separate;border-spacing:0 6px;font-variant-numeric:tabular-nums">
+<thead><tr style="text-align:left;color:#A9CDB8;font-size:13px;letter-spacing:.08em;text-transform:uppercase"><th style="padding:4px 14px;font-weight:600">День</th><th style="padding:4px 14px;font-weight:600;text-align:right">Сумма</th></tr></thead>
+<tbody style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:17px">
+<tr style="background:rgba(217,242,192,.09)"><td style="padding:12px 14px;border-radius:12px 0 0 12px">1</td><td style="padding:12px 14px;text-align:right;border-radius:0 12px 12px 0">10 500</td></tr>
+<tr style="background:rgba(217,242,192,.09)"><td style="padding:12px 14px;border-radius:12px 0 0 12px">2</td><td style="padding:12px 14px;text-align:right;border-radius:0 12px 12px 0">3 500</td></tr>
+<tr style="background:#82D000;color:#0A1A13;font-weight:700"><td style="padding:12px 14px;border-radius:12px 0 0 12px">3 · сегодня</td><td style="padding:12px 14px;text-align:right;border-radius:0 12px 12px 0">2 500</td></tr>
+<tr style="background:rgba(217,242,192,.09);color:#A9CDB8"><td style="padding:12px 14px;border-radius:12px 0 0 12px">4</td><td style="padding:12px 14px;text-align:right;border-radius:0 12px 12px 0">—</td></tr>
+<tr style="background:rgba(217,242,192,.09);color:#A9CDB8"><td style="padding:12px 14px;border-radius:12px 0 0 12px">5</td><td style="padding:12px 14px;text-align:right;border-radius:0 12px 12px 0">—</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FEATURE: GOALS -->
+<section style="background:#0F3B29;border-radius:36px;padding:clamp(28px,min(4vw,6vh),64px) clamp(20px,4vw,64px);color:#EAF7EE">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:row-reverse;flex-wrap:wrap;gap:clamp(28px,5vw,64px);align-items:center">
+
+<div style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:24px">
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(28px,3.8vw,52px);line-height:1.1;letter-spacing:-0.02em;color:#FFFFFF;text-wrap:balance">Копите на то, что хочется</h2>
+<p class="lead" style="margin:0;font-size:clamp(18px,1.6vw,21px);color:#D6EDDF;max-width:28em">Заведите цель: отпуск, машину, подушку безопасности. Таблица покажет, сколько уже отложено и сколько осталось.</p>
+</div>
+
+<div style="flex:1 1 380px;min-width:0">
+<div style="background:#F3F8EC;color:#0A1A13;border-radius:28px;padding:clamp(20px,3vw,32px);display:flex;flex-direction:column;gap:24px;transform:rotate(-1.2deg);box-shadow:0 30px 60px rgba(0,0,0,.35)">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:17px">Планы</span>
+<span style="background:#82D000;color:#0A1A13;border-radius:999px;padding:5px 14px;font-size:14px;font-weight:700">Пример</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-weight:600;font-size:18px">Отпуск</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:#0B7A44">70%</span></div>
+<div style="height:14px;background:#DDE9D0;border-radius:999px;overflow:hidden"><div style="width:70%;height:100%;background:#10A55E;border-radius:999px"></div></div>
+<span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#46604F">84 000 из 120 000</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-weight:600;font-size:18px">Машина</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:#0B7A44">21%</span></div>
+<div style="height:14px;background:#DDE9D0;border-radius:999px;overflow:hidden"><div style="width:21%;height:100%;background:#10A55E;border-radius:999px"></div></div>
+<span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#46604F">310 000 из 1 500 000</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-weight:600;font-size:18px">Подушка безопасности</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:#0B7A44">30%</span></div>
+<div style="height:14px;background:#DDE9D0;border-radius:999px;overflow:hidden"><div style="width:30%;height:100%;background:#10A55E;border-radius:999px"></div></div>
+<span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#46604F">90 000 из 300 000</span>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- FACTS -->
+<section style="background:#F3F8EC;border-radius:36px;padding:clamp(28px,6vh,72px) clamp(20px,4vw,64px)">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:clamp(20px,4.5vh,44px);text-align:center">
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(26px,min(3.6vw,5.4vh),46px);line-height:1.1;letter-spacing:-0.02em;color:#0A1A13;text-wrap:balance">Достигайте целей</h2>
+
+<div style="width:100%;display:flex;flex-wrap:wrap;gap:16px;align-items:stretch">
+
+<figure style="flex:1 1 460px;min-width:0;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:clamp(8px,2vh,24px) clamp(0px,2vw,24px)">
+<span aria-hidden="true" style="font-family:'Unbounded',sans-serif;font-weight:800;font-size:72px;line-height:.7;height:.45em;color:#10A55E">“</span>
+<blockquote class="lead" style="margin:0;font-size:clamp(26px,min(3.2vw,5vh),42px);line-height:1.3;font-weight:600;color:#0A1A13;max-width:15em;text-wrap:balance">Постановка цели увеличивает норму сбережений</blockquote>
+<figcaption style="display:flex;flex-direction:column;align-items:center;gap:4px;max-width:32em;padding-top:6px">
+<a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/jofi.13339" target="_blank" rel="noopener" style="font-size:14px;line-height:1.5;color:#46604F;text-decoration:underline;text-underline-offset:3px">на основе исследований<br>Antonio Gargano и Alberto Rossi</a>
+</figcaption>
+</figure>
+
+<figure style="flex:1 1 400px;min-width:0;margin:0;box-sizing:border-box;background:#0F3B29;border-radius:32px;padding:clamp(24px,5vh,56px) clamp(20px,3vw,48px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+<span aria-hidden="true" style="font-family:'Unbounded',sans-serif;font-weight:800;font-size:72px;line-height:.7;height:.45em;color:#82D000">“</span>
+<blockquote class="lead" style="margin:0;font-size:clamp(20px,min(2.2vw,3.5vh),29px);line-height:1.4;font-weight:500;color:#FFFFFF;max-width:20em;text-wrap:balance">В Супер Таблице предусмотрена функция для систематического откладывания денег</blockquote>
+<figcaption style="display:flex;align-items:center;gap:12px;margin-top:10px">
+<img src="images/logo-footer.png" alt="Логотип Супер Таблицы" width="36" height="36" style="display:block;width:36px;height:36px">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:16px;color:#EAF7EE">Супер Таблица</span>
+</figcaption>
+</figure>
+
+</div>
+</div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews" style="background:#E6F4CB;border-radius:36px;padding:clamp(28px,min(4vw,6vh),64px) clamp(20px,4vw,64px)">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,4vw,48px)">
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(28px,3.8vw,52px);line-height:1.1;letter-spacing:-0.02em;color:#0A1A13;text-wrap:balance">Отзывы</h2>
+<div class="swipe" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+
+<figure style="margin:0;background:#FFFFFF;border-radius:24px;padding:clamp(22px,3vw,34px);display:flex;flex-direction:column;gap:20px;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div role="img" aria-label="5 звёзд из 5" style="color:#10A55E;font-size:22px;letter-spacing:.12em">★★★★★</div>
+<blockquote style="margin:0;font-size:clamp(19px,1.7vw,22px);line-height:1.5;font-weight:500;color:#0A1A13">«Впервые вижу таблицу, где всё понятно с первого дня. Визуально очень чисто, как в Notion».</blockquote>
+</div>
+<figcaption style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="background:#82D000;color:#0A1A13;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600">Маркетинг</span><span style="font-size:16px;color:#46604F;font-weight:500">Айжан, Бишкек</span></figcaption>
+</figure>
+
+<figure style="margin:0;background:#FFFFFF;border-radius:24px;padding:clamp(22px,3vw,34px);display:flex;flex-direction:column;gap:20px;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div role="img" aria-label="5 звёзд из 5" style="color:#10A55E;font-size:22px;letter-spacing:.12em">★★★★★</div>
+<blockquote style="margin:0;font-size:clamp(19px,1.7vw,22px);line-height:1.5;font-weight:500;color:#0A1A13">«Сделали семейный бюджет за вечер. Отчеты и категории спасают от хаоса».</blockquote>
+</div>
+<figcaption style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="background:#82D000;color:#0A1A13;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600">Семья</span><span style="font-size:16px;color:#46604F;font-weight:500">Ольга, Алматы</span></figcaption>
+</figure>
+
+<figure style="margin:0;background:#FFFFFF;border-radius:24px;padding:clamp(22px,3vw,34px);display:flex;flex-direction:column;gap:20px;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div role="img" aria-label="5 звёзд из 5" style="color:#10A55E;font-size:22px;letter-spacing:.12em">★★★★★</div>
+<blockquote style="margin:0;font-size:clamp(19px,1.7vw,22px);line-height:1.5;font-weight:500;color:#0A1A13">«Очень нравится стиль — напоминает Google Sheets, но без перегруза».</blockquote>
+</div>
+<figcaption style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="background:#82D000;color:#0A1A13;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600">Фриланс</span><span style="font-size:16px;color:#46604F;font-weight:500">Руслан, Москва</span></figcaption>
+</figure>
+
+</div>
+</div>
+</section>
+
+<!-- OBJECTION -->
+<section style="background:#0F3B29;border-radius:36px;padding:clamp(28px,min(4vw,6vh),64px) clamp(20px,4vw,64px);color:#EAF7EE">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,4vw,48px)">
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(26px,3.5vw,48px);line-height:1.15;letter-spacing:-0.02em;color:#FFFFFF;text-wrap:balance;max-width:900px">«У меня нет времени вести финансы»</h2>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:stretch">
+<ul style="flex:1 1 480px;min-width:0;margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:16px">
+<li style="display:flex;gap:16px;align-items:flex-start;background:rgba(217,242,192,.09);border-radius:20px;padding:22px 24px">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<span style="color:#EAF7EE">Настройка занимает 10–15 минут, дальше таблица работает автоматически.</span></li>
+<li style="display:flex;gap:16px;align-items:flex-start;background:rgba(217,242,192,.09);border-radius:20px;padding:22px 24px">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<span style="color:#EAF7EE">Один вечер настройки экономит часы каждый месяц.</span></li>
+<li style="display:flex;gap:16px;align-items:flex-start;background:rgba(217,242,192,.09);border-radius:20px;padding:22px 24px">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<span style="color:#EAF7EE">Приложения перегружены и требуют подписок. Таблица проще и всегда под контролем.</span></li>
+</ul>
+<div style="flex:1 1 300px;min-width:0;background:#82D000;color:#0A1A13;border-radius:28px;padding:clamp(24px,3vw,40px);display:flex;flex-direction:column;justify-content:space-between;gap:24px;transform:rotate(1deg)">
+<span style="font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Настройка</span>
+<div style="font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(40px,5.4vw,72px);line-height:1;letter-spacing:-0.03em">10–15 минут</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- PAYMENT / REFUND / ACCESS -->
+<section id="pay" style="background:#F3F8EC;border-radius:36px;padding:clamp(28px,min(4vw,6vh),64px) clamp(20px,4vw,64px)">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,4vw,48px)">
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(28px,3.8vw,52px);line-height:1.1;letter-spacing:-0.02em;color:#0A1A13;text-wrap:balance">Оплата, возврат и доступ</h2>
+<div class="swipe" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+<div style="background:#FFFFFF;border-radius:24px;padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:16px">
+<div style="width:56px;height:56px;border-radius:16px;background:#0F3B29;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M3 10.5h18M7 15h4"></path></svg></div>
+<h3 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.01em">Оплата</h3>
+<p style="margin:0;color:#2E4A3A">Visa/Mastercard, перевод по номеру телефона или безналичный счёт для компаний. Реквизиты пришлём в WhatsApp.</p>
+</div>
+<div style="background:#FFFFFF;border-radius:24px;padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:16px">
+<div style="width:56px;height:56px;border-radius:16px;background:#0F3B29;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"></path><path d="M4 4v4h4"></path></svg></div>
+<h3 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.01em">Возврат</h3>
+<p style="margin:0;color:#2E4A3A">Не подошла таблица — напишите нам в течение 7 дней, и мы вернём оплату после проверки файла.</p>
+</div>
+<div style="background:#FFFFFF;border-radius:24px;padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:16px">
+<div style="width:56px;height:56px;border-radius:16px;background:#0F3B29;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#82D000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"></path></svg></div>
+<h3 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.01em">Доступ</h3>
+<p style="margin:0;color:#2E4A3A">Ссылка на скачивание и инструкция придут сразу после оплаты — в WhatsApp или на почту.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FINAL CTA -->
+<section style="background:#82D000;border-radius:36px;padding:clamp(32px,min(6vw,9vh),88px) clamp(20px,4vw,64px);color:#0A1A13">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:28px;align-items:center;text-align:center">
+<h2 style="margin:0;font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(32px,5.6vw,80px);line-height:1.05;letter-spacing:-0.03em;text-wrap:balance">Купить таблицу сейчас</h2>
+<p class="lead" style="margin:0;font-size:clamp(19px,1.8vw,24px);line-height:1.5;font-weight:500;max-width:26em">Хватит гадать, куда ушли деньги. Настройка займёт 10–15 минут.</p>
+<div style="display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center">
+<a class="btn" href="https://boosty.to/super_tablica" target="_blank" rel="noopener" style="background:#0A1A13;color:#82D000;font-weight:600;font-size:20px;padding:20px 38px;border-radius:999px;line-height:1.25">Купить таблицу</a>
+<span style="font-size:16px;font-weight:600"><span style="font-weight:800">*Вернем деньги, если не понравится</span></span>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer style="padding:clamp(32px,5vw,56px) clamp(20px,4vw,64px) 24px;color:#C9E4D4">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-wrap:wrap;gap:32px 64px;justify-content:space-between">
+<div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:center;gap:14px;color:#FFFFFF">
+<img src="images/logo-footer.png" alt="Логотип Супер Таблицы" width="44" height="44" style="display:block;width:44px;height:44px">
+<span style="font-family:'Unbounded',sans-serif;font-weight:700;font-size:18px">Супер Таблица</span>
+</div>
+<p style="margin:0;font-size:16px">Супер Таблица. Финансы под контролем.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<span title="Mastercard" style="background:#FFFFFF;border-radius:10px;height:38px;padding:0 12px;display:flex;align-items:center"><svg width="36" height="23" viewBox="0 0 36 23" role="img" aria-label="Mastercard"><circle cx="11.5" cy="11.5" r="11.5" fill="#EB001B"></circle><circle cx="24.5" cy="11.5" r="11.5" fill="#F79E1B" fill-opacity="0.92"></circle></svg></span>
+<span title="Visa" style="background:#FFFFFF;border-radius:10px;height:38px;padding:0 14px;display:flex;align-items:center;font-weight:800;font-style:italic;font-size:19px;letter-spacing:-0.02em;color:#1A1F71">VISA</span>
+<span title="МИР" style="background:#FFFFFF;border-radius:10px;height:38px;padding:0 14px;display:flex;align-items:center;font-weight:800;font-size:18px;letter-spacing:.02em;color:#0F754E">МИР</span>
+<span title="Система быстрых платежей" style="background:#FFFFFF;border-radius:10px;height:38px;padding:0 14px;display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;color:#5B57A2"><svg width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M0 0l7 4v5L0 5z" fill="#F7931E"></path><path d="M0 5l7 4-7 4z" fill="#EF3C3C"></path><path d="M7 4l5 3-5 2z" fill="#5B57A2"></path><path d="M7 9l5 3-5 3v-3z" fill="#1FA9E1"></path></svg>СБП</span>
+</div>
+</div>
+<div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<p style="margin:0;font-size:18px;color:#FFFFFF;max-width:24em">Остались вопросы? Мы на связи и поможем.</p>
+<div style="display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center">
+<a class="btn" href="https://wa.me/996709139603" target="_blank" rel="noopener" style="background:#82D000;color:#0A1A13;font-weight:600;font-size:16px;padding:12px 24px;border-radius:999px">Служба заботы</a>
+<a href="https://boosty.to/super_tablica" target="_blank" rel="noopener" style="color:#D9F2C0;font-size:16px;font-weight:500;text-decoration:underline;text-underline-offset:4px">Boosty</a>
+<a href="https://instagram.com/super_tablica" target="_blank" rel="noopener" style="color:#D9F2C0;font-size:16px;font-weight:500;text-decoration:underline;text-underline-offset:4px">Instagram</a>
+</div>
+</div>
+</div>
+
+<details style="border-top:1px solid rgba(201,228,212,.25);padding-top:20px">
+<summary style="font-size:16px;font-weight:600;color:#EAF7EE">Политика конфиденциальности</summary>
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:20px;max-width:70ch;font-size:15px;line-height:1.6;color:#C9E4D4">
+<p style="margin:0">1. Общие положения. Мы уважаем вашу конфиденциальность и обрабатываем персональные данные только в объеме, необходимом для оформления покупки, доставки файла и поддержки.</p>
+<p style="margin:0">2. Какие данные собираем. Имя, контактный номер, электронная почта, данные о платеже и выбранной версии продукта. Мы не храним полные данные банковских карт.</p>
+<p style="margin:0">3. Цели обработки. Связь с покупателем, подтверждение оплаты, отправка доступа к таблице, поддержка, возврат средств при необходимости.</p>
+<p style="margin:0">4. Хранение и защита. Данные хранятся ограниченный срок и защищаются организационными и техническими мерами. Доступ к данным имеют только уполномоченные лица.</p>
+<p style="margin:0">5. Передача третьим лицам. Мы не передаем данные третьим лицам, кроме платежных провайдеров и сервисов связи, необходимых для исполнения заказа.</p>
+<p style="margin:0">6. Отзыв согласия. Вы можете запросить удаление данных, написав на support@mukashov.com. Мы обработаем запрос в разумный срок.</p>
+<p style="margin:0">7. Контакты. По вопросам обработки данных пишите на support@mukashov.com.</p>
+</div>
+</details>
+</div>
+</footer>
+
+</div>
+
+</body>
+</html>
