@@ -486,7 +486,10 @@ body {
 }
 
 .row__item_sebet .row__item-overlay_front-side {
-    background-image: url(../../assets/img/cards/kuda_sebet.png);
+    background-image:
+        linear-gradient(to top, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.52) 22%, transparent 48%),
+        url(../../assets/img/cards/kuda-sebet-orange.png);
+    background-position: center;
 }
 
 .row__item_lection .row__item-overlay_front-side {
@@ -519,6 +522,21 @@ body {
     padding: 10px 18px;
 }
 
+.row__item-bottom .button {
+    color: #202224;
+    background: #dadada;
+    box-shadow: none;
+}
+
+.row__item-bottom .button:hover,
+.row__item-bottom .button:focus-visible {
+    background: #eeeeee;
+}
+
+.row__item-bottom .button:active {
+    background: #bfbfbf;
+}
+
 .button--dark {
     background: #101315;
     color: #f4f1ec;
@@ -531,6 +549,46 @@ body {
     text-align: center;
     color: var(--text-muted);
     font-size: 13px;
+}
+
+.footer-entry {
+    padding: 8px 0 16px;
+}
+
+.footer-entry .container {
+    display: flex;
+    justify-content: center;
+}
+
+.footer-entry__link,
+.footer-entry__link:visited {
+    color: #e6c69d;
+    -webkit-tap-highlight-color: rgba(230, 198, 157, 0.22);
+    text-decoration: none;
+    font-family: var(--font-title);
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.88;
+    transition: color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.footer-entry__link:hover,
+.footer-entry__link:focus-visible {
+    color: #ffdfb6;
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+.footer-entry__link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+}
+
+.footer-entry__link:active {
+    color: #d8b585;
+    transform: translateY(0);
+    transition: none;
 }
 
 @media (max-width: 1100px) {
