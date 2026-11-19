@@ -600,9 +600,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         const categoryId = (shared.categories || []).some((category) => category.id === params.get("category"))
             ? params.get("category")
             : "all";
-        const artistId = !publicArtist && getArtists().some((artist) => artist.id === params.get("artist"))
-            ? params.get("artist")
-            : "all";
+        const requestedArtist = params.get("artist");
+        const artists = getArtists();
+        const matchedArtist = artists.find((artist) => artist.id === requestedArtist)
+            || artists.find((artist) => slugify(artist.label) === requestedArtist);
+        const artistId = publicArtist ? "all" : matchedArtist?.id || "all";
         const initialPriceRange = normalizePriceRange(
             params.get("price_min"),
             params.get("price_max"),
@@ -1217,6 +1219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="summary-actions">
                         <button class="button button--solid" type="button" data-role="add-to-cart">Add to Bag</button>
                         <a class="button button--line" data-role="order-link" href="${product.referenceUrl}" target="_blank" rel="noopener">Order via Telegram</a>
+                        ${product.artistProfileSlug ? `<a class="button button--ghost" href="/${encodeURIComponent(product.artistProfileSlug)}">Профиль автора</a>` : ""}
                         <a class="button button--ghost" href="./">Catalog</a>
                     </div>
                 </div>
@@ -1447,16 +1450,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     try {
-        const { loadArtistProducts, loadPublicArtistProfile } = await import("./artist-data.js");
+        const { loadArtistProducts, loadPublicArtistProfile, loadCatalogArtistAssignments } = await import("./artist-data.js");
         const timeout = AbortSignal.timeout(8000);
-        const [artworks, profile] = await Promise.race([
+        const [artworks, profile, assignments] = await Promise.race([
             Promise.all([
                 loadArtistProducts(),
-                profileHandle ? loadPublicArtistProfile({ profile_handle: profileHandle }) : null
+                profileHandle ? loadPublicArtistProfile({ profile_handle: profileHandle }) : null,
+                loadCatalogArtistAssignments().catch(() => [])
             ]),
             new Promise((_, reject) => timeout.addEventListener("abort", () => reject(timeout.reason), { once: true }))
         ]);
-        catalog = [...artworks, ...catalog];
+        const owners = new Map(assignments.map((assignment) => [assignment.product_slug, assignment]));
+        catalog = [...artworks, ...catalog.map((work) => {
+            const owner = owners.get(work.slug);
+            return owner ? { ...work, artistId: owner.artist_id, artistProfileSlug: owner.profile_slug } : work;
+        })];
         publicArtist = profile;
         if (profileHandle && !publicArtist) {
             const status = document.querySelector("#catalog-status");

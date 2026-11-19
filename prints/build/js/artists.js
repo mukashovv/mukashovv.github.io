@@ -1,4 +1,4 @@
-import { createPrintsClient, fetchWorks, photoPath, unwrap } from "./artist-data.js";
+import { createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, unwrap } from "./artist-data.js";
 
 const slugCooldownMs = 14 * 24 * 60 * 60 * 1000;
 const authForm = document.querySelector("#artist-auth");
@@ -53,7 +53,7 @@ function workCard(work) {
         img.alt = work.title;
         card.append(img);
     }
-    card.append(element("h3", work.title), element("p", `${work.artist_name} · ${work.city}`));
+    card.append(element("h3", work.title), element("p", [work.artist_name, work.city].filter(Boolean).join(" · ")));
     return card;
 }
 
@@ -172,13 +172,28 @@ function initDashboard(client, storage) {
 
     async function refreshWorks(owner) {
         try {
-            const entries = await fetchWorks(client, { owner });
+            const [entries, assignments] = await Promise.all([
+                fetchWorks(client, { owner }),
+                loadCatalogArtistAssignments().catch(() => [])
+            ]);
             if (owner !== userId) return;
-            worksStatus.textContent = entries.length ? "" : "У вас пока нет работ.";
-            worksList.replaceChildren(...entries.map(dashboardCard));
+            const assignedSlugs = new Set(assignments.filter((entry) => entry.artist_id === owner)
+                .map((entry) => entry.product_slug));
+            const catalogueWorks = (window.printsCatalog || []).filter((work) => assignedSlugs.has(work.slug));
+            worksStatus.textContent = entries.length || catalogueWorks.length ? "" : "У вас пока нет работ.";
+            worksList.replaceChildren(...entries.map(dashboardCard), ...catalogueWorks.map(catalogueCard));
         } catch {
             if (owner === userId) worksStatus.textContent = "Не удалось обновить список работ. Перезагрузите страницу.";
         }
+    }
+
+    function catalogueCard(work) {
+        const card = workCard({ ...work, imageUrl: work.image, artist_name: work.artist, city: profile?.city || "" });
+        const status = element("p", "Опубликовано в основном каталоге", "artist-card__status");
+        const link = element("a", "Открыть страницу работы", "button button--line");
+        link.href = `./product.html?slug=${encodeURIComponent(work.slug)}`;
+        card.append(status, link);
+        return card;
     }
 
     function dashboardCard(work) {

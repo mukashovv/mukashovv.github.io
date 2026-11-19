@@ -110,3 +110,11 @@ export async function loadPublicArtistProfile(filters) {
     const client = await createPrintsClient();
     return unwrap(await client.rpc("prints_public_artist_profile", filters).abortSignal(AbortSignal.timeout(8000)));
 }
+
+export async function loadCatalogArtistAssignments() {
+    const client = await createPrintsClient();
+    const { data, error } = await client.rpc("prints_public_catalog_artists")
+        .abortSignal(AbortSignal.timeout(4500));
+    if (error) return [];
+    return data || [];
+}
