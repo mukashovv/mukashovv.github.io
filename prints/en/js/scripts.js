@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const page = document.body.dataset.printsPage;
     const profileHandle = page === "catalog" ? new URLSearchParams(window.location.search).get("author") : null;
     let publicArtist;
+    const normalizeSearch = (value) => value.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+    const feature = document.querySelector("[data-gallery-feature]");
+    if (feature) feature.hidden = Boolean(window.location.search);
 
     if (!catalog.length) {
         return;
@@ -164,6 +167,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const buildCatalogQuery = (state) => {
         const params = new URLSearchParams();
         if (profileHandle) params.set("author", profileHandle);
+        if (state.query) params.set("q", state.query);
 
         if (state.sortId && state.sortId !== "all") {
             params.set("sort", state.sortId);
@@ -624,6 +628,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             : defaultSizeId;
 
         return {
+            query: (params.get("q") || "").slice(0, 100).trim(),
             sortId,
             categoryId,
             artistId,
@@ -640,6 +645,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         let items = publicArtist
             ? catalog.filter((work) => work.artistId === publicArtist.artistId)
             : [...catalog];
+
+        if (state.query) {
+            const terms = normalizeSearch(state.query).split(/\s+/);
+            items = items.filter((work) => {
+                const searchable = normalizeSearch([
+                    work.title, work.artist, categoryLabel(work), work.slug.replaceAll("-", " ")
+                ].join(" "));
+                return terms.every((term) => searchable.includes(term));
+            });
+        }
 
         if (state.sortId === "new") {
             items.sort((a, b) => {
@@ -693,7 +708,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const syncCatalogUrl = (state) => {
         const queryString = buildCatalogQuery(state);
         const nextUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
-        window.history.replaceState({}, "", nextUrl);
+        window.history.replaceState({}, "", nextUrl + (window.location.hash || ""));
     };
 
     const buildFilterDropdown = ({ label, key, selectedId, options, optionLabel, arrow = "down" }) => `
@@ -881,6 +896,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         const grid = document.querySelector("#printsGrid");
         const state = getInitialCatalogState();
         let lastScrollY = window.scrollY;
+        const searchForm = document.querySelector(".gallery-search");
+        const searchInput = searchForm?.querySelector("input");
+
+        if (searchInput) searchInput.value = state.query;
+        searchForm?.addEventListener("submit", (event) => event.preventDefault());
+        searchInput?.addEventListener("input", () => {
+            state.query = searchInput.value.trim();
+            renderProducts();
+        });
 
         const renderProducts = () => {
             const products = getCatalogProducts(state);
@@ -912,7 +936,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             const scrolledDown = currentScrollY > lastScrollY + 6;
             const scrolledUp = currentScrollY < lastScrollY - 6;
 
-            if (currentScrollY < 120 || scrolledUp) {
+            const approachingGrid = grid && grid.getBoundingClientRect().top > 0;
+
+            if (approachingGrid || currentScrollY < 120 || scrolledUp) {
                 waypoint.classList.remove("is-hidden");
             } else if (scrolledDown) {
                 waypoint.classList.add("is-hidden");

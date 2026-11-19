@@ -78,6 +78,27 @@
         </header>
 
         <main>
+            <section class="gallery-feature container" data-gallery-feature aria-labelledby="gallery-feature-title" hidden>
+                <div class="gallery-feature__copy">
+                    <p class="eyebrow">Терскей-Ала-Тоо</p>
+                    <h1 id="gallery-feature-title">Искусство для пространства, в котором вы живёте</h1>
+                    <p>Фотографии Кыргызстана, принты и оригиналы от художников.</p>
+                    <div class="gallery-feature__actions">
+                        <a class="button button--solid" href="#gallery-catalogue">Смотреть каталог</a>
+                        <a href="./?sort=new#gallery-catalogue">Новые работы</a>
+                    </div>
+                </div>
+                <a class="gallery-feature__image" href="./product.html?slug=hidden-heart-of-teskey-ala-too">
+                    <img src="build/img/hidden-heart-of-teskey-ala-too-interior.webp" alt="" width="1684" height="2528" fetchpriority="high">
+                    <span>Потаённое сердце Терскей-Ала-Тоо <small>Janybek Mukash</small></span>
+                </a>
+            </section>
+            <div class="gallery-catalogue container" id="gallery-catalogue">
+                <h2>Каталог работ</h2>
+                <form class="gallery-search" role="search">
+                    <input type="search" name="q" aria-label="Поиск по названию или автору" placeholder="Поиск по названию или автору" maxlength="100" autocomplete="off">
+                </form>
+            </div>
             <section class="filter-waypoint" id="filterWaypoint"></section>
 
             <section class="catalog" id="catalog">

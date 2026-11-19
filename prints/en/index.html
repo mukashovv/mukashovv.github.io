@@ -78,6 +78,27 @@
         </header>
 
         <main>
+            <section class="gallery-feature container" data-gallery-feature aria-labelledby="gallery-feature-title" hidden>
+                <div class="gallery-feature__copy">
+                    <p class="eyebrow">Teskey Ala-Too</p>
+                    <h1 id="gallery-feature-title">Art for the spaces you live in</h1>
+                    <p>Photographs of Kyrgyzstan, prints and originals by artists.</p>
+                    <div class="gallery-feature__actions">
+                        <a class="button button--solid" href="#gallery-catalogue">Browse the catalogue</a>
+                        <a href="./?sort=new#gallery-catalogue">New arrivals</a>
+                    </div>
+                </div>
+                <a class="gallery-feature__image" href="./product.html?slug=hidden-heart-of-teskey-ala-too">
+                    <img src="../build/img/hidden-heart-of-teskey-ala-too-interior.webp" alt="" width="1684" height="2528" fetchpriority="high">
+                    <span>Hidden Heart of Teskey Ala-Too <small>Janybek Mukash</small></span>
+                </a>
+            </section>
+            <div class="gallery-catalogue container" id="gallery-catalogue">
+                <h2>Art catalogue</h2>
+                <form class="gallery-search" role="search">
+                    <input type="search" name="q" aria-label="Search by artwork or artist" placeholder="Search by artwork or artist" maxlength="100" autocomplete="off">
+                </form>
+            </div>
             <section class="filter-waypoint" id="filterWaypoint"></section>
 
             <section class="catalog" id="catalog">
