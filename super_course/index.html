@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Курс по Супер Таблице — видеокурс</title>
-    <meta name="description" content="Видеокурс по Супер Таблице: настройка, автоматизация, отчёты и контроль бюджета.">
-    <link rel="icon" href="../assets/img/super_tablica_logo.jpg" type="image/jpeg">
+    <title>Курс по Супер Таблице — инструкция по использованию Супер Таблицы</title>
+    <meta name="description" content="Курс по Супер Таблице — видеоинструкция по использованию Супер Таблицы: настройка, автоматизация, отчёты. Курс и таблица обновляются каждый год. Три тарифа.">
+    <meta name="theme-color" content="#0f1014">
     <link rel="icon" href="../assets/img/super_tablica_logo.jpg" type="image/jpeg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,438 +22,176 @@
             --course-accent-2: #ff7b2c;
             --course-card: rgba(255,255,255,0.06);
             --course-stroke: rgba(255,255,255,0.08);
+            --green: #3ddc84;
         }
-        body {
-            background: var(--course-bg);
-            color: var(--course-ink);
-        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body { background: var(--course-bg); color: var(--course-ink); font-family: "Manrope", sans-serif; }
         .course-page {
             min-height: 100vh;
             background: radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 40%),
                 radial-gradient(circle at 40% 20%, rgba(255,255,255,0.04), transparent 45%),
                 var(--course-bg);
         }
-        .course-header {
-            padding: 26px 0 10px;
-            position: relative;
-            z-index: 1001;
-        }
-        .course-header .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-        }
-        .course-brand {
-            font-family: "Unbounded", sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            font-size: 16px;
-            color: #fff;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 6px;
-        }
-        .course-brand span:first-child {
-            line-height: 1.1;
-        }
-        .course-brand span:last-child {
-            font-family: "Manrope", sans-serif;
-            font-size: 10px;
-            letter-spacing: 0.08em;
-            color: rgba(255,255,255,0.55);
-            font-weight: 300;
-            line-height: 1;
-        }
-        .course-menu {
-            display: flex;
-            gap: 18px;
-            font-size: 12px;
-        }
-        .burger {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: transparent;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .burger span {
-            display: block;
-            width: 18px;
-            height: 2px;
-            background: #fff;
-            position: relative;
-        }
-        .burger span::before,
-        .burger span::after {
-            content: "";
-            position: absolute;
-            width: 18px;
-            height: 2px;
-            background: #fff;
-            left: 0;
-        }
+
+        /* Header */
+        .course-header { padding: 18px 0 10px; position: sticky; top: 0; z-index: 1001; background: rgba(15,16,20,.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--course-stroke); }
+        .course-header .container { display: flex; align-items: center; justify-content: space-between; position: relative; gap: 16px; }
+        .course-brand { font-family: "Unbounded", sans-serif; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 16px; color: #fff; text-decoration: none; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+        .course-brand span:first-child { line-height: 1.1; }
+        .course-brand span:last-child { font-family: "Manrope", sans-serif; font-size: 10px; letter-spacing: .08em; color: rgba(255,255,255,.55); font-weight: 300; line-height: 1; }
+        .course-menu { display: flex; gap: 18px; font-size: 12px; }
+        .course-menu a { color: var(--course-muted); text-decoration: none; letter-spacing: .12em; text-transform: uppercase; }
+        .course-menu a:hover { color: #fff; }
+        .burger { width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2); background: transparent; display: none; align-items: center; justify-content: center; cursor: pointer; }
+        .burger span { display: block; width: 18px; height: 2px; background: #fff; position: relative; }
+        .burger span::before, .burger span::after { content: ""; position: absolute; width: 18px; height: 2px; background: #fff; left: 0; }
         .burger span::before { top: -6px; }
         .burger span::after { top: 6px; }
-        .course-menu a {
-            color: var(--course-muted);
-            text-decoration: none;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-        .course-menu a:hover {
-            color: #fff;
-        }
-        .course-cta {
-            background: var(--course-accent);
-            color: #fff;
-            padding: 10px 18px;
-            border-radius: 999px;
-            text-decoration: none;
-            font-size: 12px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            box-shadow: 0 14px 30px rgba(228,55,43,0.35);
-        }
-        .hero {
-            padding: 32px 0 80px;
-        }
-        .hero-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            gap: 26px;
-            align-items: center;
-        }
-        .hero h1 {
-            font-family: "Unbounded", sans-serif;
-            font-size: clamp(32px, 4vw, 52px);
-            line-height: 1.1;
-            margin-bottom: 16px;
-        }
-        .hero p {
-            color: var(--course-muted);
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        .hero-actions {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .hero-actions a {
-            text-decoration: none;
-        }
-        .btn-buy {
-            background: linear-gradient(180deg, #ff4b3b, #c52a21);
-            color: #fff;
-            padding: 14px 28px;
-            border-radius: 999px;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            font-size: 12px;
-            box-shadow: 0 18px 38px rgba(228,55,43,0.35);
-        }
-        .btn-ghost {
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            padding: 12px 20px;
-            border-radius: 999px;
-            font-size: 12px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-        .hero-media {
-            position: relative;
-            border-radius: 28px;
-            overflow: hidden;
-            min-height: 420px;
-            background: #1b1b22 center/cover no-repeat;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-        .hero-media::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
-        }
-        .hero-media__content {
-            position: absolute;
-            inset: 0;
-            padding: 26px;
-            display: grid;
-            align-content: end;
-            z-index: 1;
-        }
-        .hero-media__content strong {
-            font-size: 22px;
-            font-family: "Unbounded", sans-serif;
-        }
-        .hero-media__content span {
-            color: var(--course-muted);
-        }
-        .section {
-            padding: 50px 0 70px;
-        }
-        .section-title {
-            font-family: "Unbounded", sans-serif;
-            font-size: 26px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .video-block {
-            background: rgba(255,255,255,0.04);
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.08);
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
-            gap: 18px;
-            padding: 20px;
-            align-items: center;
-        }
-        .video-frame {
-            aspect-ratio: 16 / 9;
-            border-radius: 24px;
-            overflow: hidden;
-            background: #000;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-        .video-text h3 {
-            font-family: "Unbounded", sans-serif;
-            margin-bottom: 12px;
-        }
-        .video-text p {
-            color: var(--course-muted);
-            line-height: 1.6;
-        }
-        .result-block {
-            text-align: center;
-            padding: 60px 20px;
-            border-radius: 30px;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.06), transparent 70%);
-        }
-        .result-block h2 {
-            font-family: "Unbounded", sans-serif;
-            font-size: clamp(28px, 3.5vw, 44px);
-        }
-        .result-block p {
-            color: var(--course-muted);
-            font-size: 18px;
-            margin-top: 12px;
-        }
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
-        }
-        .card {
-            background: var(--course-card);
-            border: 1px solid var(--course-stroke);
-            border-radius: 22px;
-            padding: 16px;
-            display: grid;
-            gap: 10px;
-        }
-        .card strong {
-            font-family: "Unbounded", sans-serif;
-            font-size: 16px;
-        }
-        .card p {
-            color: var(--course-muted);
-            margin: 0;
-        }
-        .price-block {
-            display: grid;
-            grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 0.7fr);
-            gap: 18px;
-            align-items: center;
-            background: rgba(255,255,255,0.04);
-            border-radius: 30px;
-            padding: 28px 30px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-        .price-info .section-title {
-            margin-bottom: 12px;
-        }
-        .price-tag {
-            font-family: "Unbounded", sans-serif;
-            font-size: clamp(28px, 4vw, 48px);
-        }
-        .price-note {
-            color: var(--course-muted);
-            margin: 0;
-        }
-        .price-cta {
-            display: grid;
-            align-items: center;
-            gap: 18px;
-            justify-items: end;
-            text-align: right;
-        }
-        .price-cta__content {
-            display: grid;
-            gap: 12px;
-            justify-items: end;
-        }
-        .course-preview {
-            width: min(360px, 100%);
-            aspect-ratio: 16 / 9;
-            border-radius: 20px;
-            background: url("../assets/img/cards/super_course.png") center/cover no-repeat;
-            border: 1px solid rgba(255,255,255,0.14);
-            box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-        }
-        .price-preview-wrap {
-            display: grid;
-            justify-items: center;
-            margin-top: 0;
-        }
-        .teacher {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            gap: 18px;
-            align-items: center;
-        }
-        .teacher-card {
-            background: rgba(255,255,255,0.04);
-            border-radius: 28px;
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 22px;
-        }
-        .teacher-card h3 {
-            font-family: "Unbounded", sans-serif;
-            margin-bottom: 12px;
-        }
-        .teacher-card p {
-            color: var(--course-muted);
-            line-height: 1.6;
-        }
-        .teacher-photo {
-            border-radius: 28px;
-            min-height: 380px;
-            background: #1b1b22 center/cover no-repeat;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-        .timeline {
-            display: grid;
-            gap: 12px;
-        }
-        .timeline-item {
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 18px;
-            padding: 14px 16px;
-            background: rgba(255,255,255,0.04);
-        }
-        .timeline-item strong {
-            display: block;
-            margin-bottom: 6px;
-        }
-        .faq {
-            display: grid;
-            gap: 14px;
-        }
-        .faq-item {
-            border-bottom: 1px solid rgba(255,255,255,0.12);
-            padding: 14px 0;
-        }
-        .faq-question {
-            width: 100%;
-            border: none;
-            background: transparent;
-            color: #fff;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            font-size: 16px;
-            cursor: pointer;
-            text-align: left;
-        }
-        .faq-question span {
-            font-size: 24px;
-            font-weight: 600;
-            line-height: 1;
-            margin-left: 12px;
-        }
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.25s ease;
-            color: var(--course-muted);
-            line-height: 1.6;
-            margin-top: 10px;
-        }
-        .faq-item.is-open .faq-answer {
-            max-height: 240px;
-        }
-        .cta-final {
-            text-align: center;
-            padding: 50px 20px;
-        }
-        .cta-final p {
-            color: var(--course-muted);
-            margin-bottom: 18px;
-        }
-        .footer {
-            padding: 30px 0 50px;
-            color: var(--course-muted);
-            text-align: center;
-            font-size: 13px;
-        }
+        .course-cta { background: var(--course-accent); color: #fff; padding: 10px 18px; border-radius: 999px; text-decoration: none; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; box-shadow: 0 14px 30px rgba(228,55,43,.35); white-space: nowrap; }
+
+        /* Buttons */
+        .btn-buy { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(180deg, #ff4b3b, #c52a21); color: #fff; padding: 14px 28px; border-radius: 999px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: 12px; box-shadow: 0 18px 38px rgba(228,55,43,.35); text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
+        .btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid rgba(255,255,255,.2); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; text-decoration: none; background: transparent; cursor: pointer; font-family: inherit; font-weight: 600; }
+        .btn-ghost:hover { border-color: #fff; }
+        .btn-tg { background: linear-gradient(180deg, #2fb4ee, #1d8fc4); box-shadow: 0 18px 38px rgba(34,158,217,.3); }
+        .btn-wa { background: linear-gradient(180deg, #2fe07a, #1aa956); box-shadow: 0 18px 38px rgba(37,211,102,.28); }
+
+        /* Hero */
+        .hero { padding: 32px 0 60px; }
+        .hero-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 26px; align-items: center; }
+        .course-tag { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px; background: rgba(228,55,43,.14); border: 1px solid rgba(228,55,43,.4); color: #ff8a80; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 18px; }
+        .hero h1 { font-family: "Unbounded", sans-serif; font-size: clamp(30px, 3.8vw, 48px); line-height: 1.12; margin: 0 0 16px; }
+        .hero h1 em { font-style: normal; color: var(--course-accent-2); }
+        .hero p { color: var(--course-muted); line-height: 1.6; margin: 0 0 20px; }
+        .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 26px; }
+        .hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+        .hero-stat { padding: 14px; border-radius: 16px; background: var(--course-card); border: 1px solid var(--course-stroke); }
+        .hero-stat strong { display: block; font-family: "Unbounded", sans-serif; font-size: 18px; margin-bottom: 4px; }
+        .hero-stat span { color: var(--course-muted); font-size: 12px; }
+        .hero-media { position: relative; border-radius: 28px; overflow: hidden; min-height: 420px; background: #1b1b22 center/cover no-repeat; border: 1px solid rgba(255,255,255,.08); }
+        .hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,.1), rgba(0,0,0,.6)); }
+        .hero-media__content { position: absolute; inset: 0; padding: 26px; display: grid; align-content: end; z-index: 1; }
+        .hero-media__content strong { font-size: 22px; font-family: "Unbounded", sans-serif; }
+        .hero-media__content span { color: var(--course-muted); }
+
+        /* Trust strip */
+        .trust { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 8px; }
+        .trust-item { display: flex; gap: 12px; align-items: center; padding: 16px; border-radius: 18px; background: var(--course-card); border: 1px solid var(--course-stroke); }
+        .trust-item i { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.08); color: var(--course-accent-2); flex: 0 0 auto; }
+        .trust-item strong { display: block; font-size: 14px; }
+        .trust-item span { color: var(--course-muted); font-size: 12px; }
+
+        /* Sections */
+        .section { padding: 50px 0 40px; }
+        .section-title { font-family: "Unbounded", sans-serif; font-size: clamp(22px, 2.8vw, 30px); text-align: center; margin: 0 0 12px; line-height: 1.2; }
+        .section-sub { text-align: center; color: var(--course-muted); max-width: 680px; margin: 0 auto 28px; line-height: 1.6; }
+        .video-block { background: rgba(255,255,255,.04); border-radius: 30px; border: 1px solid rgba(255,255,255,.08); display: grid; grid-template-columns: minmax(0,1fr) minmax(0,.7fr); gap: 18px; padding: 20px; align-items: center; }
+        .video-frame { aspect-ratio: 16/9; border-radius: 24px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,.06); }
+        .video-frame iframe { display: block; border: 0; }
+        .video-text h3 { font-family: "Unbounded", sans-serif; margin: 0 0 12px; }
+        .video-text p { color: var(--course-muted); line-height: 1.6; margin: 0; }
+        .result-block { text-align: center; padding: 60px 20px; border-radius: 30px; background: radial-gradient(circle at center, rgba(255,255,255,.06), transparent 70%); }
+        .result-block h2 { font-family: "Unbounded", sans-serif; font-size: clamp(26px, 3.4vw, 42px); margin: 0; }
+        .result-block p { color: var(--course-muted); font-size: 18px; margin: 12px auto 0; max-width: 720px; }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+        .card { background: var(--course-card); border: 1px solid var(--course-stroke); border-radius: 22px; padding: 20px; display: grid; gap: 10px; align-content: start; }
+        .card .ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(228,55,43,.15); color: #ff8a80; }
+        .card strong { font-family: "Unbounded", sans-serif; font-size: 15px; line-height: 1.3; }
+        .card p { color: var(--course-muted); margin: 0; line-height: 1.55; font-size: 14px; }
+
+        /* Yearly update */
+        .update { border-radius: 30px; padding: 34px; display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); gap: 28px; align-items: center; background: linear-gradient(135deg, rgba(228,55,43,.2), rgba(255,123,44,.1) 60%, rgba(255,255,255,.04)); border: 1px solid rgba(255,123,44,.3); }
+        .update .course-tag { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); color: #fff; }
+        .update h2 { font-family: "Unbounded", sans-serif; font-size: clamp(22px, 2.8vw, 32px); line-height: 1.2; margin: 0 0 14px; }
+        .update p { color: var(--course-muted); line-height: 1.6; margin: 0 0 14px; }
+        .update ul { list-style: none; margin: 0; padding: 0; }
+        .update li { display: flex; gap: 10px; align-items: flex-start; color: rgba(255,255,255,.88); font-size: 14px; margin-bottom: 10px; line-height: 1.5; }
+        .update li i { color: var(--green); margin-top: 4px; }
+        .years { display: grid; gap: 12px; }
+        .year { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 18px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); }
+        .year.is-now { background: #fff; color: #14151a; border-color: #fff; }
+        .year b { font-family: "Unbounded", sans-serif; font-size: 22px; min-width: 76px; }
+        .year strong { display: block; font-size: 14px; }
+        .year span { font-size: 12px; opacity: .7; }
+        .year em { margin-left: auto; font-style: normal; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.14); white-space: nowrap; }
+        .year.is-now em { background: var(--course-accent); color: #fff; }
+
+        /* Teacher */
+        .teacher { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; align-items: center; }
+        .teacher-card { background: rgba(255,255,255,.04); border-radius: 28px; border: 1px solid rgba(255,255,255,.08); padding: 22px; }
+        .teacher-card h3 { font-family: "Unbounded", sans-serif; margin: 0 0 12px; }
+        .teacher-card p { color: var(--course-muted); line-height: 1.6; margin: 0; }
+        .teacher-photo { border-radius: 28px; min-height: 380px; background: #1b1b22 center/cover no-repeat; border: 1px solid rgba(255,255,255,.08); }
+
+        /* Steps */
+        .timeline { display: grid; gap: 12px; }
+        .timeline-item { border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 14px 16px; background: rgba(255,255,255,.04); color: var(--course-muted); line-height: 1.5; }
+        .timeline-item strong { display: block; margin-bottom: 6px; color: #fff; }
+
+        /* Pricing */
+        .region-switch { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-bottom: 30px; font-size: 13px; color: var(--course-muted); }
+        .region-switch__group { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(255,255,255,.08); }
+        .region-switch button { border: none; background: transparent; padding: 8px 16px; border-radius: 999px; font-weight: 600; font-size: 12px; color: var(--course-muted); cursor: pointer; font-family: inherit; letter-spacing: .06em; }
+        .region-switch button.is-active { background: #fff; color: #14151a; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; align-items: stretch; }
+        .plan { position: relative; background: var(--course-card); border: 1px solid var(--course-stroke); border-radius: 26px; padding: 30px 24px 24px; display: flex; flex-direction: column; }
+        .plan--popular { border: 2px solid var(--course-accent-2); background: linear-gradient(180deg, rgba(255,123,44,.12), rgba(255,255,255,.05)); box-shadow: 0 20px 50px rgba(228,55,43,.18); }
+        .plan__flag { position: absolute; top: -14px; left: 24px; padding: 6px 14px; border-radius: 999px; background: var(--course-accent-2); color: #14151a; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+        .plan__sticker { position: absolute; top: 18px; right: 18px; padding: 7px 12px; border-radius: 10px; background: #ff2d2d; color: #fff; font-family: "Unbounded", sans-serif; font-weight: 700; font-size: 14px; transform: rotate(4deg); box-shadow: 0 8px 18px rgba(255,45,45,.4); }
+        .plan__name { font-family: "Unbounded", sans-serif; font-size: 19px; margin: 0 0 8px; padding-right: 76px; line-height: 1.25; }
+        .plan__desc { color: var(--course-muted); font-size: 14px; line-height: 1.5; margin: 0 0 18px; min-height: 42px; }
+        .plan__old { color: rgba(255,255,255,.5); font-size: 18px; text-decoration: line-through; text-decoration-color: #ff2d2d; text-decoration-thickness: 2px; }
+        .plan__price { font-family: "Unbounded", sans-serif; font-size: 34px; font-weight: 700; line-height: 1.15; margin: 4px 0 18px; }
+        .plan__price small { font-size: 16px; font-weight: 600; color: var(--course-muted); }
+        .plan ul { list-style: none; margin: 0 0 22px; padding: 0; flex: 1; }
+        .plan li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--course-muted); margin-bottom: 11px; line-height: 1.45; }
+        .plan li i { color: var(--green); margin-top: 4px; font-size: 12px; }
+        .plan li.is-plus { color: #fff; font-weight: 700; }
+        .plan .btn-buy, .plan .btn-ghost { width: 100%; padding: 14px 20px; }
+        .pricing-note { margin: 18px 0 0; text-align: center; color: var(--course-muted); font-size: 13px; line-height: 1.5; }
+
+        /* FAQ */
+        .faq { display: grid; gap: 14px; max-width: 860px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid rgba(255,255,255,.12); padding: 14px 0; }
+        .faq-question { width: 100%; border: none; background: transparent; color: #fff; display: grid; grid-template-columns: 1fr auto; align-items: center; font-size: 16px; cursor: pointer; text-align: left; font-family: inherit; font-weight: 600; }
+        .faq-question span { font-size: 24px; font-weight: 600; line-height: 1; margin-left: 12px; color: var(--course-accent-2); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height .25s ease; color: var(--course-muted); line-height: 1.6; margin-top: 10px; }
+        .faq-item.is-open .faq-answer { max-height: 260px; }
+
+        /* Consultation */
+        .consult { border-radius: 30px; padding: 36px; display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); gap: 28px; align-items: center; background: radial-gradient(circle at top right, rgba(255,123,44,.16), transparent 55%), rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); }
+        .consult h2 { font-family: "Unbounded", sans-serif; font-size: clamp(22px, 2.8vw, 32px); line-height: 1.2; margin: 0 0 12px; }
+        .consult p { color: var(--course-muted); line-height: 1.6; margin: 0 0 14px; }
+        .consult-steps { display: grid; gap: 10px; }
+        .consult-step { display: flex; gap: 12px; align-items: center; color: rgba(255,255,255,.88); font-size: 14px; }
+        .consult-step b { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--course-accent); color: #fff; font-size: 13px; flex: 0 0 auto; }
+        .consult-actions { display: grid; gap: 12px; padding: 24px; border-radius: 22px; background: rgba(0,0,0,.3); border: 1px solid var(--course-stroke); }
+        .consult-actions h3 { font-family: "Unbounded", sans-serif; font-size: 16px; margin: 0 0 4px; }
+        .consult-actions .btn-buy { width: 100%; min-height: 52px; }
+        .consult-actions small { text-align: center; color: var(--course-muted); font-size: 12px; }
+
+        .cta-final { text-align: center; padding: 40px 20px 50px; }
+        .cta-final p { color: var(--course-muted); margin: 0 0 18px; }
+        .footer { padding: 30px 0 50px; color: var(--course-muted); text-align: center; font-size: 13px; border-top: 1px solid var(--course-stroke); }
+
         @media (max-width: 980px) {
-            .hero-grid,
-            .video-block,
-            .price-block,
-            .teacher {
-                grid-template-columns: 1fr;
-            }
-            .price-preview-wrap {
-                order: 1;
-            }
-            .price-info {
-                order: 2;
-            }
-            .price-cta {
-                order: 3;
-            }
-            .price-cta {
-                justify-items: start;
-                text-align: left;
-                margin-top: 6px;
-            }
-            .price-cta__content {
-                justify-items: start;
-            }
-            .grid-3 {
-                grid-template-columns: 1fr;
-            }
-            .course-menu {
-                position: absolute;
-                top: 72px;
-                right: 20px;
-                flex-direction: column;
-                gap: 12px;
-                background: rgba(0,0,0,0.85);
-                border: 1px solid rgba(255,255,255,0.12);
-                border-radius: 16px;
-                padding: 14px 16px;
-                display: none;
-                z-index: 1000;
-                pointer-events: auto;
-            }
-            .course-menu.is-open {
-                display: flex;
-            }
-            .burger {
-                display: inline-flex;
-            }
+            .hero-grid, .video-block, .teacher, .update, .consult { grid-template-columns: 1fr; }
+            .grid-3 { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+            .plan__desc { min-height: 0; }
+            .course-menu { position: absolute; top: 62px; right: 20px; flex-direction: column; gap: 12px; background: rgba(0,0,0,.92); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 14px 16px; display: none; z-index: 1000; }
+            .course-menu.is-open { display: flex; }
+            .burger { display: inline-flex; margin-left: auto; }
+        }
+        @media (max-width: 640px) {
+            .hero-stats { grid-template-columns: 1fr; }
+            .hero-media { min-height: 320px; }
+            .update, .consult { padding: 22px; }
+            .year { flex-wrap: wrap; }
+            .course-cta { padding: 9px 12px; font-size: 11px; }
+            .course-brand { font-size: 14px; }
         }
     </style>
 </head>
@@ -466,34 +204,60 @@
                     <span>курс по Супер Таблице</span>
                 </div>
                 <nav class="course-menu">
+                    <a href="#about">О курсе</a>
                     <a href="#video">Видео</a>
                     <a href="#program">Программа</a>
-                    <a href="#price">Стоимость</a>
+                    <a href="#updates">Обновления</a>
+                    <a href="#price">Тарифы</a>
                     <a href="#faq">FAQ</a>
+                    <a href="#consult">Консультация</a>
                 </nav>
-                <button class="burger" type="button" aria-label="Открыть меню">
-                    <span></span>
-                </button>
-                <a class="course-cta" href="#buy">Купить курс</a>
+                <button class="burger" type="button" aria-label="Открыть меню"><span></span></button>
+                <a class="course-cta" href="#price">Купить курс</a>
             </div>
         </header>
 
         <main>
             <section class="hero" id="top">
-                <div class="container hero-grid">
-                    <div>
-                        <h1>Как выстроить систему учёта и контроля денег в одной таблице</h1>
-                        <p>Видеокурс о том, как навести порядок в финансах, видеть картину целиком и принимать решения быстрее. Всё на базе Супер Таблицы — без хаоса и ручной рутины.</p>
-                        <div class="hero-actions">
-                            <a class="btn-buy" href="#buy">Купить курс</a>
-                            <a class="btn-ghost" href="#video">Смотреть фрагмент</a>
+                <div class="container">
+                    <div class="hero-grid">
+                        <div>
+                            <div class="course-tag"><i class="fas fa-graduation-cap"></i>Курс по Супер Таблице</div>
+                            <h1>Курс по Супер Таблице — <em>инструкция</em> по использованию Супер Таблицы</h1>
+                            <p>Видеокурс о том, как выстроить систему учёта и контроля денег: настроить Супер Таблицу, вести её каждый день и читать отчёты. Всё по шагам — без хаоса и ручной рутины.</p>
+                            <div class="hero-actions">
+                                <a class="btn-buy" href="#price">Выбрать тариф</a>
+                                <a class="btn-ghost" href="#consult">Получить консультацию</a>
+                            </div>
+                            <div class="hero-stats">
+                                <div class="hero-stat"><strong>3,5 часа</strong><span>видео без воды</span></div>
+                                <div class="hero-stat"><strong>1 раз в год</strong><span>новая версия курса и таблицы</span></div>
+                                <div class="hero-stat"><strong>6 месяцев</strong><span>доступ к курсу</span></div>
+                            </div>
+                        </div>
+                        <div class="hero-media" style="background-image:url('../assets/img/cards/super_course.png')">
+                            <div class="hero-media__content">
+                                <strong>Жаныбек Мукаш</strong>
+                                <span>основатель Супер Таблицы, предприниматель</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="hero-media" style="background-image:url('../assets/img/cards/super_course.png')">
-                        <div class="hero-media__content">
-                            <strong>Жаныбек Мукаш</strong>
-                            <span>основатель Супер Таблицы, предприниматель</span>
-                        </div>
+                    <div class="trust" style="margin-top:28px;">
+                        <div class="trust-item"><i class="fas fa-bolt"></i><div><strong>Мгновенный доступ</strong><span>сразу после оплаты</span></div></div>
+                        <div class="trust-item"><i class="fas fa-table"></i><div><strong>Сама таблица в комплекте</strong><span>курс + Супер Таблица</span></div></div>
+                        <div class="trust-item"><i class="fas fa-sync-alt"></i><div><strong>Обновляется каждый год</strong><span>курс и таблица</span></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="about">
+                <div class="container">
+                    <h2 class="section-title">Курс — это инструкция по использованию Супер Таблицы</h2>
+                    <p class="section-sub">Таблица мощная, но без объяснений легко запутаться. Курс показывает, как пользоваться каждым листом, и ведёт от пустого файла до понятных отчётов.</p>
+                    <div class="grid-3">
+                        <div class="card"><div class="ico"><i class="fas fa-book-open"></i></div><strong>Это инструкция</strong><p>Курс объясняет, как работать с Супер Таблицей: куда вносить данные, как устроены листы и что означают отчёты.</p></div>
+                        <div class="card"><div class="ico"><i class="fas fa-table"></i></div><strong>Таблица внутри</strong><p>В каждый тариф входит сама Супер Таблица — готовый файл с категориями, расчётами и сводками.</p></div>
+                        <div class="card"><div class="ico"><i class="fas fa-route"></i></div><strong>Шаг за шагом</strong><p>Без сложных формул и лишней теории: от первой настройки до статистики по годам.</p></div>
                     </div>
                 </div>
             </section>
@@ -503,7 +267,7 @@
                     <h2 class="section-title">Посмотрите вводное видео</h2>
                     <div class="video-block">
                         <div class="video-frame">
-                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/ysz5S6PUM-U" title="Видео о курсе" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/ysz5S6PUM-U" title="Видео о курсе" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
                         <div class="video-text">
                             <h3>Зачем нужна Супер Таблица</h3>
@@ -524,30 +288,36 @@
 
             <section class="section" id="program">
                 <div class="container">
-                    <h2 class="section-title">Что будет внутри</h2>
+                    <h2 class="section-title">Что будет внутри курса</h2>
+                    <p class="section-sub">Курс построен по логике самой таблицы: сначала настройка, затем ежедневный учёт, потом отчёты и контроль.</p>
                     <div class="grid-3">
-                        <div class="card"><strong>Сценарии учёта</strong><p>Доходы, расходы, цели и проекты — всё в одной системе.</p></div>
-                        <div class="card"><strong>Автоматизация</strong><p>Формулы, сводные таблицы, готовые шаблоны.</p></div>
-                        <div class="card"><strong>Контроль</strong><p>План‑факт, отчёты и прозрачность в цифрах.</p></div>
+                        <div class="card"><div class="ico"><i class="fas fa-sliders-h"></i></div><strong>Сценарии учёта</strong><p>Доходы, расходы, цели и проекты — всё в одной системе.</p></div>
+                        <div class="card"><div class="ico"><i class="fas fa-magic"></i></div><strong>Автоматизация</strong><p>Формулы, сводные таблицы, готовые шаблоны. Подсветка текущей даты и автопереход на актуальный месяц.</p></div>
+                        <div class="card"><div class="ico"><i class="fas fa-chart-line"></i></div><strong>Контроль</strong><p>План‑факт, отчёты и прозрачность в цифрах.</p></div>
+                        <div class="card"><div class="ico"><i class="fas fa-layer-group"></i></div><strong>Настройка под себя</strong><p>Готовые категории и как добавить свои.</p></div>
+                        <div class="card"><div class="ico"><i class="fas fa-calendar-check"></i></div><strong>Планирование</strong><p>Как заранее распределять деньги и видеть план против факта.</p></div>
+                        <div class="card"><div class="ico"><i class="fas fa-chart-bar"></i></div><strong>Статистика по годам</strong><p>Годовая сводка, пики и просадки по месяцам, рост дохода.</p></div>
                     </div>
                 </div>
             </section>
 
-            <section class="section" id="price">
+            <section class="section" id="updates">
                 <div class="container">
-                    <div class="price-block">
-                        <div class="price-preview-wrap">
-                            <div class="course-preview" aria-hidden="true"></div>
+                    <div class="update">
+                        <div>
+                            <div class="course-tag"><i class="fas fa-sync-alt"></i>Всегда актуально</div>
+                            <h2>Курс обновляется каждый год — и каждый год выходит новая версия Супер Таблицы</h2>
+                            <p>Финансы меняются, и инструмент должен меняться вместе с ними. Поэтому раз в год мы обновляем курс и выпускаем новую версию Супер Таблицы.</p>
+                            <ul>
+                                <li><i class="fas fa-check"></i>Новая версия таблицы под каждый год</li>
+                                <li><i class="fas fa-check"></i>Курс обновляется вместе с таблицей, и инструкция всегда соответствует файлу</li>
+                                <li><i class="fas fa-check"></i>Улучшения и новые возможности — на основе вопросов пользователей</li>
+                            </ul>
                         </div>
-                        <div class="price-info">
-                            <h2 class="section-title" style="text-align:left;">Курс уже записан</h2>
-                            <p class="price-note">Доступ открывается сразу после оплаты. Формат — 3,5 часа видео без воды.</p>
-                        </div>
-                        <div class="price-cta">
-                            <div class="price-cta__content">
-                                <div class="price-tag">20 000 <u>с</u></div>
-                                <a class="btn-buy" href="#buy">Купить курс</a>
-                            </div>
+                        <div class="years">
+                            <div class="year is-now"><b>2026</b><div><strong>Супер Таблица 2026</strong><span>Актуальная версия курса</span></div><em>Сейчас</em></div>
+                            <div class="year"><b>2027</b><div><strong>Новая версия таблицы</strong><span>Обновлённый курс</span></div><em>Следующая</em></div>
+                            <div class="year"><b>2028</b><div><strong>И так каждый год</strong><span>Курс и таблица растут вместе с вами</span></div><em>План</em></div>
                         </div>
                     </div>
                 </div>
@@ -563,17 +333,75 @@
                 </div>
             </section>
 
-            <section class="section" id="buy">
+            <section class="section">
                 <div class="container">
-                    <h2 class="section-title">Купить курс</h2>
+                    <h2 class="section-title">Как начать</h2>
                     <div class="timeline">
-                        <div class="timeline-item"><strong>1. Оплата</strong>Оплатите банковской картой или переводом.</div>
-                        <div class="timeline-item"><strong>2. Доступ</strong>Получите ссылку на уроки сразу после оплаты.</div>
+                        <div class="timeline-item"><strong>1. Выберите тариф и оплатите</strong>Оплатите банковской картой или переводом.</div>
+                        <div class="timeline-item"><strong>2. Получите доступ</strong>Ссылка на уроки и таблицу приходит сразу после оплаты.</div>
                         <div class="timeline-item"><strong>3. Практика</strong>Настройте таблицу под себя за 1–2 вечера.</div>
                     </div>
-                    <div style="margin-top:18px;">
-                        <a class="btn-buy" href="https://wa.me/996709139603" target="_blank" rel="noopener">Купить курс</a>
+                </div>
+            </section>
+
+            <section class="section" id="price">
+                <div class="container">
+                    <h2 class="section-title">Выберите тариф</h2>
+                    <p class="section-sub">Во всех тарифах есть курс-инструкция и сама Супер Таблица. Дальше добавляется поддержка.</p>
+
+                    <div class="region-switch">
+                        <span>Цены в вашей валюте:</span>
+                        <div class="region-switch__group" role="group" aria-label="Валюта">
+                            <button type="button" data-currency="RUB">₽ Рубли</button>
+                            <button type="button" data-currency="KGS">с Сомы</button>
+                        </div>
                     </div>
+
+                    <div class="pricing-grid">
+                        <div class="plan" data-plan="Курс + Таблица">
+                            <div class="plan__sticker" data-discount></div>
+                            <h3 class="plan__name">Курс + Таблица</h3>
+                            <p class="plan__desc">Всё, чтобы самостоятельно разобраться и начать вести учёт.</p>
+                            <div class="plan__old" data-old="2479"></div>
+                            <div class="plan__price" data-price="2479"></div>
+                            <ul>
+                                <li><i class="fas fa-check"></i>Курс — инструкция по использованию Супер Таблицы</li>
+                                <li><i class="fas fa-check"></i>Сама Супер Таблица (актуальная версия)</li>
+                                <li><i class="fas fa-check"></i>Мгновенный доступ после оплаты</li>
+                            </ul>
+                            <a class="btn-ghost" data-buy target="_blank" rel="noopener" href="https://wa.me/996709139603">Выбрать тариф</a>
+                        </div>
+
+                        <div class="plan plan--popular" data-plan="С обратной связью">
+                            <div class="plan__flag">★ Самый популярный</div>
+                            <div class="plan__sticker" data-discount></div>
+                            <h3 class="plan__name">С обратной связью</h3>
+                            <p class="plan__desc">Можно задавать вопросы по таблице и получать ответы в общем чате.</p>
+                            <div class="plan__old" data-old="4200"></div>
+                            <div class="plan__price" data-price="4200"></div>
+                            <ul>
+                                <li class="is-plus"><i class="fas fa-plus"></i>Всё из тарифа «Курс + Таблица»</li>
+                                <li><i class="fas fa-check"></i>Онлайн обратная связь по вопросам таблицы</li>
+                                <li><i class="fas fa-check"></i>Общий чат участников</li>
+                            </ul>
+                            <a class="btn-buy" data-buy target="_blank" rel="noopener" href="https://wa.me/996709139603">Выбрать тариф</a>
+                        </div>
+
+                        <div class="plan" data-plan="С личной помощью">
+                            <div class="plan__sticker" data-discount></div>
+                            <h3 class="plan__name">С личной помощью</h3>
+                            <p class="plan__desc">Индивидуально настроим Супер Таблицу под вас.</p>
+                            <div class="plan__old" data-old="6699"></div>
+                            <div class="plan__price" data-price="6699"></div>
+                            <ul>
+                                <li class="is-plus"><i class="fas fa-plus"></i>Всё из тарифа «С обратной связью»</li>
+                                <li><i class="fas fa-check"></i>Индивидуальная онлайн помощь с настройкой Супер Таблицы</li>
+                                <li><i class="fas fa-check"></i>Настройка под ваши категории и задачи</li>
+                            </ul>
+                            <a class="btn-ghost" data-buy target="_blank" rel="noopener" href="https://wa.me/996709139603">Выбрать тариф</a>
+                        </div>
+                    </div>
+                    <p class="pricing-note">Валюта определяется автоматически по вашему региону. Если определилась неверно — переключите вручную. Реквизиты для оплаты отправим в WhatsApp.</p>
                 </div>
             </section>
 
@@ -582,8 +410,20 @@
                     <h2 class="section-title">Частые вопросы</h2>
                     <div class="faq">
                         <div class="faq-item">
+                            <button class="faq-question" type="button">Что именно я получу?<span>+</span></button>
+                            <div class="faq-answer">Курс по Супер Таблице — видеоинструкцию по использованию таблицы — и саму Супер Таблицу. Во втором и третьем тарифах добавляется поддержка: общий чат или индивидуальная помощь.</div>
+                        </div>
+                        <div class="faq-item">
                             <button class="faq-question" type="button">Подойдёт ли курс новичкам?<span>+</span></button>
                             <div class="faq-answer">Да, начинаем с базовой структуры и шаг за шагом усложняем.</div>
+                        </div>
+                        <div class="faq-item">
+                            <button class="faq-question" type="button">Как часто обновляются курс и таблица?<span>+</span></button>
+                            <div class="faq-answer">Раз в год: каждый год выходит новая версия Супер Таблицы, а вместе с ней обновляется курс.</div>
+                        </div>
+                        <div class="faq-item">
+                            <button class="faq-question" type="button">Какой тариф выбрать?<span>+</span></button>
+                            <div class="faq-answer">Если готовы разбираться самостоятельно — первый. Если хотите задавать вопросы по ходу — второй. Если нужна помощь с настройкой под ваши задачи — третий. Не уверены — получите консультацию, подскажем.</div>
                         </div>
                         <div class="faq-item">
                             <button class="faq-question" type="button">Сколько длится доступ?<span>+</span></button>
@@ -597,10 +437,33 @@
                 </div>
             </section>
 
+            <section class="section" id="consult">
+                <div class="container">
+                    <div class="consult">
+                        <div>
+                            <div class="course-tag"><i class="fas fa-comments"></i>Консультация</div>
+                            <h2>Не уверены, какой тариф подойдёт? Подскажем</h2>
+                            <p>Расскажите, как вы сейчас ведёте учёт, и мы поможем выбрать формат курса и ответим на любые вопросы о Супер Таблице.</p>
+                            <div class="consult-steps">
+                                <div class="consult-step"><b>1</b>Напишите нам в Telegram или WhatsApp</div>
+                                <div class="consult-step"><b>2</b>Расскажите о своей задаче</div>
+                                <div class="consult-step"><b>3</b>Получите рекомендацию по тарифу и ответы на вопросы</div>
+                            </div>
+                        </div>
+                        <div class="consult-actions">
+                            <h3>Выберите удобный мессенджер</h3>
+                            <a class="btn-buy btn-tg" href="https://t.me/+996709139603" target="_blank" rel="noopener"><i class="fab fa-telegram-plane" aria-hidden="true"></i>Получить консультацию</a>
+                            <a class="btn-buy btn-wa" href="https://wa.me/996709139603?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B8%D1%82%D1%8C%20%D0%BA%D0%BE%D0%BD%D1%81%D1%83%D0%BB%D1%8C%D1%82%D0%B0%D1%86%D0%B8%D1%8E%20%D0%BF%D0%BE%20%D0%9A%D1%83%D1%80%D1%81%D1%83%20%D0%BF%D0%BE%20%D0%A1%D1%83%D0%BF%D0%B5%D1%80%20%D0%A2%D0%B0%D0%B1%D0%BB%D0%B8%D1%86%D0%B5." target="_blank" rel="noopener"><i class="fab fa-whatsapp" aria-hidden="true"></i>Получить консультацию</a>
+                            <small>Номер: +996 709 139 603</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="cta-final">
                 <div class="container">
                     <p>Готовы начать? Доступ открывается сразу после оплаты.</p>
-                    <a class="btn-buy" href="https://wa.me/996709139603" target="_blank" rel="noopener">Купить курс</a>
+                    <a class="btn-buy" href="#price">Выбрать тариф</a>
                 </div>
             </section>
         </main>
@@ -608,18 +471,17 @@
         <footer class="footer">Курс по Супер Таблице — порядок в финансах и проектах.</footer>
     </div>
     <script>
+        /* Меню */
         const burger = document.querySelector(".burger");
         const courseMenu = document.querySelector(".course-menu");
         if (burger && courseMenu) {
-            burger.addEventListener("click", () => {
-                courseMenu.classList.toggle("is-open");
-            });
+            burger.addEventListener("click", () => courseMenu.classList.toggle("is-open"));
             courseMenu.querySelectorAll("a").forEach((link) => {
-                link.addEventListener("click", () => {
-                    courseMenu.classList.remove("is-open");
-                });
+                link.addEventListener("click", () => courseMenu.classList.remove("is-open"));
             });
         }
+
+        /* FAQ */
         document.querySelectorAll(".faq-item").forEach((item) => {
             const btn = item.querySelector(".faq-question");
             if (!btn) return;
@@ -628,6 +490,56 @@
                 const icon = btn.querySelector("span");
                 if (icon) icon.textContent = isOpen ? "–" : "+";
             });
+        });
+
+        /* Цены и валюта.
+           Числа одинаковые: 2479 / 4200 / 6699 — в рублях или в сомах.
+           Зачёркнутая цена выше реальной на 68% (в диапазоне 65–70%).
+           Скидка в стикере считается из этих цен, чтобы совпадала с цифрами. */
+        const OLD_PRICE_MARKUP = 1.68;
+        const CURRENCIES = { RUB: { symbol: "₽" }, KGS: { symbol: "сом" } };
+
+        const detectCurrency = () => {
+            let tz = "";
+            try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+            // Кыргызстан → сомы; Россия, СНГ и остальные → рубли
+            return tz === "Asia/Bishkek" ? "KGS" : "RUB";
+        };
+        const fmt = (n) => n.toLocaleString("ru-RU").replace(/ /g, " ");
+
+        const renderPrices = (code) => {
+            const { symbol } = CURRENCIES[code];
+            document.querySelectorAll("[data-price]").forEach((el) => {
+                el.innerHTML = fmt(Number(el.dataset.price)) + " <small>" + symbol + "</small>";
+            });
+            document.querySelectorAll("[data-old]").forEach((el) => {
+                el.textContent = fmt(Math.round(Number(el.dataset.old) * OLD_PRICE_MARKUP)) + " " + symbol;
+            });
+            document.querySelectorAll("[data-discount]").forEach((el) => {
+                const price = Number(el.closest(".plan").querySelector("[data-price]").dataset.price);
+                const old = Math.round(price * OLD_PRICE_MARKUP);
+                el.textContent = "−" + Math.round((1 - price / old) * 100) + "%";
+            });
+            document.querySelectorAll("[data-currency]").forEach((btn) => {
+                btn.classList.toggle("is-active", btn.dataset.currency === code);
+            });
+            // Ссылки «Выбрать тариф» — в WhatsApp с названием тарифа и ценой
+            document.querySelectorAll(".plan").forEach((plan) => {
+                const price = Number(plan.querySelector("[data-price]").dataset.price);
+                const text = "Здравствуйте! Хочу купить Курс по Супер Таблице, тариф «" + plan.dataset.plan + "» (" + fmt(price) + " " + symbol + ").";
+                plan.querySelector("[data-buy]").href = "https://wa.me/996709139603?text=" + encodeURIComponent(text);
+            });
+            try { localStorage.setItem("st_currency", code); } catch (e) {}
+        };
+
+        let initial = detectCurrency();
+        try {
+            const saved = localStorage.getItem("st_currency");
+            if (saved && CURRENCIES[saved]) initial = saved;
+        } catch (e) {}
+        renderPrices(initial);
+        document.querySelectorAll("[data-currency]").forEach((btn) => {
+            btn.addEventListener("click", () => renderPrices(btn.dataset.currency));
         });
     </script>
 </body>

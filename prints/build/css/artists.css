@@ -1,0 +1,85 @@
+.artists-header, .artist-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.artists-header {
+    padding-block: 1.5rem;
+    border-bottom: 1px solid #d8d4cf;
+}
+
+.artists-page, .artist-gallery {
+    padding-block: clamp(2rem, 6vw, 5rem);
+}
+
+.artists-page h1, .artists-page h2, .artist-gallery h2 {
+    font: 600 clamp(2rem, 5vw, 3.5rem)/1.1 "Cormorant Garamond", Georgia, serif;
+    margin-block: 0 1rem;
+}
+
+.artist-form {
+    display: grid;
+    gap: 1rem;
+    max-width: 36rem;
+}
+
+.artist-form label {
+    display: grid;
+    gap: .4rem;
+}
+
+.artist-form input, .artist-form textarea {
+    width: 100%;
+    min-width: 0;
+    padding: .7rem;
+    font: inherit;
+    color: inherit;
+    border: 1px solid #8a847e;
+    border-radius: 3px;
+    background: transparent;
+}
+
+.artist-form .button, .artist-card .button {
+    justify-self: start;
+    margin-top: .5rem;
+}
+
+.artist-actions {
+    margin-bottom: 2rem;
+    overflow-wrap: anywhere;
+}
+
+.artist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: 1.5rem;
+    margin-block: 1.5rem;
+}
+
+.artist-card {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.artist-card img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: contain;
+    background: #efede9;
+}
+
+.artist-card h3 {
+    font-size: 1.2rem;
+    margin-block: .75rem .35rem;
+}
+
+.artist-card p {
+    white-space: pre-wrap;
+}
+
+.artists-page [hidden], .artist-gallery [hidden] {
+    display: none;
+}

@@ -1,0 +1,3490 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Куда себет — онлайн‑сервис доставки подарочных корзин. Добавьте в корзину и закажите через WhatsApp.">
+    <meta name="theme-color" content="#ff6900">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Куда Себет">
+    <title>Куда себет — подарочные корзины</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">
+    <link rel="manifest" href="./site.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/app-icon-192.png">
+    <link rel="icon" href="https://framerusercontent.com/images/qPEgZC7jwWSxqEYT17wbDPXbAs.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" sizes="180x180" href="./assets/icons/apple-touch-icon.png">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EH31YBR01M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-EH31YBR01M');
+    </script>
+    <style>
+        :root {
+            --cream: #ffffff;
+            --ink: #e84f2f;
+            --muted: #e84f2f;
+            --accent: #ffb86b;
+            --accent-2: #2ec4b6;
+            --card: #ffffff;
+            --stroke: #e7e1d9;
+            --shadow: 0 20px 50px rgba(21, 21, 21, 0.12);
+            --radius: 26px;
+            --font-title: "Inter Display", "Inter", "Helvetica Neue", Arial, sans-serif;
+            --font-body: "Inter Display", "Inter", "Helvetica Neue", Arial, sans-serif;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html,
+        body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        body {
+            font-family: var(--font-body);
+            background: var(--cream);
+            color: var(--ink);
+        }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .container {
+            width: min(1320px, 94vw);
+            margin: 0 auto;
+        }
+        .topbar {
+            padding: 22px 0 16px;
+            border-bottom: 1px solid #ede7df;
+            background: #ffffff;
+        }
+        .topbar .container {
+            display: grid;
+            gap: 18px;
+        }
+        .topbar-main {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 22px;
+        }
+        .topbar-meta {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            color: #1f1f1f;
+        }
+        .topbar-meta__item {
+            display: grid;
+            gap: 4px;
+        }
+        .topbar-meta__item strong {
+            font-size: 20px;
+            line-height: 1.08;
+            color: #111;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .topbar-meta__item span {
+            font-size: 13px;
+            color: #6f6f6f;
+            line-height: 1.35;
+        }
+        .schedule-hint {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            color: #5b6370;
+            text-decoration: underline dotted;
+            text-underline-offset: 2px;
+        }
+        .schedule-tooltip {
+            position: absolute;
+            left: 0;
+            top: calc(100% + 8px);
+            min-width: 240px;
+            max-width: 300px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(250, 250, 250, 0.74);
+            border: 1px solid rgba(255, 255, 255, 0.74);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #e27516;
+            font-size: 12px;
+            line-height: 1.35;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(-4px);
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 20;
+        }
+        .schedule-hint:hover .schedule-tooltip,
+        .schedule-hint:focus-visible .schedule-tooltip {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .social-links {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .social-link {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            border: 1px solid #ece5de;
+            background: #fff;
+            color: #222;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+        .social-link:hover,
+        .social-link:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+        .social-link--wa {
+            color: #1c9f59;
+            background: #f2fff7;
+            border-color: #d9f4e5;
+        }
+        .social-link--ig {
+            color: #c53d86;
+            background: #fff4fb;
+            border-color: #f4daea;
+        }
+        .topbar-cart-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #fff7f2;
+            border: 1.5px solid #e84f2f;
+            color: #e84f2f;
+            padding: 10px 22px;
+            font-size: 15px;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .topbar-cart-link:hover,
+        .topbar-cart-link:focus-visible {
+            background: #e84f2f;
+            color: #fff;
+        }
+        .top-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .top-menu::-webkit-scrollbar {
+            display: none;
+        }
+        .top-menu a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid #ece5de;
+            color: #202020;
+            background: #fff;
+            font-size: 15px;
+            white-space: nowrap;
+        }
+        .top-menu a.is-active {
+            background: #f3efea;
+        }
+        .cart-fab {
+            position: fixed;
+            right: 24px;
+            top: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid #ede7df;
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+            display: grid;
+            place-items: center;
+            color: #111;
+            text-decoration: none;
+            z-index: 140;
+        }
+        .cart-fab.is-bumping {
+            animation: cart-bump 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @keyframes cart-bump {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.12); }
+            55% { transform: scale(0.96); }
+            75% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+        .cart-drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            z-index: 210;
+        }
+        .cart-drawer.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .cart-drawer__panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: min(420px, 92vw);
+            height: 100%;
+            background: #ffffff;
+            padding: 28px;
+            box-shadow: -12px 0 30px rgba(0, 0, 0, 0.12);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 18px;
+            align-content: start;
+        }
+        .cart-drawer__title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111;
+        }
+        .cart-drawer__close {
+            position: absolute;
+            top: 22px;
+            right: 22px;
+            width: 22px;
+            height: 22px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        .cart-drawer__close::before,
+        .cart-drawer__close::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #111;
+            left: 0;
+            top: 50%;
+            margin-top: -1px;
+        }
+        .cart-drawer__close::before { transform: rotate(45deg); }
+        .cart-drawer__close::after { transform: rotate(-45deg); }
+        .cart-drawer__list {
+            display: grid;
+            gap: 14px;
+            overflow: auto;
+            padding-right: 6px;
+            align-content: start;
+        }
+        .cart-drawer__item {
+            display: grid;
+            grid-template-columns: 64px 1fr auto;
+            gap: 12px;
+            align-items: center;
+            border-bottom: 1px solid #eee5dd;
+            padding-bottom: 12px;
+        }
+        .cart-drawer__controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .cart-drawer__btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            color: #111;
+        }
+        .cart-drawer__thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            background: #f4efe9 center/cover no-repeat;
+        }
+        .cart-drawer__name {
+            font-size: 14px;
+            color: #111;
+        }
+        .cart-drawer__qty {
+            font-size: 13px;
+            color: #111;
+        }
+        .cart-drawer__total {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111;
+            text-align: right;
+        }
+        .cart-drawer__checkout {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 999px;
+            border: none;
+            background: #111;
+            color: #fff;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .checkout-address {
+            display: grid;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .checkout-address__label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2a2a2a;
+        }
+        .checkout-address__input {
+            width: 100%;
+            border: 1px solid #e8ded3;
+            border-radius: 12px;
+            padding: 11px 12px;
+            font-size: 14px;
+            color: #111;
+            font-family: inherit;
+            background: #fff;
+        }
+        .checkout-address__input:focus-visible {
+            outline: none;
+            border-color: #ff8a00;
+            box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.16);
+        }
+        .checkout-address__meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 18px;
+        }
+        .checkout-address__geo {
+            border: none;
+            background: transparent;
+            color: #d76811;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 0;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            flex-shrink: 0;
+        }
+        .checkout-address__geo:disabled {
+            opacity: 0.6;
+            cursor: progress;
+        }
+        .checkout-address__status {
+            font-size: 11px;
+            color: #6f6f6f;
+            margin-left: auto;
+            text-align: right;
+            line-height: 1.2;
+        }
+        .checkout-address__status.is-error {
+            color: #c85a21;
+        }
+        .checkout-address__map {
+            width: 100%;
+            height: 138px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #ece1d6;
+            background: #f5f0e9;
+        }
+        .checkout-address__map[hidden] {
+            display: none;
+        }
+        .checkout-address__map iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        .checkout-address__note {
+            font-size: 11px;
+            line-height: 1.35;
+            color: #6f6f6f;
+        }
+        .cart-fab__count {
+            position: absolute;
+            right: -4px;
+            bottom: -4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ff3b30;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: grid;
+            place-items: center;
+        }
+        .support-trigger {
+            color: var(--ink);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .support-panel {
+            position: fixed;
+            left: 0;
+            top: 90px;
+            width: min(300px, 90vw);
+            background: #ffffff;
+            color: var(--ink);
+            border-radius: 0;
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 60;
+        }
+        .support-panel.is-open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .support-panel a {
+            color: var(--ink);
+            font-weight: 700;
+            text-decoration: none;
+            position: relative;
+            display: inline-flex;
+            gap: 8px;
+        }
+        .support-panel a:hover,
+        .support-panel a:focus-visible {
+            text-decoration: none;
+        }
+        .support-panel a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -4px;
+            width: 100%;
+            height: 1px;
+            background: var(--ink);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 0.35s ease;
+        }
+        .support-panel a:hover::after,
+        .support-panel a:focus-visible::after {
+            transform: scaleX(1);
+        }
+        .support-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 18px;
+            height: 18px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        .support-close::before,
+        .support-close::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--ink);
+            left: 0;
+            top: 50%;
+            margin-top: -1px;
+        }
+        .support-close::before { transform: rotate(45deg); }
+        .support-close::after { transform: rotate(-45deg); }
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-title);
+            color: #111;
+            text-decoration: none;
+        }
+        .brand__name {
+            font-size: 34px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            line-height: 1;
+            font-weight: 800;
+        }
+        .brand__mark {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: #ff6900 url("https://framerusercontent.com/images/qPEgZC7jwWSxqEYT17wbDPXbAs.svg") center/70% no-repeat;
+        }
+        .stories-section {
+            padding: 20px 0 6px;
+        }
+        .stories-strip {
+            position: relative;
+        }
+        .stories-row {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 8px;
+            scroll-behavior: smooth;
+            width: 100%;
+        }
+        .stories-row::-webkit-scrollbar {
+            display: none;
+        }
+        .stories-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #e7dfd8;
+            background: #fff;
+            color: #2a2a2a;
+            font-size: 20px;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            z-index: 3;
+        }
+        .stories-nav:hover,
+        .stories-nav:focus-visible {
+            transform: translateY(calc(-50% - 1px));
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+        .stories-nav--prev {
+            left: -18px;
+        }
+        .stories-nav--next {
+            right: -18px;
+        }
+        .stories-nav.is-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-50%) scale(0.92);
+        }
+        .story-card {
+            width: 165px;
+            aspect-ratio: 1 / 1;
+            border: none;
+            border-radius: 22px;
+            overflow: hidden;
+            position: relative;
+            flex: 0 0 auto;
+            cursor: pointer;
+            background: #f3eee7 center/cover no-repeat;
+            text-align: left;
+            color: #fff;
+            font-family: inherit;
+            padding: 0;
+        }
+        .story-card--about {
+            background-image:
+                linear-gradient(138deg, rgba(53, 35, 22, 0.22), rgba(53, 35, 22, 0.22)),
+                url("assets/img/stories/story-about.webp");
+        }
+        .story-card--app {
+            background-image:
+                linear-gradient(138deg, rgba(28, 50, 76, 0.22), rgba(28, 50, 76, 0.22)),
+                url("assets/img/stories/story-app-preview.jpg");
+        }
+        .story-card--cashback {
+            background-image: url("assets/img/stories/story-heavy-bags.webp");
+            background-size: 128% auto;
+            background-position: center 72%;
+            background-repeat: no-repeat;
+        }
+        .story-card--feb23 {
+            background-image:
+                linear-gradient(140deg, rgba(20, 38, 51, 0.26), rgba(20, 38, 51, 0.26)),
+                url("assets/img/stories/story-feb23.webp");
+        }
+        .story-card--mar8 {
+            background-image:
+                linear-gradient(138deg, rgba(145, 36, 87, 0.22), rgba(145, 36, 87, 0.22)),
+                url("assets/img/stories/story-mar8.webp");
+        }
+        .story-card--combo {
+            background-image:
+                linear-gradient(128deg, rgba(122, 62, 20, 0.24), rgba(122, 62, 20, 0.24)),
+                url("assets/img/stories/story-combo.webp");
+        }
+        .story-card--hit {
+            background-image:
+                radial-gradient(circle at 84% 28%, rgba(255, 208, 130, 0.66) 0, rgba(255, 208, 130, 0) 36%),
+                radial-gradient(circle at 24% 84%, rgba(255, 94, 94, 0.54) 0, rgba(255, 94, 94, 0) 40%),
+                linear-gradient(138deg, #ff5432 0%, #ff7139 46%, #ff8f43 100%);
+        }
+        .story-card--kyrgyz {
+            background-image:
+                linear-gradient(140deg, rgba(90, 24, 24, 0.22), rgba(90, 24, 24, 0.22)),
+                url("assets/img/stories/story-kyrgyz.webp");
+        }
+        .story-card--custom {
+            background-image:
+                linear-gradient(136deg, rgba(115, 56, 20, 0.24), rgba(115, 56, 20, 0.24)),
+                url("assets/img/stories/story-ozunchogult.webp");
+        }
+        .story-card--delivery {
+            background-image:
+                linear-gradient(142deg, rgba(29, 74, 115, 0.22), rgba(29, 74, 115, 0.22)),
+                url("assets/img/stories/story-delivery-preview.webp");
+        }
+        .story-card.is-viewed {
+            opacity: 0.48;
+        }
+        .story-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 60%);
+        }
+        .story-card__title {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            z-index: 2;
+            font-size: 14px;
+            line-height: 1.05;
+            font-weight: 700;
+        }
+        .section--popular {
+            padding-top: 8px;
+        }
+        .popular-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .popular-card {
+            border: 1px solid #ece6df;
+            border-radius: 22px;
+            background: #f5f5f7;
+            padding: 10px 12px;
+            min-height: 96px;
+            display: grid;
+            grid-template-columns: 58px minmax(0, 1fr) auto;
+            grid-template-areas: "thumb meta add";
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            outline: none;
+            position: relative;
+        }
+        .popular-card:hover,
+        .popular-card:focus-visible {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(13, 13, 13, 0.08);
+        }
+        .popular-card__thumb {
+            width: 58px;
+            height: 58px;
+            grid-area: thumb;
+            border-radius: 50%;
+            background: #fff center/86% no-repeat;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+        }
+        .popular-card__meta {
+            grid-area: meta;
+            min-width: 0;
+        }
+        .popular-card__meta h3 {
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.08;
+            margin-bottom: 4px;
+            color: #181818;
+        }
+        .popular-card__meta p {
+            font-size: 12px;
+            color: #5f6470;
+            line-height: 1.1;
+            font-weight: 400;
+        }
+        .popular-card__add {
+            grid-area: add;
+            border: 1px solid #d96a12;
+            background: linear-gradient(135deg, #ff8a2a 0%, #ff6d00 100%);
+            color: #fff;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            white-space: nowrap;
+            align-self: center;
+            box-shadow: 0 6px 14px rgba(255, 109, 0, 0.32);
+        }
+        .popular-card__add:hover,
+        .popular-card__add:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(255, 109, 0, 0.38);
+            filter: saturate(1.08) brightness(1.02);
+        }
+        .popular-card--note {
+            border-color: #ffd5b5;
+            background:
+                radial-gradient(circle at 100% 0%, rgba(255, 139, 42, 0.26) 0%, rgba(255, 139, 42, 0) 48%),
+                linear-gradient(138deg, #fff7ef 0%, #fff 58%, #fff2e5 100%);
+            padding: 10px 12px;
+            min-height: 96px;
+            cursor: pointer;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 7px;
+            align-content: start;
+            position: relative;
+            overflow: hidden;
+        }
+        .popular-card--note::before {
+            content: "";
+            position: absolute;
+            right: -20px;
+            bottom: -24px;
+            width: 86px;
+            height: 86px;
+            border-radius: 24px;
+            background: linear-gradient(145deg, rgba(255, 166, 94, 0.38), rgba(255, 105, 0, 0.08));
+            border: 1px solid rgba(255, 120, 24, 0.24);
+            transform: rotate(18deg);
+            pointer-events: none;
+        }
+        .popular-card--note::after {
+            content: "";
+            position: absolute;
+            top: -26px;
+            left: -34px;
+            width: 86px;
+            height: 86px;
+            border-radius: 50%;
+            background: rgba(255, 145, 50, 0.12);
+            pointer-events: none;
+        }
+        .popular-card--note:hover,
+        .popular-card--note:focus-visible {
+            transform: none;
+            box-shadow: 0 10px 24px rgba(210, 90, 0, 0.08);
+        }
+        .popular-note__head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .popular-note__logo {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            background: #ff6900 url("https://framerusercontent.com/images/qPEgZC7jwWSxqEYT17wbDPXbAs.svg") center/70% no-repeat;
+            box-shadow: 0 5px 12px rgba(255, 105, 0, 0.34);
+            flex: 0 0 auto;
+        }
+        .popular-note__title {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #b85207;
+            text-decoration-line: underline;
+            text-decoration-style: wavy;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+            text-decoration-color: rgba(184, 82, 7, 0.45);
+            transition: color 0.2s ease, text-decoration-color 0.2s ease;
+        }
+        .popular-note__list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        .popular-note__list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 4px 7px;
+            border: 1px solid #f4deca;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 11px;
+            line-height: 1.15;
+            color: #4a3d33;
+        }
+        .popular-note__list span {
+            font-weight: 600;
+            color: #6b4a2d;
+            white-space: nowrap;
+        }
+        .popular-note__list strong {
+            color: #b64b00;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .popular-card--note:hover .popular-note__title,
+        .popular-card--note:focus-visible .popular-note__title {
+            color: #933600;
+            text-decoration-color: #ff6d00;
+        }
+        .story-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            display: grid;
+            place-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 220;
+        }
+        .story-modal.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .story-modal__frame {
+            width: min(430px, calc(100vw - 28px));
+            aspect-ratio: 9 / 16;
+            border-radius: 26px;
+            overflow: hidden;
+            position: relative;
+            background: #151515;
+        }
+        .story-modal__frame,
+        .story-modal__frame * {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        .story-modal__image {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #222 center/cover no-repeat;
+        }
+        .story-modal__timer {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            top: 12px;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.28);
+            overflow: hidden;
+            z-index: 3;
+        }
+        .story-modal__timer-fill {
+            width: 0%;
+            height: 100%;
+            border-radius: inherit;
+            background: #ff7d1a;
+            transition: width 0.08s linear;
+        }
+        .story-modal__shade {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.06) 50%, rgba(0, 0, 0, 0.18));
+        }
+        .story-modal__content {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: grid;
+            align-content: center;
+            justify-items: center;
+            gap: 14px;
+            text-align: center;
+            color: #fff;
+            padding: 74px 18px 18px;
+        }
+        .story-modal__text {
+            font-size: 17px;
+            line-height: 1.35;
+            font-weight: 600;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+            max-width: 320px;
+            white-space: pre-line;
+        }
+        .story-modal__cta {
+            border: none;
+            border-radius: 999px;
+            background: #ff7d1a;
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            padding: 10px 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .story-modal__cta:hover,
+        .story-modal__cta:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.24);
+        }
+        .story-modal.is-cta-only .story-modal__content {
+            align-content: end;
+            padding: 74px 18px max(8px, env(safe-area-inset-bottom));
+        }
+        .story-modal.is-cta-right .story-modal__content {
+            justify-items: end;
+        }
+        .story-modal.is-cta-only .story-modal__text {
+            display: none;
+        }
+        .story-modal__pause,
+        .story-modal__close {
+            position: absolute;
+            top: 14px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            cursor: pointer;
+            z-index: 6;
+            line-height: 1;
+        }
+        .story-modal__pause {
+            right: 52px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+        .story-modal__pause.is-paused {
+            background: rgba(255, 125, 26, 0.9);
+        }
+        .story-modal__close {
+            right: 14px;
+            font-size: 20px;
+        }
+        .story-modal__nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.42);
+            color: #fff;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 6;
+            display: grid;
+            place-items: center;
+        }
+        .story-modal__nav--prev {
+            left: 12px;
+        }
+        .story-modal__nav--next {
+            right: 12px;
+        }
+        .section {
+            padding: 30px 0;
+        }
+        .section-title {
+            font-family: var(--font-title);
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+        .products {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 28px;
+        }
+        .product-card {
+            background: transparent;
+            border-radius: 0;
+            border: none;
+            padding: 0;
+            display: grid;
+            gap: 12px 14px;
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-areas:
+                "image image"
+                "title title"
+                "desc desc"
+                "price action";
+            align-items: start;
+            cursor: pointer;
+            text-align: left;
+            position: relative;
+        }
+        .product-card--soon {
+            cursor: default;
+        }
+        .product-card--soon::after {
+            content: "Скоро";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 4;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(32, 32, 32, 0.8);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: 0.2px;
+            text-transform: uppercase;
+        }
+        .product-card--soon .product-card__image {
+            opacity: 1;
+            filter: saturate(0.86) brightness(1.08);
+        }
+        .product-card--soon .product-card__image::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.44) 100%);
+            pointer-events: none;
+        }
+        .product-card--soon h3,
+        .product-card--soon p,
+        .product-card--soon .price {
+            color: #777f8a;
+        }
+        .product-card--soon .button {
+            background: #f3eee8;
+            color: #827566;
+            border: 1px solid #ddd3c7;
+            box-shadow: none;
+            text-shadow: none;
+            transform: none;
+            filter: none;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .product-card--soon .button:hover,
+        .product-card--soon .button:focus-visible {
+            transform: none;
+            box-shadow: none;
+            filter: none;
+        }
+        .product-card__image {
+            grid-area: image;
+            height: 300px;
+            border-radius: 0;
+            background: transparent;
+            display: grid;
+            place-items: center;
+            font-size: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .product-card__slider {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.35s ease;
+        }
+        .product-card__slide {
+            flex: 0 0 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .slider-dots {
+            position: absolute;
+            left: 50%;
+            bottom: 14px;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .slider-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #d7cfc6;
+        }
+        .slider-dot.is-active {
+            width: 8px;
+            height: 8px;
+            background: var(--ink);
+        }
+        .product-card__tag {
+            display: none;
+        }
+        .product-card__category {
+            display: none;
+        }
+        .product-card__image--s {
+            background: url("assets/img/cards/kuda_sebet_s-removebg-preview_square.png") center/contain no-repeat;
+        }
+        .product-card__image--m {
+            background: url("assets/img/cards/kuda_sebet_s-removebg-preview_square.png") center/contain no-repeat;
+        }
+        .product-card__image--vip {
+            background: url("assets/img/cards/kuda_sebet_s-removebg-preview_square.png") center/contain no-repeat;
+        }
+        .product-card h3 {
+            grid-area: title;
+            font-size: clamp(20px, 1.55vw, 34px);
+            font-family: var(--font-title);
+            line-height: 1.1;
+            letter-spacing: 0;
+            color: #101010;
+            font-weight: 600;
+        }
+        .product-card p {
+            grid-area: desc;
+            color: #5a6270;
+            font-size: clamp(12px, 0.86vw, 19px);
+            line-height: 1.28;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+        .product-card .price {
+            grid-area: price;
+            justify-self: start;
+            align-self: center;
+            font-weight: 500;
+            font-size: clamp(14px, 1.02vw, 20px);
+            color: #121212;
+            white-space: nowrap;
+        }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            background: var(--ink);
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+        .button--accent {
+            background: #eadbd1;
+            color: #d25a00;
+        }
+        .button--accent:hover,
+        .button--accent:focus-visible {
+            filter: brightness(0.98);
+        }
+        .button--cta {
+            background: linear-gradient(135deg, #ffb25f 0%, #ff8a3d 45%, #ff6a00 100%);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            box-shadow: 0 8px 18px rgba(228, 92, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+            text-shadow: 0 1px 1px rgba(138, 52, 0, 0.28);
+        }
+        .button--cta:hover,
+        .button--cta:focus-visible {
+            transform: translateY(-1px);
+            filter: none;
+            box-shadow: 0 12px 24px rgba(228, 92, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        .button--cta:active {
+            transform: translateY(0);
+            box-shadow: 0 7px 14px rgba(228, 92, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+        .product-card .button {
+            grid-area: action;
+            justify-self: end;
+            align-self: center;
+            width: auto;
+            min-width: 138px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: clamp(14px, 1vw, 22px);
+        }
+        .section--catalog {
+            padding-top: 26px;
+        }
+        .builder {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.8fr);
+            gap: 24px;
+        }
+        .builder-pro-entry {
+            margin-bottom: 14px;
+            padding: 14px 16px;
+            border: 1px solid #f0dfcf;
+            border-radius: 14px;
+            background: #fff7ee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .builder-pro-entry strong {
+            display: block;
+            color: #181818;
+            font-size: 17px;
+            line-height: 1.25;
+        }
+        .builder-pro-entry p {
+            margin-top: 4px;
+            color: #5f5750;
+            font-size: 14px;
+            line-height: 1.35;
+        }
+        .builder-pro-entry .button {
+            border-radius: 999px;
+            white-space: nowrap;
+            min-width: 220px;
+        }
+        .builder-list {
+            background: #ececef;
+            border-radius: 18px;
+            padding: 16px;
+            display: grid;
+            gap: 10px;
+        }
+        .builder-item {
+            background: #ffffff;
+            border: 1px solid #ebe4dc;
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            align-items: center;
+            gap: 14px;
+        }
+        .builder-item__name {
+            color: #181818;
+            font-size: 15px;
+            line-height: 1.3;
+            font-weight: 600;
+        }
+        .builder-item__price {
+            color: #5d616a;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .builder-item__controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .builder-qty-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid #d8d3cd;
+            background: #fff;
+            color: #222;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .builder-item__qty {
+            width: 24px;
+            text-align: center;
+            font-weight: 700;
+            color: #171717;
+        }
+        .builder-summary {
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid #ece3da;
+            padding: 20px;
+            display: grid;
+            gap: 12px;
+            height: fit-content;
+            position: sticky;
+            top: 22px;
+        }
+        .builder-summary h3 {
+            font-size: 22px;
+            color: #111;
+        }
+        .builder-summary__list {
+            display: grid;
+            gap: 8px;
+            max-height: 280px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+        .builder-summary__empty {
+            color: #6f6f6f;
+            font-size: 14px;
+        }
+        .builder-summary__row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 14px;
+            color: #222;
+        }
+        .builder-summary__total {
+            font-size: 20px;
+            color: #121212;
+            font-weight: 700;
+        }
+        .builder-summary .button {
+            width: 100%;
+            border-radius: 999px;
+            font-size: 16px;
+        }
+        .builder-summary .button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .cart {
+            display: none;
+        }
+        .cart h3 {
+            font-family: var(--font-title);
+            font-size: 18px;
+        }
+        .cart-list {
+            display: grid;
+            gap: 10px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 13px;
+        }
+        .cart-item button {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+        }
+        .cart-total {
+            font-weight: 700;
+        }
+        .info-menu {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+        }
+        .info-menu__item {
+            border: none;
+            background: transparent;
+            color: #5e6572;
+            padding: 0;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .info-menu__item:hover,
+        .info-menu__item:focus-visible {
+            color: #171717;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .info-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 230;
+            display: grid;
+            place-items: center;
+            padding: 14px;
+        }
+        .info-modal.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .info-modal__dialog {
+            width: min(680px, 100%);
+            max-height: min(86vh, 780px);
+            overflow: auto;
+            background: #fff;
+            border-radius: 22px;
+            padding: 22px 22px 20px;
+            position: relative;
+            box-shadow: 0 20px 44px rgba(0, 0, 0, 0.16);
+        }
+        .info-modal__close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid #eadfd4;
+            background: #fff;
+            color: #111;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+        }
+        .info-modal__title {
+            font-family: var(--font-title);
+            font-size: 24px;
+            color: #111;
+            margin-bottom: 12px;
+            padding-right: 36px;
+        }
+        .info-modal__body {
+            color: #505864;
+            font-size: 14px;
+            line-height: 1.5;
+            display: grid;
+            gap: 10px;
+        }
+        .footer {
+            padding: 30px 0 42px;
+            border-top: 1px solid #efe8df;
+            background: #fff;
+        }
+        .footer .container {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 14px;
+        }
+        .footer-center {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        .footer-left {
+            justify-self: start;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #6a6a6a;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .footer-brand {
+            display: grid;
+            gap: 2px;
+            line-height: 1.1;
+        }
+        .footer-brand__name {
+            font-weight: 700;
+            color: #161616;
+            font-size: 12.5px;
+            text-transform: none;
+        }
+        .footer-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: #ff6900 url("https://framerusercontent.com/images/qPEgZC7jwWSxqEYT17wbDPXbAs.svg") center/70% no-repeat;
+            box-shadow: 0 8px 16px rgba(255, 105, 0, 0.22);
+        }
+        .footer-socials {
+            justify-self: end;
+        }
+        @media (max-width: 1200px) {
+            .popular-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 980px) {
+            .topbar-main {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .topbar-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .topbar-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .products {
+                grid-template-columns: 1fr;
+            }
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .popular-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .builder {
+                grid-template-columns: 1fr;
+            }
+            .builder-pro-entry {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .builder-pro-entry .button {
+                width: 100%;
+                min-width: 0;
+            }
+            .builder-summary {
+                position: static;
+            }
+            .footer .container {
+                grid-template-columns: 1fr;
+                justify-items: center;
+                gap: 10px;
+            }
+            .footer-left {
+                justify-self: center;
+            }
+            .footer-socials {
+                justify-self: center;
+            }
+        }
+        @media (max-width: 900px) {
+            .container {
+                width: calc(100% - 20px);
+            }
+            .brand__name {
+                font-size: 28px;
+            }
+            .brand__mark {
+                width: 50px;
+                height: 50px;
+                border-radius: 12px;
+            }
+            .topbar-meta__item strong {
+                font-size: 17px;
+                white-space: normal;
+            }
+            .top-menu a {
+                font-size: 14px;
+            }
+            .topbar-cart-link {
+                font-size: 14px;
+                padding: 9px 16px;
+            }
+            .social-link {
+                width: 34px;
+                height: 34px;
+            }
+            .stories-nav {
+                width: 30px;
+                height: 30px;
+                font-size: 18px;
+            }
+            .stories-nav--prev {
+                left: 2px;
+            }
+            .stories-nav--next {
+                right: 2px;
+            }
+            .story-card {
+                width: 126px;
+                border-radius: 18px;
+            }
+            .story-card__title {
+                font-size: 12px;
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+            }
+            .story-modal__text {
+                font-size: 15px;
+            }
+            .story-modal__pause {
+                display: none;
+            }
+            .popular-grid {
+                grid-template-columns: 1fr;
+            }
+            .popular-card {
+                grid-template-columns: 54px minmax(0, 1fr);
+                grid-template-areas:
+                    "thumb meta"
+                    "add add";
+                row-gap: 8px;
+            }
+            .popular-card__thumb {
+                width: 54px;
+                height: 54px;
+            }
+            .popular-card__add {
+                justify-self: start;
+            }
+            .popular-card--note {
+                grid-template-columns: 1fr;
+                grid-template-areas: none;
+            }
+            .popular-card__meta h3 {
+                font-size: 16px;
+            }
+            .popular-card__meta p {
+                font-size: 12px;
+            }
+            .popular-note__list li {
+                font-size: 10px;
+            }
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 18px;
+            }
+            .product-card {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "image"
+                    "title"
+                    "desc"
+                    "price"
+                    "action";
+                gap: 10px;
+                padding: 0;
+            }
+            .product-card__image {
+                height: 220px;
+            }
+            .product-card .price {
+                justify-self: start;
+            }
+            .product-card .button {
+                justify-self: start;
+                min-width: 0;
+                width: fit-content;
+                max-width: 100%;
+                font-size: 14px;
+                padding: 9px 14px;
+            }
+            .product-card__slide {
+                background-size: contain;
+            }
+            .builder-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .builder-item__controls {
+                justify-content: flex-start;
+            }
+            .cart-fab {
+                top: calc(env(safe-area-inset-top, 0px) + 12px);
+                right: 12px;
+                bottom: auto;
+                width: 52px;
+                height: 52px;
+            }
+            .cart-fab i {
+                font-size: 18px;
+            }
+            .cart-fab__count {
+                width: 20px;
+                height: 20px;
+                font-size: 11px;
+                right: -2px;
+                bottom: -2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="container">
+            <div class="topbar-main">
+                <a class="brand" href="./index.html">
+                    <span class="brand__mark" aria-hidden="true"></span>
+                    <span class="brand__name">Куда Себет</span>
+                </a>
+                <div class="topbar-meta">
+                    <div class="topbar-meta__item">
+                        <strong>Доставка Себета Бишкек</strong>
+                        <span>
+                            доставляем оперативно в срок |
+                            <span class="schedule-hint" tabindex="0">вт-вс
+                                <span class="schedule-tooltip">со вторника по воскресенье, кроме понедельника</span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="topbar-meta__item">
+                        <strong><a href="tel:996509130090">+996 509 130 090</a></strong>
+                        <span>ежедневно 10:00-20:00</span>
+                    </div>
+                </div>
+                <div class="topbar-actions">
+                    <span class="support-trigger" id="supportTrigger">Поддержка</span>
+                    <div class="social-links topbar-socials" aria-label="Социальные сети">
+                        <a class="social-link social-link--wa" href="https://wa.me/996509130090" target="_blank" rel="noopener" aria-label="WhatsApp">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        </a>
+                        <a class="social-link social-link--ig" href="https://instagram.com/kudasebet" target="_blank" rel="noopener" aria-label="Instagram">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                    <a class="topbar-cart-link" href="#cart" id="topCartButton">Корзина</a>
+                </div>
+            </div>
+            <nav class="top-menu" aria-label="Категории">
+                <a class="is-active" href="#section-sebetter">Себеттер</a>
+                <a href="#section-kyrgyz-box">Кыргыз Box</a>
+                <a href="#section-mayramdar">Майрамдарга</a>
+                <a href="#section-tematik-box">Тематикалык бокстор</a>
+                <a href="#section-gifts">Белектер</a>
+                <a href="#section-vegan-box">Веган Box</a>
+                <a href="#section-ozun-chogult">Өзүң чогулт</a>
+                <a href="./personal-builder.html">Личный конструктор</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="stories-section">
+            <div class="container">
+                <div class="stories-strip">
+                    <button class="stories-nav stories-nav--prev is-hidden" type="button" id="storiesPrevBtn" aria-label="Предыдущие сториз">‹</button>
+                    <div class="stories-row" id="storiesRow">
+                        <button class="story-card story-card--about" type="button" data-story-text="Собираем стильные подарочные корзины в Бишкеке и доставляем с заботой." data-story-target="#section-sebetter">
+                            <span class="story-card__title">О нас</span>
+                        </button>
+                        <button class="story-card story-card--app" type="button" data-story-text="" data-story-target="#section-sebetter" data-story-bg="url('assets/img/stories/story-app-instruction.webp')" data-story-action="install-app" data-story-cta="Добавить на экран">
+                            <span class="story-card__title">Скачай приложение!</span>
+                        </button>
+                        <button class="story-card story-card--cashback" type="button" data-story-text="Не носите тяжелые пакеты - закажите подарочные корзины прямо к двери." data-story-target="#section-info" data-story-cta="Подробнее" data-story-bg-size="cover" data-story-bg-position="72% 72%" data-story-bg-repeat="no-repeat">
+                            <span class="story-card__title">Не носите тяжелые пакеты</span>
+                        </button>
+                        <button class="story-card story-card--feb23" type="button" data-story-text="Готовые подарки к 23 февраля для пап, друзей и коллег." data-story-target="#section-mayramdar">
+                            <span class="story-card__title">23 февраля!</span>
+                        </button>
+                        <button class="story-card story-card--mar8" type="button" data-story-text="Нежные наборы к 8 марта для мам, любимых и коллег." data-story-target="#section-mayramdar">
+                            <span class="story-card__title">Подарки на 8 марта!</span>
+                        </button>
+                        <button class="story-card story-card--combo" type="button" data-story-text="Комбо-наборы с фруктами и сладостями в выгодном формате." data-story-target="#section-tematik-box">
+                            <span class="story-card__title">Куда Себет Комбо</span>
+                        </button>
+                        <button class="story-card story-card--hit" type="button" data-story-text="Хиты продаж, которые чаще всего выбирают для подарка." data-story-target="#section-popular">
+                            <span class="story-card__title">Себет Хит!</span>
+                        </button>
+                        <button class="story-card story-card--kyrgyz" type="button" data-story-text="Кыргыз бокс с национальным акцентом и щедрым наполнением." data-story-target="#section-kyrgyz-box">
+                            <span class="story-card__title">Кыргыз бокс</span>
+                        </button>
+                        <button class="story-card story-card--custom" type="button" data-story-text="Соберите корзину под свой вкус: только то, что нравится вам." data-story-target="#section-ozun-chogult">
+                            <span class="story-card__title">Өзүн чогулт!</span>
+                        </button>
+                        <button class="story-card story-card--delivery" type="button" data-story-text="Условия доставки, оплаты и безопасности заказа в одном разделе." data-story-target="#section-info" data-story-bg="url('assets/img/stories/story-delivery.webp')">
+                            <span class="story-card__title">Доставка</span>
+                        </button>
+                    </div>
+                    <button class="stories-nav stories-nav--next" type="button" id="storiesNextBtn" aria-label="Следующие сториз">›</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--popular" id="section-popular">
+            <div class="container">
+                <h2 class="section-title">Часто заказывают</h2>
+                <div class="popular-grid" id="popularGrid">
+                    <article class="popular-card" data-slug="sebet-s" data-name="Куда Себет S" data-price="4790" tabindex="0" role="link" aria-label="Открыть Куда Себет S">
+                        <div class="popular-card__thumb" style="background-image:url('assets/img/cards/kuda_sebet_s-removebg-preview_square.png')"></div>
+                        <div class="popular-card__meta">
+                            <h3>Куда Себет S</h3>
+                            <p>от 4 790 сом</p>
+                        </div>
+                        <button class="popular-card__add" type="button">Добавить</button>
+                    </article>
+                    <article class="popular-card" data-slug="sebet-m" data-name="Куда Себет M" data-price="6990" tabindex="0" role="link" aria-label="Открыть Куда Себет M">
+                        <div class="popular-card__thumb" style="background-image:url('assets/img/cards/kuda_sebet_s-removebg-preview_square.png')"></div>
+                        <div class="popular-card__meta">
+                            <h3>Куда Себет M</h3>
+                            <p>от 6 990 сом</p>
+                        </div>
+                        <button class="popular-card__add" type="button">Добавить</button>
+                    </article>
+                    <article class="popular-card" data-slug="sebet-vip" data-name="Куда Себет Vip" data-price="13790" tabindex="0" role="link" aria-label="Открыть Куда Себет Vip">
+                        <div class="popular-card__thumb" style="background-image:url('assets/img/cards/kuda_sebet_s-removebg-preview_square.png')"></div>
+                        <div class="popular-card__meta">
+                            <h3>Куда Себет Vip</h3>
+                            <p>от 13 790 сом</p>
+                        </div>
+                        <button class="popular-card__add" type="button">Добавить</button>
+                    </article>
+                    <article class="popular-card popular-card--note" data-href="kuda-podskazki.html" tabindex="0" role="link" aria-label="Открыть страницу Куда Подсказки">
+                        <div class="popular-note__head">
+                            <span class="popular-note__logo" aria-hidden="true"></span>
+                            <p class="popular-note__title">Куда Подсказки</p>
+                        </div>
+                        <ul class="popular-note__list">
+                            <li><span>S корзина</span><strong>от 7 позиций</strong></li>
+                            <li><span>M корзина</span><strong>от 9 позиций</strong></li>
+                            <li><span>VIP корзина</span><strong>от 12 позиций</strong></li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--catalog" id="section-sebetter">
+            <div class="container">
+                <h2 class="section-title">Себеттер</h2>
+                <div class="products">
+                    <div class="product-grid" id="productGrid">
+                        <article class="product-card" data-slug="sebet-s" data-name="Куда Себет S" data-price="4790" data-desc="Корзина S — это маленький мир сладостей, подобранных с любовью. Каждый элемент выбран так, чтобы порадовать самых близких любителей вкусного." data-composition="«Merci», «Toblerone» mini, сок яблоко-груша 0,25 мл, виноград «Дамские пальчики», фрукт «Сердце дракона», гранат ~600 г, манго ~500 г." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                            <div class="product-card__image">
+                                <div class="product-card__slider"></div>
+                                <span class="product-card__tag">S</span>
+                                <div class="slider-dots"></div>
+                            </div>
+                            <div class="product-card__category">Себеттер</div>
+                            <h3>Куда Себет S</h3>
+                            <p>Корзина S — это маленький мир сладостей, подобранных с любовью.</p>
+                            <div class="price">4 790 сом</div>
+                            <button class="button button--accent button--cta" type="button">В корзину</button>
+                        </article>
+                        <article class="product-card" data-slug="sebet-m" data-name="Куда Себет M" data-price="6990" data-desc="Подарочная корзина, наполненная свежими фруктами и сладостями. Внутри — сочный ананас, манго, гранат, маракуйя, виноград «Дамские пальчики», экзотический «Сердце дракона», печенье в банке и натуральный сок Yan. Идеальный подарок для любимых и близких." data-composition="Фрукт «Сердце дракона», гранат, манго, ананас, печенье в банке, маракуйя, сок Yan «Виноград», сеточка под продукты, виноград «Дамские пальчики»." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                            <div class="product-card__image">
+                                <div class="product-card__slider"></div>
+                                <span class="product-card__tag">M</span>
+                                <div class="slider-dots"></div>
+                            </div>
+                            <div class="product-card__category">Себеттер</div>
+                            <h3>Куда Себет M</h3>
+                            <p>Подарочная корзина со свежими фруктами, сладостями и соком Yan.</p>
+                            <div class="price">6 990 сом</div>
+                            <button class="button button--accent button--cta" type="button">В корзину</button>
+                        </article>
+                        <article class="product-card" data-slug="sebet-vip" data-name="Куда Себет Vip" data-price="13790" data-desc="Стильная премиальная корзина, созданная для особых случаев. Вместительная, прочная и эстетичная — идеально подчёркивает статус и ценность подарка." data-composition="Виноград «Дамские пальчики», фрукт «Сердце дракона», гранат, манго, ананас, печенье в банке, маракуйя, сок Yan «Яблоко–Груша», сеточка под продукты, шоколад «Toblerone», Raffaello, Ferrero Rocher, большая шоколадка Merci, корзина." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                            <div class="product-card__image">
+                                <div class="product-card__slider"></div>
+                                <span class="product-card__tag">Vip</span>
+                                <div class="slider-dots"></div>
+                            </div>
+                            <div class="product-card__category">Бэлектер</div>
+                            <h3>Куда Себет Vip</h3>
+                            <p>Премиальная корзина для особых случаев и статуса подарка.</p>
+                            <div class="price">13 790 сом</div>
+                            <button class="button button--accent button--cta" type="button">В корзину</button>
+                        </article>
+                        <article class="product-card" data-slug="sebet-combo" data-name="Куда Себет Комбо 3в1" data-price="25570" data-desc="Большая праздничная корзина с богатым составом для семейных торжеств и важных событий." data-composition="Расширенный набор фруктов, сладостей, напитков и фирменная корзина большого объема." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                            <div class="product-card__image">
+                                <div class="product-card__slider"></div>
+                                <span class="product-card__tag">XL</span>
+                                <div class="slider-dots"></div>
+                            </div>
+                            <div class="product-card__category">Себеттер</div>
+                            <h3>Куда Себет Комбо 3в1</h3>
+                            <p>Максимальный размер набора для больших поздравлений и щедрых подарков.</p>
+                            <div class="price">25 570 сом</div>
+                            <button class="button button--accent button--cta" type="button">В корзину</button>
+                        </article>
+                    </div>
+                    <aside class="cart" id="cart">
+                        <h3>Корзина</h3>
+                        <div class="cart-list" id="cartList">Корзина пуста</div>
+                        <div class="cart-total" id="cartTotal">Итого: 0 сом</div>
+                        <button class="button" type="button" id="orderBtn">Заказать в WhatsApp</button>
+                        <button class="button button--accent" type="button" id="clearBtn">Очистить</button>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--catalog" id="section-kyrgyz-box">
+            <div class="container">
+                <h2 class="section-title">Кыргыз Box</h2>
+                <div class="product-grid">
+                    <article class="product-card" data-slug="sebet-s" data-name="Кыргыз Box Традиция" data-price="5890" data-desc="Фрукты, сладости и локальные акценты в подарочном наборе для близких." data-composition="Фрукты, шоколад, сладости, сок и декоративная корзина." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">K</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Кыргыз Box</div>
+                        <h3>Кыргыз Box Традиция</h3>
+                        <p>Яркий набор с фруктами и сладким наполнением для семейных встреч.</p>
+                        <div class="price">5 890 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-m" data-name="Кыргыз Box Үй-бүлө" data-price="8390" data-desc="Увеличенный формат набора для большой компании и праздничного стола." data-composition="Увеличенная сборка фруктов, шоколада и соков." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">K</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Кыргыз Box</div>
+                        <h3>Кыргыз Box Үй-бүлө</h3>
+                        <p>Продуманный состав для больших столов и теплых семейных праздников.</p>
+                        <div class="price">8 390 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Кыргыз Box Премиум" data-price="12990" data-desc="Подарочный премиум-набор с изысканной подачей и насыщенным составом." data-composition="Премиальные сладости, экзотические фрукты, напитки и корзина." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">K</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Кыргыз Box</div>
+                        <h3>Кыргыз Box Премиум</h3>
+                        <p>Статусная подача и премиальные ингредиенты для особенного случая.</p>
+                        <div class="price">12 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Кыргыз Box Ultra" data-price="14990" data-desc="Усиленный национальный бокс с богатым наполнением и акцентом на праздничную подачу." data-composition="Фрукты, конфеты, шоколад, напитки и дополнительный праздничный декор." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">K</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Кыргыз Box</div>
+                        <h3>Кыргыз Box Ultra</h3>
+                        <p>Расширенная версия для больших семейных столов и крупных подарков.</p>
+                        <div class="price">14 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--catalog" id="section-mayramdar">
+            <div class="container">
+                <h2 class="section-title">Майрамдарга</h2>
+                <div class="product-grid">
+                    <article class="product-card" data-slug="sebet-s" data-name="Майрам Box Classic" data-price="5490" data-desc="Готовая сборка к празднику с универсальным составом и оформлением." data-composition="Фрукты, сладости, сок и упаковка для майрама." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">M</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Майрамдарга</div>
+                        <h3>Майрам Box Classic</h3>
+                        <p>Универсальный выбор на праздник, день рождения или семейный ужин.</p>
+                        <div class="price">5 490 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-m" data-name="Майрам Box Family" data-price="7990" data-desc="Расширенная праздничная корзина для большой компании." data-composition="Фрукты, конфеты, шоколад, соки и декор." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">M</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Майрамдарга</div>
+                        <h3>Майрам Box Family</h3>
+                        <p>Праздничная корзина на компанию с яркой подачей и насыщенным составом.</p>
+                        <div class="price">7 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Майрам Box Grand" data-price="13990" data-desc="Максимальная праздничная комплектация и премиальная корзина." data-composition="Экзотические фрукты, премиальные сладости, напитки, корзина." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">G</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Майрамдарга</div>
+                        <h3>Майрам Box Grand</h3>
+                        <p>Премиальный набор для важных мероприятий и статусных поздравлений.</p>
+                        <div class="price">13 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Майрам Box Special" data-price="15990" data-desc="Праздничный набор повышенной комплектации для юбилеев, мероприятий и больших компаний." data-composition="Экзотические фрукты, сладости премиум-класса, напитки и корзина." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">S</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Майрамдарга</div>
+                        <h3>Майрам Box Special</h3>
+                        <p>Супернабор с акцентом на масштаб и эффектную праздничную подачу.</p>
+                        <div class="price">15 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--catalog" id="section-tematik-box">
+            <div class="container">
+                <h2 class="section-title">Тематикалык бокстор</h2>
+                <div class="product-grid">
+                    <article class="product-card" data-slug="sebet-s" data-name="Romantic Box" data-price="6190" data-desc="Тематическая романтическая корзина для сюрприза и особенного вечера." data-composition="Сладости, фрукты, тематический декор и подарочная корзина." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">R</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Тематикалык бокстор</div>
+                        <h3>Romantic Box</h3>
+                        <p>Сборка для свидания с красивой подачей и готовой праздничной атмосферой.</p>
+                        <div class="price">6 190 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-m" data-name="Kids Party Box" data-price="7290" data-desc="Тематический набор для детского праздника с мягким вкусом и яркой подачей." data-composition="Фрукты, печенье, конфеты, сок и безопасная упаковка." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">K</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Тематикалык бокстор</div>
+                        <h3>Kids Party Box</h3>
+                        <p>Идеальный тематический подарок для детей и семейных праздников.</p>
+                        <div class="price">7 290 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Office Box" data-price="9490" data-desc="Тематическая сборка для офиса и командных поздравлений." data-composition="Универсальный состав с фруктами, сладостями и напитками." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">O</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Тематикалык бокстор</div>
+                        <h3>Office Box</h3>
+                        <p>Практичный набор для команды, коллег и корпоративных поздравлений.</p>
+                        <div class="price">9 490 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-m" data-name="Love Story Box" data-price="8990" data-desc="Романтический тематический набор для личных праздников и памятных дат." data-composition="Сладости, фрукты, напиток и декоративные элементы в стильной корзине." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">L</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Тематикалык бокстор</div>
+                        <h3>Love Story Box</h3>
+                        <p>Нежный тематический бокс с праздничной атмосферой и красивой подачей.</p>
+                        <div class="price">8 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--catalog" id="section-gifts">
+            <div class="container">
+                <h2 class="section-title">Белектер</h2>
+                <div class="product-grid">
+                    <article class="product-card" data-slug="sebet-s" data-name="Белек Mini" data-price="4990" data-desc="Небольшой, но эффектный подарок для повседневных поводов." data-composition="Фрукты, шоколад и сладости в компактной корзине." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">B</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Белектер</div>
+                        <h3>Белек Mini</h3>
+                        <p>Компактная подарочная корзина с аккуратной подачей и приятным составом.</p>
+                        <div class="price">4 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-m" data-name="Белек Gold" data-price="8690" data-desc="Подарочный комплект среднего размера для важных поздравлений." data-composition="Увеличенная сборка сладостей, фруктов и напитка." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">B</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Белектер</div>
+                        <h3>Белек Gold</h3>
+                        <p>Оптимальный набор для значимых дат и теплых поздравлений близким.</p>
+                        <div class="price">8 690 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Белек Signature" data-price="14990" data-desc="Фирменный премиальный подарок с эффектной презентацией." data-composition="Экзотические фрукты, премиальные конфеты и шоколад." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">S</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Белектер</div>
+                        <h3>Белек Signature</h3>
+                        <p>Стильный премиум-набор с насыщенным составом и подачей высокого уровня.</p>
+                        <div class="price">14 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Белек Platinum" data-price="17990" data-desc="Флагманский подарочный набор с максимальной комплектацией и статусной подачей." data-composition="Премиальный ассортимент фруктов, шоколада, конфет и напитков." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">P</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Белектер</div>
+                        <h3>Белек Platinum</h3>
+                        <p>Премиальный уровень подарка для особых случаев и крупных поздравлений.</p>
+                        <div class="price">17 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--catalog" id="section-vegan-box">
+            <div class="container">
+                <h2 class="section-title">Веган Box</h2>
+                <div class="product-grid">
+                    <article class="product-card" data-slug="sebet-s" data-name="Веган Box Fresh" data-price="5690" data-desc="Сборка без продуктов животного происхождения: только фрукты и натуральные сладости." data-composition="Фрукты, сок, растительные сладости и упаковка." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">V</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Веган Box</div>
+                        <h3>Веган Box Fresh</h3>
+                        <p>Легкий и свежий состав для тех, кто выбирает растительное питание.</p>
+                        <div class="price">5 690 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-m" data-name="Веган Box Balance" data-price="7990" data-desc="Сбалансированный веган-набор с большим объемом фруктов и полезных десертов." data-composition="Фрукты, сок, набор растительных сладостей и корзина." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">V</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Веган Box</div>
+                        <h3>Веган Box Balance</h3>
+                        <p>Продуманная веган-сборка для подарка, офиса или полезного праздника.</p>
+                        <div class="price">7 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Веган Box Premium" data-price="10490" data-desc="Премиальная версия веган-набора с экзотическими фруктами и дизайнерской подачей." data-composition="Экзотические фрукты, натуральные веган-десерты, сок, корзина." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">V</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Веган Box</div>
+                        <h3>Веган Box Premium</h3>
+                        <p>Премиальная веган-корзина с фокусом на вкус, стиль и полезный состав.</p>
+                        <div class="price">10 490 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                    <article class="product-card" data-slug="sebet-vip" data-name="Веган Box Natural" data-price="11990" data-desc="Расширенный натуральный веган-набор без продуктов животного происхождения." data-composition="Большой ассортимент фруктов, растительных сладостей и напитков." data-images="assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png,assets/img/cards/kuda_sebet_s-removebg-preview_square.png">
+                        <div class="product-card__image">
+                            <div class="product-card__slider"></div>
+                            <span class="product-card__tag">N</span>
+                            <div class="slider-dots"></div>
+                        </div>
+                        <div class="product-card__category">Веган Box</div>
+                        <h3>Веган Box Natural</h3>
+                        <p>Натуральный расширенный состав для тех, кто выбирает осознанное питание.</p>
+                        <div class="price">11 990 сом</div>
+                        <button class="button button--accent button--cta" type="button">В корзину</button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--catalog section--builder" id="section-ozun-chogult">
+            <div class="container">
+                <h2 class="section-title">Өзүң чогулт</h2>
+                <div class="builder-pro-entry">
+                    <div>
+                        <strong>Нужен более удобный режим для телефона?</strong>
+                        <p>Откройте отдельную страницу с категориями, сворачиванием разделов, правой корзиной, итоговой ценой и отправкой состава в WhatsApp.</p>
+                    </div>
+                    <a class="button button--cta" href="./personal-builder.html">Открыть личный конструктор</a>
+                </div>
+                <div class="builder" id="customBuilder">
+                    <div class="builder-list">
+                        <div class="builder-item" data-name="Виноград «Дамские пальчики»" data-price="650" data-qty="0">
+                            <div class="builder-item__name">Виноград «Дамские пальчики»</div>
+                            <div class="builder-item__price">650 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Фрукт «Сердце дракона»" data-price="520" data-qty="0">
+                            <div class="builder-item__name">Фрукт «Сердце дракона»</div>
+                            <div class="builder-item__price">520 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Гранат" data-price="290" data-qty="0">
+                            <div class="builder-item__name">Гранат</div>
+                            <div class="builder-item__price">290 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Манго" data-price="340" data-qty="0">
+                            <div class="builder-item__name">Манго</div>
+                            <div class="builder-item__price">340 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Ананас" data-price="430" data-qty="0">
+                            <div class="builder-item__name">Ананас</div>
+                            <div class="builder-item__price">430 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Печенье в банке" data-price="260" data-qty="0">
+                            <div class="builder-item__name">Печенье в банке</div>
+                            <div class="builder-item__price">260 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Маракуйя" data-price="230" data-qty="0">
+                            <div class="builder-item__name">Маракуйя</div>
+                            <div class="builder-item__price">230 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Сок Yan «Яблоко–Груша»" data-price="180" data-qty="0">
+                            <div class="builder-item__name">Сок Yan «Яблоко–Груша»</div>
+                            <div class="builder-item__price">180 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Сеточка под продукты" data-price="90" data-qty="0">
+                            <div class="builder-item__name">Сеточка под продукты</div>
+                            <div class="builder-item__price">90 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Шоколад «Toblerone»" data-price="310" data-qty="0">
+                            <div class="builder-item__name">Шоколад «Toblerone»</div>
+                            <div class="builder-item__price">310 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Raffaello" data-price="320" data-qty="0">
+                            <div class="builder-item__name">Raffaello</div>
+                            <div class="builder-item__price">320 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Ferrero Rocher" data-price="350" data-qty="0">
+                            <div class="builder-item__name">Ferrero Rocher</div>
+                            <div class="builder-item__price">350 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Большая шоколадка Merci" data-price="420" data-qty="0">
+                            <div class="builder-item__name">Большая шоколадка Merci</div>
+                            <div class="builder-item__price">420 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                        <div class="builder-item" data-name="Корзина" data-price="600" data-qty="0">
+                            <div class="builder-item__name">Корзина</div>
+                            <div class="builder-item__price">600 сом</div>
+                            <div class="builder-item__controls">
+                                <button class="builder-qty-btn" data-action="dec" type="button">−</button>
+                                <span class="builder-item__qty">0</span>
+                                <button class="builder-qty-btn" data-action="inc" type="button">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <aside class="builder-summary">
+                        <h3>Ваша сборка</h3>
+                        <div class="builder-summary__list" id="builderSummaryList">
+                            <div class="builder-summary__empty">Выберите ингредиенты для своей корзины.</div>
+                        </div>
+                        <div class="builder-summary__total" id="builderSummaryTotal">Итого: 0 сом</div>
+                        <button class="button button--accent" type="button" id="builderAddBtn" disabled>Добавить набор в корзину</button>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="section-info">
+            <div class="container">
+                <div class="info-menu" aria-label="Информация">
+                    <button class="info-menu__item" type="button" data-info-modal="delivery">Способы доставки</button>
+                    <button class="info-menu__item" type="button" data-info-modal="payment">Способы оплаты</button>
+                    <button class="info-menu__item" type="button" data-info-modal="safety">Безопасность заказа</button>
+                    <button class="info-menu__item" type="button" data-info-modal="policy">Политика конфиденциальности</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-left">
+                <span class="footer-logo" aria-hidden="true"></span>
+                <div class="footer-brand">
+                    <span class="footer-brand__name">Куда себет</span>
+                    <span>Все права защищены</span>
+                </div>
+            </div>
+            <div class="footer-center">Куда себет — заботливая доставка подарков.</div>
+            <div class="social-links footer-socials" aria-label="Социальные сети">
+                <a class="social-link social-link--wa" href="https://wa.me/996509130090" target="_blank" rel="noopener" aria-label="WhatsApp">
+                    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                </a>
+                <a class="social-link social-link--ig" href="https://instagram.com/kudasebet" target="_blank" rel="noopener" aria-label="Instagram">
+                    <i class="fab fa-instagram" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <a class="cart-fab" href="#cart" aria-label="Корзина">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="cart-fab__count" id="cartFabCount">0</span>
+    </a>
+
+    <div class="cart-drawer" id="cartDrawer" aria-hidden="true">
+        <div class="cart-drawer__panel">
+            <button class="cart-drawer__close" type="button" aria-label="Закрыть"></button>
+            <div class="cart-drawer__title">Ваш заказ</div>
+            <div class="cart-drawer__list" id="cartDrawerList"></div>
+            <div>
+                <div class="cart-drawer__total" id="cartDrawerTotal">Сумма: 0 сом</div>
+                <div class="checkout-address">
+                    <label class="checkout-address__label" for="cartDrawerAddress">Укажите адрес</label>
+                    <input class="checkout-address__input" id="cartDrawerAddress" type="text" placeholder="Улица, дом, квартира" autocomplete="street-address" required>
+                    <div class="checkout-address__meta">
+                        <button class="checkout-address__geo" type="button" id="cartDrawerAddressDetect">Определить автоматически</button>
+                        <span class="checkout-address__status" id="cartDrawerAddressStatus" aria-live="polite"></span>
+                    </div>
+                    <p class="checkout-address__note">перед оформлением заказа, убедитесь в правильности указанного адреса</p>
+                    <div class="checkout-address__map" id="cartDrawerAddressMapWrap" hidden>
+                        <iframe id="cartDrawerAddressMap" title="Проверка адреса доставки на карте" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+                <button class="cart-drawer__checkout" type="button" id="cartDrawerCheckout">Оформить через Whatsapp</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-modal" id="infoModal" aria-hidden="true">
+        <div class="info-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
+            <button class="info-modal__close" type="button" id="infoModalClose" aria-label="Закрыть">×</button>
+            <h3 class="info-modal__title" id="infoModalTitle"></h3>
+            <div class="info-modal__body" id="infoModalBody"></div>
+        </div>
+    </div>
+
+    <div class="support-panel" id="supportPanel" aria-hidden="true">
+        <button class="support-close" type="button" aria-label="Закрыть"></button>
+        <p>Свяжитесь с поддержкой:</p>
+        <p><a href="tel:996509130090"><i class="fas fa-phone"></i> +996 509 130 090</a></p>
+        <p><a href="https://wa.me/996509130090" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> написать в whatsapp</a></p>
+    </div>
+
+    <div class="story-modal" id="storyModal" aria-hidden="true">
+        <div class="story-modal__frame" role="dialog" aria-modal="true" aria-label="История">
+            <div class="story-modal__timer">
+                <div class="story-modal__timer-fill" id="storyModalTimerFill"></div>
+            </div>
+            <button class="story-modal__pause" type="button" id="storyModalPause" aria-label="Пауза истории" aria-pressed="false">||</button>
+            <button class="story-modal__close" type="button" aria-label="Закрыть историю">×</button>
+            <button class="story-modal__nav story-modal__nav--prev" type="button" id="storyModalPrev" aria-label="Предыдущая история">‹</button>
+            <button class="story-modal__nav story-modal__nav--next" type="button" id="storyModalNext" aria-label="Следующая история">›</button>
+            <div class="story-modal__image" id="storyModalImage">
+                <div class="story-modal__shade"></div>
+                <div class="story-modal__content">
+                    <div class="story-modal__text" id="storyModalText"></div>
+                    <a class="story-modal__cta" id="storyModalCta" href="#section-sebetter">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CART_KEY = "kuda_sebet_cart_v1";
+        const DELIVERY_ADDRESS_KEY = "kuda_sebet_delivery_address_v1";
+        const DELIVERY_COORDS_KEY = "kuda_sebet_delivery_coords_v1";
+        const FALLBACK_IMAGE = "assets/img/cards/kuda_sebet_s-removebg-preview_square.png";
+        const thumbByName = {
+            "Куда Себет S": FALLBACK_IMAGE,
+            "Куда Себет M": FALLBACK_IMAGE,
+            "Куда Себет Vip": FALLBACK_IMAGE,
+            "Куда Себет Комбо 3в1": FALLBACK_IMAGE
+        };
+        const ACTIVE_PRODUCT_NAMES = new Set([
+            "Куда Себет S",
+            "Куда Себет M",
+            "Куда Себет Vip",
+            "Куда Себет Комбо 3в1"
+        ]);
+        const cart = new Map();
+        const cartList = document.getElementById("cartList");
+        const cartTotal = document.getElementById("cartTotal");
+        const orderBtn = document.getElementById("orderBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        const productGrids = Array.from(document.querySelectorAll(".product-grid"));
+        const cartFabCount = document.getElementById("cartFabCount");
+        const cartDrawer = document.getElementById("cartDrawer");
+        const cartDrawerList = document.getElementById("cartDrawerList");
+        const cartDrawerTotal = document.getElementById("cartDrawerTotal");
+        const cartDrawerCheckout = document.getElementById("cartDrawerCheckout");
+        const cartDrawerClose = document.querySelector(".cart-drawer__close");
+        const cartDrawerAddress = document.getElementById("cartDrawerAddress");
+        const cartDrawerAddressDetect = document.getElementById("cartDrawerAddressDetect");
+        const cartDrawerAddressStatus = document.getElementById("cartDrawerAddressStatus");
+        const cartDrawerAddressMapWrap = document.getElementById("cartDrawerAddressMapWrap");
+        const cartDrawerAddressMap = document.getElementById("cartDrawerAddressMap");
+        const cartFab = document.querySelector(".cart-fab");
+        const topCartButton = document.getElementById("topCartButton");
+        const popularGrid = document.getElementById("popularGrid");
+        const topMenuLinks = Array.from(document.querySelectorAll(".top-menu a"));
+        const storiesRow = document.getElementById("storiesRow");
+        const storiesPrevBtn = document.getElementById("storiesPrevBtn");
+        const storiesNextBtn = document.getElementById("storiesNextBtn");
+        const storyModal = document.getElementById("storyModal");
+        const storyModalImage = document.getElementById("storyModalImage");
+        const storyModalTimerFill = document.getElementById("storyModalTimerFill");
+        const storyModalText = document.getElementById("storyModalText");
+        const storyModalCta = document.getElementById("storyModalCta");
+        const storyModalPause = document.getElementById("storyModalPause");
+        const storyModalClose = document.querySelector(".story-modal__close");
+        const storyModalPrev = document.getElementById("storyModalPrev");
+        const storyModalNext = document.getElementById("storyModalNext");
+        const storyCards = Array.from(document.querySelectorAll(".story-card"));
+        const customBuilder = document.getElementById("customBuilder");
+        const builderItems = Array.from(document.querySelectorAll(".builder-item"));
+        const builderSummaryList = document.getElementById("builderSummaryList");
+        const builderSummaryTotal = document.getElementById("builderSummaryTotal");
+        const builderAddBtn = document.getElementById("builderAddBtn");
+        const infoModal = document.getElementById("infoModal");
+        const infoModalTitle = document.getElementById("infoModalTitle");
+        const infoModalBody = document.getElementById("infoModalBody");
+        const infoModalClose = document.getElementById("infoModalClose");
+        const infoModalTriggers = Array.from(document.querySelectorAll("[data-info-modal]"));
+        const STORY_DURATION_MS = 5000;
+        let activeStoryIndex = -1;
+        let storyTimerFrame = 0;
+        let storyTick = null;
+        let storyTimerStart = 0;
+        let storyPausedAt = 0;
+        let storyPausedTotal = 0;
+        let storyIsPaused = false;
+        let addressInputTimer = 0;
+        let deliveryCoords = null;
+        let deferredInstallPrompt = null;
+
+        window.addEventListener("beforeinstallprompt", (event) => {
+            event.preventDefault();
+            deferredInstallPrompt = event;
+        });
+
+        const infoModalContent = {
+            delivery: {
+                title: "Способы доставки",
+                body: `
+                    <p>Доставка курьером по городу, самовывоз из пункта выдачи или точечная доставка ко времени.</p>
+                    <p>В день отправки присылаем фото готовой корзины перед выездом.</p>
+                `
+            },
+            payment: {
+                title: "Способы оплаты",
+                body: `
+                    <p>Онлайн-оплата картой, перевод по номеру телефона и безналичный счет для компаний.</p>
+                    <p>Чек и подтверждение оплаты отправляются сразу после оформления.</p>
+                `
+            },
+            safety: {
+                title: "Безопасность заказа",
+                body: `
+                    <p>Каждая корзина собирается вручную и фиксируется для безопасной перевозки.</p>
+                    <p>Перед отправкой проводится контроль качества и проверка комплектации.</p>
+                `
+            },
+            policy: {
+                title: "Политика конфиденциальности",
+                body: `
+                    <p>1. Мы собираем только минимально необходимые данные: имя, телефон, адрес доставки, состав заказа и способ оплаты.</p>
+                    <p>2. Данные используются только для обработки заказа, доставки, обратной связи и возврата средств при необходимости.</p>
+                    <p>3. Мы не передаем данные третьим лицам, кроме служб доставки и платежных провайдеров.</p>
+                    <p>4. Данные хранятся ограниченный срок и защищены техническими и организационными мерами.</p>
+                    <p>5. Для запроса удаления данных можно написать на support@mukashov.com.</p>
+                `
+            }
+        };
+
+        const triggerCartBump = () => {
+            if (!cartFab) return;
+            cartFab.classList.remove("is-bumping");
+            void cartFab.offsetWidth;
+            cartFab.classList.add("is-bumping");
+        };
+
+        const normalizeAddress = (value) => String(value || "").replace(/\s+/g, " ").trim();
+        const addressForMessage = (address) => normalizeAddress(address)
+            .replace(/,\s*\d{6}\s*,\s*(Киргизия|Кыргызстан|Kyrgyzstan)\.?$/i, "")
+            .replace(/,\s*(Киргизия|Кыргызстан|Kyrgyzstan)\.?$/i, "")
+            .replace(/,\s*\d{6}$/i, "");
+        const addressForInput = (address) => normalizeAddress(
+            addressForMessage(address)
+                .replace(/,\s*г\.?\s+/i, ", ")
+                .replace(/,\s*город\s+/i, ", ")
+                .replace(/^\s*г\.?\s+/i, "")
+                .replace(/^\s*город\s+/i, "")
+        );
+
+        const setAddressStatus = (text, isError = false) => {
+            if (!cartDrawerAddressStatus) return;
+            cartDrawerAddressStatus.textContent = text || "";
+            cartDrawerAddressStatus.classList.toggle("is-error", Boolean(isError));
+        };
+
+        const saveDeliveryAddress = (address) => {
+            if (!address) {
+                localStorage.removeItem(DELIVERY_ADDRESS_KEY);
+                return;
+            }
+            localStorage.setItem(DELIVERY_ADDRESS_KEY, address);
+        };
+
+        const loadDeliveryAddress = () => normalizeAddress(localStorage.getItem(DELIVERY_ADDRESS_KEY) || "");
+
+        const saveDeliveryCoords = (coords) => {
+            if (!coords) {
+                localStorage.removeItem(DELIVERY_COORDS_KEY);
+                return;
+            }
+            localStorage.setItem(DELIVERY_COORDS_KEY, JSON.stringify(coords));
+        };
+
+        const loadDeliveryCoords = () => {
+            try {
+                const raw = localStorage.getItem(DELIVERY_COORDS_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed.lat !== "number" || typeof parsed.lon !== "number") return null;
+                return parsed;
+            } catch (error) {
+                localStorage.removeItem(DELIVERY_COORDS_KEY);
+                return null;
+            }
+        };
+
+        const getMapEmbedSrc = (address, coords) => {
+            if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lon)) {
+                return `https://www.google.com/maps?q=${encodeURIComponent(`${coords.lat},${coords.lon}`)}&z=16&output=embed`;
+            }
+            if (!address) return "";
+            return `https://www.google.com/maps?q=${encodeURIComponent(address)}&z=16&output=embed`;
+        };
+
+        const getMapShareLink = (address, coords) => {
+            if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lon)) {
+                return `https://maps.google.com/?q=${encodeURIComponent(`${coords.lat},${coords.lon}`)}`;
+            }
+            return `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+        };
+
+        const renderAddressMap = (address, coords = null) => {
+            if (!cartDrawerAddressMapWrap || !cartDrawerAddressMap) return;
+            const src = getMapEmbedSrc(address, coords);
+            if (!src) {
+                cartDrawerAddressMap.removeAttribute("src");
+                cartDrawerAddressMapWrap.hidden = true;
+                return;
+            }
+            cartDrawerAddressMap.src = src;
+            cartDrawerAddressMapWrap.hidden = false;
+        };
+
+        const applyAddressValue = (value, coords = null) => {
+            const address = normalizeAddress(value);
+            if (cartDrawerAddress) {
+                cartDrawerAddress.value = address;
+            }
+            saveDeliveryAddress(address);
+            deliveryCoords = coords;
+            saveDeliveryCoords(coords);
+            renderAddressMap(address, coords);
+            return address;
+        };
+
+        const requireDeliveryAddress = () => {
+            const address = normalizeAddress((cartDrawerAddress && cartDrawerAddress.value) || loadDeliveryAddress());
+            if (!address) {
+                setAddressStatus("Укажите адрес доставки", true);
+                if (cartDrawerAddress) {
+                    openDrawer();
+                    cartDrawerAddress.focus();
+                }
+                alert("Укажите адрес доставки");
+                return "";
+            }
+            applyAddressValue(address, deliveryCoords);
+            setAddressStatus("");
+            return address;
+        };
+
+        const detectAddressByGeo = async () => {
+            if (!cartDrawerAddressDetect) return;
+            if (!navigator.geolocation) {
+                setAddressStatus("Геолокация недоступна в браузере", true);
+                return;
+            }
+            cartDrawerAddressDetect.disabled = true;
+            setAddressStatus("Определяем адрес...");
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const coords = {
+                    lat: Number(position.coords.latitude.toFixed(6)),
+                    lon: Number(position.coords.longitude.toFixed(6))
+                };
+                let detectedAddress = "";
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.lat}&lon=${coords.lon}&accept-language=ru`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        detectedAddress = addressForInput(data.display_name || "");
+                    }
+                } catch (error) {
+                    detectedAddress = "";
+                }
+                const finalAddress = detectedAddress || `Координаты: ${coords.lat}, ${coords.lon}`;
+                applyAddressValue(finalAddress, coords);
+                setAddressStatus(detectedAddress ? "Адрес определен автоматически" : "Точка определена по геолокации");
+                cartDrawerAddressDetect.disabled = false;
+            }, () => {
+                setAddressStatus("Не удалось определить геопозицию", true);
+                cartDrawerAddressDetect.disabled = false;
+            }, {
+                enableHighAccuracy: true,
+                timeout: 12000,
+                maximumAge: 0
+            });
+        };
+
+        const saveCart = () => {
+            const data = Array.from(cart.entries()).map(([name, item]) => ({
+                name,
+                price: item.price,
+                qty: item.qty,
+                details: item.details || ""
+            }));
+            localStorage.setItem(CART_KEY, JSON.stringify(data));
+        };
+
+        const loadCart = () => {
+            try {
+                const raw = localStorage.getItem(CART_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                data.forEach((item) => {
+                    if (item && item.name) {
+                        cart.set(item.name, {
+                            price: Number(item.price),
+                            qty: Number(item.qty) || 1,
+                            details: typeof item.details === "string" ? item.details : ""
+                        });
+                    }
+                });
+            } catch (e) {
+                localStorage.removeItem(CART_KEY);
+            }
+        };
+
+        const renderCart = () => {
+            if (cart.size === 0) {
+                cartList.textContent = "Корзина пуста";
+                cartTotal.textContent = "Итого: 0 сом";
+                if (cartFabCount) cartFabCount.textContent = "0";
+                if (cartDrawerList) cartDrawerList.textContent = "Корзина пуста";
+                if (cartDrawerTotal) cartDrawerTotal.textContent = "Сумма: 0 сом";
+                return;
+            }
+            cartList.innerHTML = "";
+            let total = 0;
+            let count = 0;
+            if (cartDrawerList) cartDrawerList.innerHTML = "";
+            cart.forEach((item, name) => {
+                total += item.price * item.qty;
+                count += item.qty;
+                const row = document.createElement("div");
+                row.className = "cart-item";
+                row.innerHTML = `
+                    <span>${name} × ${item.qty}</span>
+                    <span>${item.price * item.qty} сом <button data-remove="${name}">✕</button></span>
+                `;
+                cartList.appendChild(row);
+                if (cartDrawerList) {
+                    const drawerRow = document.createElement("div");
+                    drawerRow.className = "cart-drawer__item";
+                    drawerRow.innerHTML = `
+                        <div class="cart-drawer__thumb" style="background-image:url('${thumbByName[name] || "assets/img/cards/kuda_sebet_s-removebg-preview_square.png"}')"></div>
+                        <div>
+                            <div class="cart-drawer__name">${name}</div>
+                            <div class="cart-drawer__controls">
+                                <button class="cart-drawer__btn" data-action="dec" data-name="${name}">−</button>
+                                <div class="cart-drawer__qty">${item.qty}</div>
+                                <button class="cart-drawer__btn" data-action="inc" data-name="${name}">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-drawer__qty">${item.price * item.qty} сом</div>
+                    `;
+                    cartDrawerList.appendChild(drawerRow);
+                }
+            });
+            cartTotal.textContent = `Итого: ${total} сом`;
+            if (cartFabCount) cartFabCount.textContent = String(count);
+            if (cartDrawerTotal) cartDrawerTotal.textContent = `Сумма: ${total} сом`;
+        };
+
+
+        const productCards = Array.from(document.querySelectorAll(".product-card"));
+
+        productCards.forEach((card) => {
+            const productName = card.dataset.name || "";
+            const isActiveProduct = ACTIVE_PRODUCT_NAMES.has(productName);
+            if (!isActiveProduct) {
+                card.classList.add("product-card--soon");
+                card.setAttribute("aria-disabled", "true");
+                const priceNode = card.querySelector(".price");
+                if (priceNode) priceNode.textContent = "Скоро";
+                const addButton = card.querySelector(".button--cta");
+                if (addButton) {
+                    addButton.textContent = "Скоро";
+                    addButton.disabled = true;
+                    addButton.setAttribute("aria-disabled", "true");
+                    addButton.setAttribute("tabindex", "-1");
+                }
+            }
+            const imageBox = card.querySelector(".product-card__image");
+            const slider = card.querySelector(".product-card__slider");
+            const dots = card.querySelector(".slider-dots");
+            const images = (card.dataset.images || "").split(",").map((s) => s.trim()).filter(Boolean);
+            if (card.dataset.name && images[0]) {
+                thumbByName[card.dataset.name] = images[0];
+            }
+            if (!imageBox || !slider || images.length === 0) return;
+            let index = 0;
+            let lastX = 0;
+            let lastSwitch = 0;
+
+            slider.innerHTML = images
+                .map((src) => `<div class="product-card__slide" style="background-image:url('${src}')"></div>`)
+                .join("");
+
+            if (dots) {
+                dots.innerHTML = images
+                    .map((_, i) => `<span class="slider-dot${i === 0 ? " is-active" : ""}"></span>`)
+                    .join("");
+            }
+
+            const updateSlider = () => {
+                slider.style.transform = `translateX(-${index * 100}%)`;
+                if (dots) {
+                    Array.from(dots.children).forEach((dot, i) => {
+                        dot.classList.toggle("is-active", i === index);
+                    });
+                }
+            };
+
+            imageBox.addEventListener("mousemove", (event) => {
+                const now = Date.now();
+                if (now - lastSwitch < 180) return;
+                const direction = event.clientX - lastX;
+                if (Math.abs(direction) < 12) return;
+                if (direction > 0) {
+                    index = Math.min(images.length - 1, index + 1);
+                } else {
+                    index = Math.max(0, index - 1);
+                }
+                updateSlider();
+                lastSwitch = now;
+                lastX = event.clientX;
+            });
+
+            imageBox.addEventListener("mouseenter", (event) => {
+                lastX = event.clientX;
+            });
+        });
+
+        const openProductBySlug = (slug) => {
+            if (!slug) return;
+            window.location.href = `product.html?item=${encodeURIComponent(slug)}`;
+        };
+
+        const openPopularLink = (card) => {
+            if (!card || !card.dataset) return false;
+            const href = card.dataset.href || "";
+            if (!href) return false;
+            window.location.href = href;
+            return true;
+        };
+
+        productGrids.forEach((grid) => {
+            grid.addEventListener("click", (event) => {
+                const card = event.target.closest(".product-card");
+                if (!card || !grid.contains(card)) return;
+                if (card.classList.contains("product-card--soon")) return;
+                const isAdd = event.target.closest(".button--accent");
+                if (isAdd) {
+                    const name = card.dataset.name;
+                    const price = Number(card.dataset.price);
+                    triggerCartBump();
+                    const existing = cart.get(name) || { price, qty: 0, details: "" };
+                    cart.set(name, { price, qty: existing.qty + 1, details: existing.details || "" });
+                    renderCart();
+                    saveCart();
+                    return;
+                }
+                openProductBySlug(card.dataset.slug);
+            });
+        });
+
+        if (popularGrid) {
+            popularGrid.addEventListener("click", (event) => {
+                const card = event.target.closest(".popular-card");
+                if (!card) return;
+                const name = card.dataset.name || "";
+                const isProductCard = ACTIVE_PRODUCT_NAMES.has(name);
+                const addBtn = event.target.closest(".popular-card__add");
+                if (addBtn) {
+                    const price = Number(card.dataset.price || 0);
+                    if (!isProductCard || !name || price <= 0) return;
+                    triggerCartBump();
+                    const existing = cart.get(name) || { price, qty: 0, details: "" };
+                    cart.set(name, { price, qty: existing.qty + 1, details: existing.details || "" });
+                    renderCart();
+                    saveCart();
+                    return;
+                }
+                if (openPopularLink(card)) return;
+                if (!isProductCard) return;
+                openProductBySlug(card.dataset.slug);
+            });
+            popularGrid.addEventListener("keydown", (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                if (event.target.closest(".popular-card__add")) return;
+                const card = event.target.closest(".popular-card");
+                if (!card) return;
+                event.preventDefault();
+                if (openPopularLink(card)) return;
+                if (!ACTIVE_PRODUCT_NAMES.has(card.dataset.name || "")) return;
+                openProductBySlug(card.dataset.slug);
+            });
+        }
+
+        cartList.addEventListener("click", (event) => {
+            const remove = event.target.getAttribute("data-remove");
+            if (!remove) return;
+            cart.delete(remove);
+            renderCart();
+            saveCart();
+        });
+
+        clearBtn.addEventListener("click", () => {
+            cart.clear();
+            renderCart();
+            saveCart();
+        });
+
+        orderBtn.addEventListener("click", () => {
+            if (cart.size === 0) {
+                alert("Добавьте хотя бы одну корзину");
+                return;
+            }
+            const address = requireDeliveryAddress();
+            if (!address) return;
+            const lines = [
+                "Здравствуйте! Хочу заказать подарочные корзины:",
+                `Адрес доставки: ${addressForMessage(address)}`
+            ];
+            let total = 0;
+            cart.forEach((item, name) => {
+                lines.push(`• ${name} × ${item.qty} — ${item.price * item.qty} сом`);
+                if (item.details) lines.push(`   ${item.details}`);
+                total += item.price * item.qty;
+            });
+            lines.push(`Итого: ${total} сом`);
+            const url = `https://wa.me/996509130090?text=${encodeURIComponent(lines.join("\n"))}`;
+            window.open(url, "_blank");
+        });
+
+        if (cartDrawerCheckout) {
+            cartDrawerCheckout.addEventListener("click", () => {
+                orderBtn.click();
+            });
+        }
+
+        if (cartDrawerAddress) {
+            const savedAddress = loadDeliveryAddress();
+            const savedCoords = loadDeliveryCoords();
+            if (savedCoords) deliveryCoords = savedCoords;
+            if (savedAddress) {
+                cartDrawerAddress.value = savedAddress;
+            }
+            renderAddressMap(savedAddress, deliveryCoords);
+            cartDrawerAddress.addEventListener("input", () => {
+                const value = normalizeAddress(cartDrawerAddress.value);
+                saveDeliveryAddress(value);
+                setAddressStatus("");
+                deliveryCoords = null;
+                saveDeliveryCoords(null);
+                window.clearTimeout(addressInputTimer);
+                addressInputTimer = window.setTimeout(() => {
+                    renderAddressMap(value);
+                }, 260);
+            });
+            cartDrawerAddress.addEventListener("blur", () => {
+                window.setTimeout(() => {
+                    const value = applyAddressValue(cartDrawerAddress.value);
+                    setAddressStatus("");
+                    renderAddressMap(value);
+                }, 120);
+            });
+        }
+
+        if (cartDrawerAddressDetect) {
+            cartDrawerAddressDetect.addEventListener("click", detectAddressByGeo);
+        }
+
+        if (cartDrawerList) {
+            cartDrawerList.addEventListener("click", (event) => {
+                const btn = event.target.closest(".cart-drawer__btn");
+                if (!btn) return;
+                const name = btn.dataset.name;
+                const action = btn.dataset.action;
+                const item = cart.get(name);
+                if (!item) return;
+                if (action === "inc") item.qty += 1;
+                if (action === "dec") item.qty -= 1;
+                if (item.qty <= 0) cart.delete(name);
+                renderCart();
+                saveCart();
+            });
+        }
+
+        const openDrawer = () => {
+            if (!cartDrawer) return;
+            cartDrawer.classList.add("is-open");
+            cartDrawer.setAttribute("aria-hidden", "false");
+        };
+        const closeDrawer = () => {
+            if (!cartDrawer) return;
+            cartDrawer.classList.remove("is-open");
+            cartDrawer.setAttribute("aria-hidden", "true");
+        };
+
+        if (topCartButton) {
+            topCartButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                openDrawer();
+            });
+        }
+
+        topMenuLinks.forEach((link) => {
+            link.addEventListener("click", () => {
+                topMenuLinks.forEach((menuLink) => menuLink.classList.remove("is-active"));
+                link.classList.add("is-active");
+            });
+        });
+
+        const scrollStoriesRow = (direction) => {
+            if (!storiesRow) return;
+            const step = Math.max(220, Math.floor(storiesRow.clientWidth * 0.72));
+            storiesRow.scrollBy({ left: direction * step, behavior: "smooth" });
+        };
+        const updateStoriesNavState = () => {
+            if (!storiesRow) return;
+            const maxScroll = Math.max(0, storiesRow.scrollWidth - storiesRow.clientWidth);
+            const current = storiesRow.scrollLeft;
+            const atStart = current <= 2;
+            const atEnd = current >= maxScroll - 2;
+            if (storiesPrevBtn) {
+                storiesPrevBtn.classList.toggle("is-hidden", atStart);
+            }
+            if (storiesNextBtn) {
+                storiesNextBtn.classList.toggle("is-hidden", atEnd || maxScroll <= 2);
+            }
+        };
+        if (storiesPrevBtn) {
+            storiesPrevBtn.addEventListener("click", () => scrollStoriesRow(-1));
+        }
+        if (storiesNextBtn) {
+            storiesNextBtn.addEventListener("click", () => scrollStoriesRow(1));
+        }
+        if (storiesRow) {
+            let navTicking = false;
+            storiesRow.addEventListener("scroll", () => {
+                if (navTicking) return;
+                navTicking = true;
+                requestAnimationFrame(() => {
+                    updateStoriesNavState();
+                    navTicking = false;
+                });
+            }, { passive: true });
+            window.addEventListener("resize", updateStoriesNavState);
+            updateStoriesNavState();
+            requestAnimationFrame(updateStoriesNavState);
+        }
+
+        const stopStoryTimer = () => {
+            if (storyTimerFrame) {
+                cancelAnimationFrame(storyTimerFrame);
+                storyTimerFrame = 0;
+            }
+        };
+
+        const updateStoryPauseUi = () => {
+            if (!storyModalPause) return;
+            storyModalPause.textContent = storyIsPaused ? ">" : "||";
+            storyModalPause.setAttribute("aria-label", storyIsPaused ? "Продолжить историю" : "Пауза истории");
+            storyModalPause.setAttribute("aria-pressed", storyIsPaused ? "true" : "false");
+            storyModalPause.classList.toggle("is-paused", storyIsPaused);
+        };
+
+        const setStoryPaused = (paused) => {
+            if (!storyModal || !storyModal.classList.contains("is-open")) return;
+            if (paused === storyIsPaused) return;
+            if (paused) {
+                storyIsPaused = true;
+                storyPausedAt = performance.now();
+                stopStoryTimer();
+            } else {
+                if (storyPausedAt) {
+                    storyPausedTotal += performance.now() - storyPausedAt;
+                }
+                storyPausedAt = 0;
+                storyIsPaused = false;
+                if (storyTick) {
+                    storyTimerFrame = requestAnimationFrame(storyTick);
+                }
+            }
+            storyModal.classList.toggle("is-paused", storyIsPaused);
+            updateStoryPauseUi();
+        };
+
+        const closeStoryModal = () => {
+            if (!storyModal) return;
+            stopStoryTimer();
+            activeStoryIndex = -1;
+            storyTick = null;
+            storyTimerStart = 0;
+            storyPausedAt = 0;
+            storyPausedTotal = 0;
+            storyIsPaused = false;
+            if (storyModalTimerFill) {
+                storyModalTimerFill.style.width = "0%";
+            }
+            storyModal.classList.remove("is-cta-only");
+            storyModal.classList.remove("is-cta-right");
+            storyModal.classList.remove("is-paused");
+            storyModal.classList.remove("is-open");
+            storyModal.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
+            updateStoryPauseUi();
+        };
+
+        const openStoryTarget = (targetSelector) => {
+            if (!targetSelector || !targetSelector.startsWith("#")) return;
+            const target = document.querySelector(targetSelector);
+            if (!target) return;
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+        };
+
+        const openStoryByIndex = (index) => {
+            if (!storyModal || !storyModalImage || storyCards.length === 0) return;
+            if (index < 0 || index >= storyCards.length) {
+                closeStoryModal();
+                return;
+            }
+
+            const card = storyCards[index];
+            activeStoryIndex = index;
+            card.classList.add("is-viewed");
+            const cardStyle = getComputedStyle(card);
+            const storyBackground = card.dataset.storyBg || cardStyle.backgroundImage || "";
+            const storyBackgroundSize = card.dataset.storyBgSize || cardStyle.backgroundSize || "cover";
+            const storyBackgroundPosition = card.dataset.storyBgPosition || cardStyle.backgroundPosition || "center";
+            const storyBackgroundRepeat = card.dataset.storyBgRepeat || cardStyle.backgroundRepeat || "no-repeat";
+            const storyText = card.dataset.storyText || "";
+            const storyTarget = card.dataset.storyTarget || "#section-sebetter";
+            const storyAction = card.dataset.storyAction || "";
+            const storyCtaLabel = card.dataset.storyCta || "Перейти";
+            const isCtaOnlyStory = card.classList.contains("story-card--delivery") || card.classList.contains("story-card--app");
+            const isCtaRightStory = card.classList.contains("story-card--app");
+            storyModal.classList.toggle("is-cta-only", isCtaOnlyStory);
+            storyModal.classList.toggle("is-cta-right", isCtaRightStory);
+            if (storyModalText) {
+                storyModalText.textContent = isCtaOnlyStory ? "" : storyText;
+            }
+            if (storyModalCta) {
+                storyModalCta.setAttribute("href", storyTarget);
+                storyModalCta.dataset.target = storyTarget;
+                storyModalCta.dataset.action = storyAction;
+                storyModalCta.textContent = storyCtaLabel;
+            }
+            storyModalImage.style.backgroundImage = storyBackground === "none" ? "" : storyBackground;
+            storyModalImage.style.backgroundSize = storyBackgroundSize;
+            storyModalImage.style.backgroundPosition = storyBackgroundPosition;
+            storyModalImage.style.backgroundRepeat = storyBackgroundRepeat;
+            storyModal.classList.add("is-open");
+            storyModal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+            storyIsPaused = false;
+            storyPausedAt = 0;
+            storyPausedTotal = 0;
+            storyTimerStart = performance.now();
+            storyModal.classList.remove("is-paused");
+            updateStoryPauseUi();
+            stopStoryTimer();
+            const tick = (now) => {
+                if (storyIsPaused) return;
+                const elapsed = now - storyTimerStart - storyPausedTotal;
+                const progress = Math.min(elapsed / STORY_DURATION_MS, 1);
+                if (storyModalTimerFill) {
+                    storyModalTimerFill.style.width = `${progress * 100}%`;
+                }
+                if (progress >= 1) {
+                    openStoryByIndex(activeStoryIndex + 1);
+                    return;
+                }
+                storyTimerFrame = requestAnimationFrame(tick);
+            };
+            storyTick = tick;
+            if (storyModalTimerFill) {
+                storyModalTimerFill.style.width = "0%";
+            }
+            storyTimerFrame = requestAnimationFrame(storyTick);
+        };
+
+        const openNextStory = () => {
+            openStoryByIndex(activeStoryIndex + 1);
+        };
+
+        const openPrevStory = () => {
+            openStoryByIndex(Math.max(0, activeStoryIndex - 1));
+        };
+
+        storyCards.forEach((card, index) => {
+            card.addEventListener("click", () => openStoryByIndex(index));
+        });
+        if (storyModalClose) {
+            storyModalClose.addEventListener("click", closeStoryModal);
+        }
+        if (storyModalPrev) {
+            storyModalPrev.addEventListener("click", openPrevStory);
+        }
+        if (storyModalNext) {
+            storyModalNext.addEventListener("click", openNextStory);
+        }
+        if (storyModalPause) {
+            storyModalPause.addEventListener("click", (event) => {
+                event.preventDefault();
+                setStoryPaused(!storyIsPaused);
+            });
+        }
+        const handleStoryTouchHoldStart = () => {
+            if (!window.matchMedia("(max-width: 900px)").matches) return;
+            setStoryPaused(true);
+        };
+        const handleStoryTouchHoldEnd = () => {
+            if (!window.matchMedia("(max-width: 900px)").matches) return;
+            setStoryPaused(false);
+        };
+        if (storyModalImage) {
+            storyModalImage.addEventListener("touchstart", handleStoryTouchHoldStart, { passive: true });
+            storyModalImage.addEventListener("touchend", handleStoryTouchHoldEnd, { passive: true });
+            storyModalImage.addEventListener("touchcancel", handleStoryTouchHoldEnd, { passive: true });
+        }
+
+        const triggerInstallApp = async () => {
+            const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+            const userAgent = navigator.userAgent || "";
+            const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+            const isAndroid = /android/i.test(userAgent);
+            const isMacDesktop = /macintosh|mac os x/i.test(userAgent) && !isIOS;
+            const isWindowsDesktop = /windows nt/i.test(userAgent);
+            if (isStandalone) {
+                alert("Приложение уже установлено на этом устройстве");
+                return;
+            }
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                try {
+                    await deferredInstallPrompt.userChoice;
+                } catch (error) {
+                    // Ignore browser-specific prompt promise errors.
+                }
+                deferredInstallPrompt = null;
+                return;
+            }
+            if (isIOS) {
+                alert("На iPhone откройте сайт в Safari: Поделиться → На экран Домой");
+                return;
+            }
+            if (isAndroid) {
+                alert("На Android откройте меню браузера (⋮) и выберите «Добавить на главный экран»");
+                return;
+            }
+            if (isMacDesktop) {
+                alert("На Mac установите сайт на экран компьютера: в Chrome/Edge нажмите значок установки в адресной строке или Меню → «Установить приложение», в Safari — «Файл → Добавить в Dock»");
+                return;
+            }
+            if (isWindowsDesktop) {
+                alert("На компьютере откройте Chrome/Edge и нажмите значок установки в адресной строке или Меню → «Установить приложение»");
+                return;
+            }
+            alert("Откройте меню браузера и выберите установку приложения на экран устройства");
+        };
+
+        if (storyModalCta) {
+            storyModalCta.addEventListener("click", (event) => {
+                event.preventDefault();
+                const action = storyModalCta.dataset.action || "";
+                if (action === "install-app") {
+                    triggerInstallApp();
+                    closeStoryModal();
+                    return;
+                }
+                const targetSelector = storyModalCta.dataset.target || storyModalCta.getAttribute("href") || "";
+                closeStoryModal();
+                window.setTimeout(() => {
+                    openStoryTarget(targetSelector);
+                }, 40);
+            });
+        }
+        if (storyModal) {
+            storyModal.addEventListener("click", (event) => {
+                if (event.target === storyModal) closeStoryModal();
+            });
+        }
+        const closeInfoModal = () => {
+            if (!infoModal) return;
+            infoModal.classList.remove("is-open");
+            infoModal.setAttribute("aria-hidden", "true");
+        };
+        const openInfoModal = (key) => {
+            if (!infoModal || !infoModalTitle || !infoModalBody) return;
+            const modalItem = infoModalContent[key];
+            if (!modalItem) return;
+            infoModalTitle.textContent = modalItem.title;
+            infoModalBody.innerHTML = modalItem.body;
+            infoModal.classList.add("is-open");
+            infoModal.setAttribute("aria-hidden", "false");
+        };
+        infoModalTriggers.forEach((trigger) => {
+            trigger.addEventListener("click", () => {
+                openInfoModal(trigger.dataset.infoModal || "");
+            });
+        });
+        if (infoModalClose) {
+            infoModalClose.addEventListener("click", closeInfoModal);
+        }
+        if (infoModal) {
+            infoModal.addEventListener("click", (event) => {
+                if (event.target === infoModal) closeInfoModal();
+            });
+        }
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closeStoryModal();
+                closeInfoModal();
+            }
+            if (!storyModal || !storyModal.classList.contains("is-open")) return;
+            if (event.key === "ArrowRight") openNextStory();
+            if (event.key === "ArrowLeft") openPrevStory();
+        });
+
+        const formatSom = (value) => `${value.toLocaleString("ru-RU")} сом`;
+        const collectBuilderSelection = () => {
+            let total = 0;
+            let positions = 0;
+            const selected = [];
+            builderItems.forEach((item) => {
+                const qty = Number(item.dataset.qty || 0);
+                const price = Number(item.dataset.price || 0);
+                const name = item.dataset.name || "";
+                const qtyNode = item.querySelector(".builder-item__qty");
+                if (qtyNode) qtyNode.textContent = String(qty);
+                if (qty <= 0) return;
+                selected.push({ name, qty, price });
+                total += price * qty;
+                positions += qty;
+            });
+            return { selected, total, positions };
+        };
+
+        const renderBuilderSummary = () => {
+            if (!builderSummaryList || !builderSummaryTotal) return;
+            const { selected, total } = collectBuilderSelection();
+            if (selected.length === 0) {
+                builderSummaryList.innerHTML = `<div class="builder-summary__empty">Выберите ингредиенты для своей корзины.</div>`;
+                builderSummaryTotal.textContent = "Итого: 0 сом";
+                if (builderAddBtn) builderAddBtn.disabled = true;
+                return;
+            }
+            builderSummaryList.innerHTML = selected
+                .map((item) => `<div class="builder-summary__row"><span>${item.name} × ${item.qty}</span><span>${formatSom(item.price * item.qty)}</span></div>`)
+                .join("");
+            builderSummaryTotal.textContent = `Итого: ${formatSom(total)}`;
+            if (builderAddBtn) builderAddBtn.disabled = false;
+        };
+
+        if (customBuilder) {
+            customBuilder.addEventListener("click", (event) => {
+                const btn = event.target.closest(".builder-qty-btn");
+                if (!btn) return;
+                const item = btn.closest(".builder-item");
+                if (!item) return;
+                let qty = Number(item.dataset.qty || 0);
+                if (btn.dataset.action === "inc") qty += 1;
+                if (btn.dataset.action === "dec") qty -= 1;
+                item.dataset.qty = String(Math.max(0, qty));
+                renderBuilderSummary();
+            });
+        }
+
+        if (builderAddBtn) {
+            builderAddBtn.addEventListener("click", () => {
+                const { selected, total, positions } = collectBuilderSelection();
+                if (selected.length === 0 || total <= 0) {
+                    alert("Выберите хотя бы один продукт для своей корзины");
+                    return;
+                }
+                const details = `Состав: ${selected.map((item) => `${item.name} ×${item.qty}`).join(", ")}`;
+                const baseName = `Өзүң чогулт (${positions} поз.)`;
+                let customName = baseName;
+                let variant = 2;
+                while (cart.has(customName)) {
+                    const existing = cart.get(customName);
+                    if (existing && existing.price === total && (existing.details || "") === details) break;
+                    customName = variant === 2 ? `${baseName} • ${total}` : `${baseName} • ${total} #${variant}`;
+                    variant += 1;
+                }
+                triggerCartBump();
+                const existing = cart.get(customName) || { price: total, qty: 0, details };
+                cart.set(customName, { price: total, qty: existing.qty + 1, details });
+                builderItems.forEach((item) => {
+                    item.dataset.qty = "0";
+                });
+                renderBuilderSummary();
+                renderCart();
+                saveCart();
+            });
+        }
+        renderBuilderSummary();
+
+        if (cartFabCount && cartDrawer) {
+            if (cartFab) {
+                cartFab.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    openDrawer();
+                });
+            }
+            if (cartDrawerClose) {
+                cartDrawerClose.addEventListener("click", closeDrawer);
+            }
+            cartDrawer.addEventListener("click", (event) => {
+                if (event.target === cartDrawer) closeDrawer();
+            });
+        }
+
+        loadCart();
+        renderCart();
+
+        const supportTrigger = document.getElementById("supportTrigger");
+        const supportPanel = document.getElementById("supportPanel");
+        const supportClose = document.querySelector(".support-close");
+        const positionSupport = () => {
+            const anchor = document.querySelector(".stories-row") || document.querySelector(".products") || document.querySelector(".container");
+            if (!anchor) return;
+            const rect = anchor.getBoundingClientRect();
+            const width = supportPanel.offsetWidth || 300;
+            const left = Math.max(16, rect.right - width);
+            supportPanel.style.left = `${left}px`;
+        };
+        const toggleSupport = () => {
+            positionSupport();
+            supportPanel.classList.toggle("is-open");
+            supportPanel.setAttribute("aria-hidden", String(!supportPanel.classList.contains("is-open")));
+        };
+        if (supportTrigger && supportPanel) {
+            supportTrigger.addEventListener("click", (event) => {
+                event.stopPropagation();
+                toggleSupport();
+            });
+            if (supportClose) {
+                supportClose.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    supportPanel.classList.remove("is-open");
+                    supportPanel.setAttribute("aria-hidden", "true");
+                });
+            }
+            document.addEventListener("click", (event) => {
+                if (!supportPanel.contains(event.target) && event.target !== supportTrigger) {
+                    supportPanel.classList.remove("is-open");
+                    supportPanel.setAttribute("aria-hidden", "true");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

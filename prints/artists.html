@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Кабинет художника — Mukashov Prints</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="build/css/styles.css">
+    <link rel="stylesheet" href="build/css/artists.css">
+    <script type="module" src="build/js/artists.js"></script>
+</head>
+<body>
+    <header class="container artists-header">
+        <a class="prints-brand" href="./">MUKASHOV PRINTS</a>
+        <a href="./#artist-gallery">Работы художников</a>
+    </header>
+    <main class="container artists-page">
+        <h1>Кабинет художника</h1>
+        <p id="artist-status" role="status" aria-live="polite">Загрузка кабинета…</p>
+        <noscript>Для работы кабинета включите JavaScript.</noscript>
+        <form id="artist-auth" class="artist-form" hidden>
+            <p>Зарегистрируйтесь или войдите по одноразовой ссылке из письма.</p>
+            <label>Электронная почта <input type="email" name="email" autocomplete="email" required></label>
+            <button class="button button--solid">Получить ссылку</button>
+        </form>
+        <section id="artist-dashboard" hidden>
+            <div class="artist-actions">
+                <span id="artist-email"></span>
+                <button class="button button--ghost" id="artist-signout" type="button">Выйти</button>
+            </div>
+            <h2>Добавить работу</h2>
+            <form id="artist-work" class="artist-form">
+                <label>Имя художника или псевдоним <input name="artist_name" maxlength="80" required></label>
+                <label>Город <input name="city" maxlength="80" required></label>
+                <label>Название работы <input name="title" maxlength="120" required></label>
+                <label>Описание <textarea name="description" rows="4" maxlength="2000"></textarea></label>
+                <label>Фото работы (JPEG, PNG или WebP, до 5 МБ)
+                    <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+                </label>
+                <button class="button button--solid">Сохранить черновик</button>
+            </form>
+            <section class="artist-gallery" aria-labelledby="my-artworks-title">
+                <h2 id="my-artworks-title">Мои работы</h2>
+                <p id="artist-works-status" role="status"></p>
+                <div id="artist-works" class="artist-grid"></div>
+            </section>
+        </section>
+    </main>
+</body>
+</html>

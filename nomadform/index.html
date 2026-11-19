@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Nomadform — модульные дома</title>
+    <meta name="description" content="Nomadform — модульные дома для жизни, аренды и туризма. Цена от 180 000 сом.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="build/css/styles.css">
+    <style>
+        :root {
+            --nf-ink: #111218;
+            --nf-accent: #ff6b3d;
+            --nf-accent-2: #ffb24a;
+            --nf-bg: #f7f4ef;
+            --nf-muted: #6d6f75;
+            --nf-card: #ffffff;
+            --nf-border: #e7e2da;
+            --nf-dark: #121216;
+            --nf-dark-2: #1b1b22;
+        }
+        body {
+            background: var(--nf-bg);
+            color: var(--nf-ink);
+        }
+        a {
+            color: var(--nf-dark);
+        }
+        .nf-wrapper {
+            min-height: 100vh;
+            position: relative;
+        }
+        .nf-header {
+            padding: 26px 0 10px;
+        }
+        .nf-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .nf-menu {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            flex: 1;
+            justify-content: center;
+        }
+        .nf-menu a {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--nf-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .nf-menu a:hover {
+            color: var(--nf-dark);
+        }
+        .nf-brand {
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+        }
+        .nf-brand span:first-child {
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .nf-brand span:last-child {
+            font-family: "Manrope", sans-serif;
+            font-size: 12px;
+            color: var(--nf-muted);
+        }
+        .nf-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            border-radius: 999px;
+            background: var(--nf-dark);
+            color: #fff;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .nf-cta:hover {
+            background: var(--nf-accent);
+        }
+        .nf-hero {
+            padding: 32px 0 60px;
+        }
+        .nf-hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+            gap: 28px;
+            align-items: center;
+        }
+        .nf-hero h1 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(32px, 4.2vw, 54px);
+            line-height: 1.05;
+            margin-bottom: 18px;
+        }
+        .nf-hero p {
+            font-family: "Manrope", sans-serif;
+            font-size: 16px;
+            color: var(--nf-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .nf-hero .nf-hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .nf-hero .nf-hero-actions a {
+            text-decoration: none;
+        }
+        .nf-primary {
+            background: var(--nf-dark);
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-family: "Space Grotesk", sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .nf-primary:hover {
+            background: var(--nf-accent);
+        }
+        .nf-secondary {
+            background: transparent;
+            color: var(--nf-dark);
+            padding: 12px 18px;
+            border-radius: 14px;
+            border: 1px solid var(--nf-dark);
+            font-family: "Space Grotesk", sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .nf-secondary:hover {
+            background: var(--nf-accent);
+            color: #fff;
+            border-color: var(--nf-accent);
+        }
+        .nf-hero-visual {
+            border-radius: 26px;
+            overflow: hidden;
+            min-height: 360px;
+            position: relative;
+            background: #111;
+        }
+        .nf-hero-photo {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.2), rgba(0,0,0,0.55));
+        }
+        .nf-hero-photo::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 40%),
+                linear-gradient(120deg, rgba(255,107,61,0.25), rgba(17,18,24,0.85));
+        }
+        .nf-photo-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+            height: 100%;
+        }
+        .nf-photo-main {
+            background: #1b1c21 center/cover no-repeat;
+            border-radius: 26px;
+            min-height: 360px;
+        }
+        .nf-photo-side {
+            display: grid;
+            gap: 12px;
+        }
+        .nf-photo-tile {
+            flex: 1;
+            background: #222 center/cover no-repeat;
+            border-radius: 20px;
+            min-height: 170px;
+        }
+        .nf-section {
+            padding: 40px 0 60px;
+        }
+        .nf-section h2 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 28px;
+            margin-bottom: 14px;
+        }
+        .nf-about {
+            background: #fff;
+            border-radius: 26px;
+            border: 1px solid var(--nf-border);
+            padding: 24px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            gap: 18px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .nf-about::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(255,107,61,0.12), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .nf-about:hover::after {
+            opacity: 1;
+        }
+        .nf-about__title {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 22px;
+            margin: 0 0 8px;
+        }
+        .nf-about__text {
+            color: var(--nf-muted);
+            line-height: 1.6;
+            margin: 0;
+        }
+        .nf-about__text span {
+            color: var(--nf-ink);
+            border-bottom: 1px solid rgba(17,18,24,0.2);
+        }
+        .nf-about__pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--nf-border);
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-family: "Space Grotesk", sans-serif;
+            color: var(--nf-muted);
+            margin-bottom: 10px;
+        }
+        .nf-about__stats {
+            display: grid;
+            gap: 10px;
+        }
+        .nf-about__stat {
+            background: #f7f4ef;
+            border-radius: 16px;
+            padding: 12px 14px;
+            border: 1px solid var(--nf-border);
+            font-size: 13px;
+            color: var(--nf-muted);
+            transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .nf-about__stat:hover {
+            transform: translateY(-2px);
+            color: var(--nf-ink);
+            border-color: var(--nf-accent);
+        }
+        .nf-card {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid var(--nf-border);
+            padding: 18px;
+            display: grid;
+            gap: 8px;
+        }
+        .nf-benefits {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .nf-benefit-card {
+            position: relative;
+            border-radius: 22px;
+            overflow: hidden;
+            min-height: 220px;
+            display: grid;
+            align-items: end;
+            padding: 18px;
+            color: #fff;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.2s ease;
+        }
+        .nf-benefit-card:hover {
+            transform: translateY(-4px);
+        }
+        .nf-benefit-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.7));
+        }
+        .nf-benefit-card strong,
+        .nf-benefit-card p {
+            position: relative;
+            z-index: 1;
+        }
+        .nf-benefit-card strong {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 18px;
+        }
+        .nf-benefit-card p {
+            margin: 6px 0 0;
+            color: rgba(255,255,255,0.85);
+            font-size: 13px;
+        }
+        .nf-benefit-card__more {
+            margin-top: 8px;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+            width: fit-content;
+        }
+        .nf-models {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+        .nf-model {
+            background: #fff;
+            border-radius: 24px;
+            border: 1px solid var(--nf-border);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: 200px 1fr;
+        }
+        .nf-model__media {
+            background: #1b1c21 center/cover no-repeat;
+            position: relative;
+        }
+        .nf-model__body {
+            padding: 18px;
+            display: grid;
+            gap: 8px;
+        }
+        .nf-model__body h3 {
+            margin: 0;
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .nf-model__body p {
+            margin: 0;
+            color: var(--nf-muted);
+        }
+        .nf-price {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .nf-calc {
+            background: #fff;
+            border-radius: 24px;
+            border: 1px solid var(--nf-border);
+            padding: 22px;
+            display: grid;
+            gap: 16px;
+        }
+        .nf-calc__row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+        .nf-calc input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--nf-border);
+            font-family: "Manrope", sans-serif;
+            font-size: 16px;
+        }
+        .nf-calc__pill {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--nf-border);
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: #faf8f5;
+            color: var(--nf-ink);
+        }
+        .nf-calc__range {
+            width: 100%;
+            accent-color: var(--nf-accent);
+        }
+        .nf-calc__result {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 20px;
+        }
+        .nf-form {
+            background: #fff;
+            border-radius: 24px;
+            border: 1px solid var(--nf-border);
+            padding: 20px;
+            display: grid;
+            gap: 12px;
+        }
+        .nf-form input,
+        .nf-form textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--nf-border);
+            font-family: "Manrope", sans-serif;
+            font-size: 14px;
+        }
+        .nf-form textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+        .nf-plans {
+            margin-top: 28px;
+            background: #fff;
+            border-radius: 26px;
+            border: 1px solid var(--nf-border);
+            padding: 22px;
+            display: grid;
+            gap: 18px;
+        }
+        .nf-plans__tabs {
+            display: flex;
+            gap: 22px;
+            border-bottom: 1px solid var(--nf-border);
+            padding-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .nf-plans__tab {
+            background: transparent;
+            border: none;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--nf-muted);
+            cursor: pointer;
+            padding: 6px 0;
+        }
+        .nf-plans__tab.is-active {
+            color: var(--nf-ink);
+            border-bottom: 2px solid var(--nf-ink);
+        }
+        .nf-plans__grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+        .nf-plan-card {
+            border: 1px solid var(--nf-border);
+            border-radius: 22px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: #fff;
+            min-height: 240px;
+        }
+        .nf-plan-card__media {
+            background: #f3efe8;
+            position: relative;
+            display: grid;
+            place-items: center;
+        }
+        .nf-plan-card__media::before {
+            content: "";
+            width: 86%;
+            height: 86%;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.08), rgba(0,0,0,0.02));
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        .nf-plan-card__media span {
+            position: absolute;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--nf-muted);
+        }
+        .nf-plan-card__body {
+            padding: 18px;
+            display: grid;
+            gap: 8px;
+            align-content: start;
+        }
+        .nf-plan-card__body h3 {
+            margin: 0;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 18px;
+        }
+        .nf-plan-card__body ul {
+            margin: 0;
+            padding-left: 16px;
+            color: var(--nf-muted);
+            display: grid;
+            gap: 4px;
+            font-size: 13px;
+        }
+        .nf-plan-card__actions {
+            margin-top: 6px;
+        }
+        .nf-plan-card__actions button {
+            background: transparent;
+            border: 1px solid var(--nf-border);
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .nf-plan-card__actions button:hover {
+            background: var(--nf-dark);
+            color: #fff;
+            border-color: var(--nf-dark);
+        }
+        @media (max-width: 980px) {
+            .nf-plans__grid {
+                grid-template-columns: 1fr;
+            }
+            .nf-plan-card {
+                grid-template-columns: 1fr;
+            }
+        }
+        .nf-footer {
+            padding: 20px 0 40px;
+            color: var(--nf-muted);
+        }
+        .nf-faq {
+            background: #fff;
+            border-radius: 26px;
+            border: 1px solid var(--nf-border);
+            padding: 22px;
+            display: grid;
+            gap: 14px;
+        }
+        .nf-faq-item {
+            border-bottom: 1px solid var(--nf-border);
+            padding-bottom: 12px;
+        }
+        .nf-faq-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .nf-faq-question {
+            width: 100%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 6px 0;
+        }
+        .nf-faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+            color: var(--nf-muted);
+            line-height: 1.5;
+        }
+        .nf-faq-item.is-open .nf-faq-answer {
+            max-height: 200px;
+        }
+        .nf-faq-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 999px;
+            border: 1px solid var(--nf-border);
+            display: grid;
+            place-items: center;
+            font-size: 14px;
+            color: var(--nf-ink);
+        }
+        .nf-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 18, 24, 0.6);
+            display: grid;
+            place-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 999;
+        }
+        .nf-modal.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .nf-modal__panel {
+            width: min(520px, 92vw);
+            background: #fff;
+            border-radius: 26px;
+            padding: 28px;
+            position: relative;
+            display: grid;
+            gap: 16px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+        }
+        .nf-modal__close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 10px;
+            background: #f0f0f0;
+            cursor: pointer;
+        }
+        .nf-modal__close::before,
+        .nf-modal__close::after {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 2px;
+            background: #111;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .nf-modal__close::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+        .nf-modal__title {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 22px;
+            text-align: center;
+            line-height: 1.3;
+        }
+        .nf-modal__inputs {
+            display: grid;
+            gap: 12px;
+        }
+        .nf-modal__inputs input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--nf-border);
+            font-family: "Manrope", sans-serif;
+            font-size: 14px;
+        }
+        .nf-modal__send {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: none;
+            background: var(--nf-ink);
+            color: #fff;
+            font-family: "Space Grotesk", sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .nf-modal__send:hover {
+            background: var(--nf-accent);
+        }
+        .nf-modal__note {
+            font-size: 12px;
+            color: var(--nf-muted);
+            text-align: center;
+        }
+        .nf-sheen {
+            position: relative;
+            overflow: hidden;
+        }
+        .nf-sheen::after {
+            content: "";
+            position: absolute;
+            inset: -70% -30%;
+            background: linear-gradient(120deg, rgba(255,255,255,0.0), rgba(255,255,255,0.18), rgba(255,255,255,0.0));
+            transform: translateX(-70%);
+            transition: transform 1.1s ease;
+            pointer-events: none;
+        }
+        .nf-sheen:hover::after {
+            transform: translateX(70%);
+        }
+        .nf-modal__note {
+            font-size: 12px;
+            color: var(--nf-muted);
+            text-align: center;
+        }
+        @media (max-width: 980px) {
+            .nf-hero-grid {
+                grid-template-columns: 1fr;
+            }
+            .nf-benefits {
+                grid-template-columns: 1fr;
+            }
+            .nf-models {
+                grid-template-columns: 1fr;
+            }
+            .nf-about {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="nf-wrapper">
+        <header class="nf-header">
+            <div class="container">
+                <a class="nf-brand" href="/">
+                    <span>Nomadform</span>
+                    <span>Модульные дома</span>
+                </a>
+                <nav class="nf-menu">
+                    <a href="#about">О нас</a>
+                    <a href="#plans">Наши продукты</a>
+                    <a href="https://nomadhouse.mukashov.com" target="_blank" rel="noopener">Аренда</a>
+                    <a href="#contacts">Контакты</a>
+                </nav>
+                <button class="nf-cta" id="openLead" type="button">Оставьте заявку</button>
+            </div>
+        </header>
+
+        <main>
+            <section class="nf-hero">
+                <div class="container">
+                    <div class="nf-hero-grid">
+                        <div>
+                            <h1>Модульные дома для жизни и туризма</h1>
+                            <p>Nomadform — это компактные, тёплые и быстровозводимые дома. Стоимость начинается от <strong>180&nbsp;000 сом</strong>. Главное преимущество: дом можно переставить в более перспективную локацию, если место не оправдало ожиданий.</p>
+                            <div class="nf-hero-actions">
+                                <a class="nf-primary" href="#calc">Рассчитать стоимость</a>
+                                <a class="nf-secondary" href="#models">Смотреть модели</a>
+                            </div>
+                        </div>
+                        <div class="nf-hero-visual" aria-hidden="true">
+                            <div class="nf-hero-photo"></div>
+                            <div class="nf-photo-grid">
+                                <div class="nf-photo-main" style="background-image:linear-gradient(120deg, rgba(0,0,0,0.2), rgba(0,0,0,0.6)), url('assets/img/cards/nomadhouse.png')"></div>
+                                <div class="nf-photo-side">
+                                    <div class="nf-photo-tile" style="background-image:linear-gradient(120deg, rgba(0,0,0,0.2), rgba(0,0,0,0.6)), url('assets/img/cards/nomadform.png')"></div>
+                                    <div class="nf-photo-tile" style="background-image:linear-gradient(120deg, rgba(0,0,0,0.2), rgba(0,0,0,0.6)), url('assets/img/cards/nomadhouse.png')"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nf-section" id="about">
+                <div class="container">
+                    <h2>О компании</h2>
+                    <div class="nf-about nf-sheen">
+                        <div>
+                            <div class="nf-about__pill">Nomadform</div>
+                            <h3 class="nf-about__title">Мы проектируем модульные дома с современным взглядом на каркасные технологии</h3>
+                            <p class="nf-about__text">Создаём дома, которые <span>быстро запускаются</span>, легко масштабируются и готовы к переезду в более перспективную локацию, если выбранное место не оправдало ожиданий.</p>
+                        </div>
+                        <div class="nf-about__stats">
+                            <div class="nf-about__stat">Гибкие конфигурации под аренду, жизнь и туризм</div>
+                            <div class="nf-about__stat">Сборка без долгих строительных процессов</div>
+                            <div class="nf-about__stat">Фокус на дизайн, тепло и энергоэффективность</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nf-section">
+                <div class="container">
+                    <h2>Почему модульные дома Nomadform</h2>
+                    <div class="nf-benefits">
+                        <div class="nf-benefit-card nf-sheen" style="background-image:url('assets/img/cards/nomadform.png')">
+                            <strong>Мобильность</strong>
+                            <p>Вы не привязаны к одной локации — дом можно перенести туда, где поток гостей или спрос выше.</p>
+                            <div class="nf-benefit-card__more">Подробнее</div>
+                        </div>
+                        <div class="nf-benefit-card nf-sheen" style="background-image:url('assets/img/cards/nomadhouse.png')">
+                            <strong>Быстрый запуск</strong>
+                            <p>Запуск без долгих строек: производство и монтаж — в короткие сроки.</p>
+                            <div class="nf-benefit-card__more">Подробнее</div>
+                        </div>
+                        <div class="nf-benefit-card nf-sheen" style="background-image:url('assets/img/cards/nomadform.png')">
+                            <strong>Экономика и комфорт</strong>
+                            <p>Тёплый контур и продуманная инженерия — ниже расходы и комфорт в любой сезон.</p>
+                            <div class="nf-benefit-card__more">Подробнее</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nf-section" id="models">
+                <div class="container">
+                    <h2>Популярные форматы</h2>
+                    <div class="nf-models">
+                        <article class="nf-model nf-sheen">
+                            <div class="nf-model__media" style="background-image:url('assets/img/cards/nomadform.png')"></div>
+                            <div class="nf-model__body">
+                                <h3>Компакт 18 м²</h3>
+                                <p>Идеален для 2 гостей или небольшого семейного отдыха.</p>
+                                <div class="nf-price">от 180&nbsp;000 сом</div>
+                            </div>
+                        </article>
+                        <article class="nf-model nf-sheen">
+                            <div class="nf-model__media" style="background-image:url('assets/img/cards/nomadhouse.png')"></div>
+                            <div class="nf-model__body">
+                                <h3>Семейный 36–45 м²</h3>
+                                <p>Больше пространства, отдельные зоны для отдыха.</p>
+                                <div class="nf-price">индивидуальный расчёт</div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nf-section" id="plans">
+                <div class="container">
+                    <h2>Выберите планировку, которая подойдёт именно вам</h2>
+                    <div class="nf-plans nf-sheen">
+                        <div class="nf-plans__tabs">
+                            <button class="nf-plans__tab is-active" data-tab="homes">Модульные дома</button>
+                            <button class="nf-plans__tab" data-tab="saunas">Сауны</button>
+                            <button class="nf-plans__tab" data-tab="cabins">Кабины</button>
+                        </div>
+                        <div class="nf-plans__grid" data-pane="homes">
+                            <article class="nf-plan-card nf-sheen">
+                                <div class="nf-plan-card__media"><span>Plan 01</span></div>
+                                <div class="nf-plan-card__body">
+                                    <h3>Дом 18 м²</h3>
+                                    <ul>
+                                        <li>Кухня‑гостиная</li>
+                                        <li>Спальня на 2 места</li>
+                                        <li>Санузел</li>
+                                        <li>Терраса (опция)</li>
+                                    </ul>
+                                    <div class="nf-plan-card__actions">
+                                        <button type="button">Оставить заявку</button>
+                                    </div>
+                                </div>
+                            </article>
+                            <article class="nf-plan-card nf-sheen">
+                                <div class="nf-plan-card__media"><span>Plan 02</span></div>
+                                <div class="nf-plan-card__body">
+                                    <h3>Дом 36–45 м²</h3>
+                                    <ul>
+                                        <li>2 спальни</li>
+                                        <li>Кухня‑гостиная</li>
+                                        <li>Санузел</li>
+                                        <li>Терраса (опция)</li>
+                                    </ul>
+                                    <div class="nf-plan-card__actions">
+                                        <button type="button">Оставить заявку</button>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="nf-plans__grid" data-pane="saunas" style="display:none;">
+                            <article class="nf-plan-card nf-sheen">
+                                <div class="nf-plan-card__media"><span>Sauna 01</span></div>
+                                <div class="nf-plan-card__body">
+                                    <h3>Сауна Compact</h3>
+                                    <ul>
+                                        <li>Парная на 4 чел.</li>
+                                        <li>Зона отдыха</li>
+                                        <li>Душевая</li>
+                                        <li>Терраса (опция)</li>
+                                    </ul>
+                                    <div class="nf-plan-card__actions">
+                                        <button type="button">Оставить заявку</button>
+                                    </div>
+                                </div>
+                            </article>
+                            <article class="nf-plan-card nf-sheen">
+                                <div class="nf-plan-card__media"><span>Sauna 02</span></div>
+                                <div class="nf-plan-card__body">
+                                    <h3>Сауна Family</h3>
+                                    <ul>
+                                        <li>Парная на 6–8 чел.</li>
+                                        <li>Комната отдыха</li>
+                                        <li>Душевая + WC</li>
+                                        <li>Терраса (опция)</li>
+                                    </ul>
+                                    <div class="nf-plan-card__actions">
+                                        <button type="button">Оставить заявку</button>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="nf-plans__grid" data-pane="cabins" style="display:none;">
+                            <article class="nf-plan-card nf-sheen">
+                                <div class="nf-plan-card__media"><span>Cabin 01</span></div>
+                                <div class="nf-plan-card__body">
+                                    <h3>Кабина Solo</h3>
+                                    <ul>
+                                        <li>Спальное место</li>
+                                        <li>Мини‑кухня</li>
+                                        <li>Санузел</li>
+                                        <li>Панорамное окно</li>
+                                    </ul>
+                                    <div class="nf-plan-card__actions">
+                                        <button type="button">Оставить заявку</button>
+                                    </div>
+                                </div>
+                            </article>
+                            <article class="nf-plan-card nf-sheen">
+                                <div class="nf-plan-card__media"><span>Cabin 02</span></div>
+                                <div class="nf-plan-card__body">
+                                    <h3>Кабина Duo</h3>
+                                    <ul>
+                                        <li>2 спальных места</li>
+                                        <li>Зона отдыха</li>
+                                        <li>Санузел</li>
+                                        <li>Мини‑терраса</li>
+                                    </ul>
+                                    <div class="nf-plan-card__actions">
+                                        <button type="button">Оставить заявку</button>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nf-section" id="calc">
+                <div class="container">
+                    <h2>Калькулятор стоимости</h2>
+                    <div class="nf-calc nf-sheen">
+                        <label for="area">Площадь дома (м²)</label>
+                        <div class="nf-calc__row">
+                            <input type="number" id="area" min="10" step="1" value="18">
+                            <span class="nf-calc__pill">от 10 м²</span>
+                        </div>
+                        <input type="range" id="areaRange" class="nf-calc__range" min="10" max="80" step="1" value="18">
+                        <div class="nf-calc__result" id="calcResult">Итого: 180 000 сом</div>
+                        <small style="color: var(--nf-muted);">Расчёт основан на стартовой цене 10&nbsp;000 сом за м².</small>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nf-section" id="faq">
+                <div class="container">
+                    <h2>Часто задаваемые вопросы</h2>
+                    <div class="nf-faq nf-sheen">
+                        <div class="nf-faq-item">
+                            <button class="nf-faq-question" type="button">
+                                Можно ли жить в доме круглый год?
+                                <span class="nf-faq-icon">+</span>
+                            </button>
+                            <div class="nf-faq-answer">Да, дома утеплены и рассчитаны на 4 сезона, при необходимости можно усилить теплоизоляцию.</div>
+                        </div>
+                        <div class="nf-faq-item">
+                            <button class="nf-faq-question" type="button">
+                                Сколько занимает монтаж?
+                                <span class="nf-faq-icon">+</span>
+                            </button>
+                            <div class="nf-faq-answer">В среднем от 14 дней — зависит от выбранной комплектации и подготовки участка.</div>
+                        </div>
+                        <div class="nf-faq-item">
+                            <button class="nf-faq-question" type="button">
+                                Нужен ли фундамент?
+                                <span class="nf-faq-icon">+</span>
+                            </button>
+                            <div class="nf-faq-answer">Для большинства моделей достаточно облегчённого основания или свай.</div>
+                        </div>
+                        <div class="nf-faq-item">
+                            <button class="nf-faq-question" type="button">
+                                Можно ли перевозить дом?
+                                <span class="nf-faq-icon">+</span>
+                            </button>
+                            <div class="nf-faq-answer">Да, это модульная конструкция — дом можно переместить на другую локацию.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nf-section" id="form">
+                <div class="container">
+                    <h2>Получить коммерческое предложение</h2>
+                    <div class="nf-form">
+                        <input type="text" id="leadName" placeholder="Ваше имя">
+                        <input type="tel" id="leadPhone" placeholder="Телефон">
+                        <input type="number" id="leadArea" placeholder="Желаемая площадь, м²">
+                        <textarea id="leadComment" placeholder="Комментарий или вопросы"></textarea>
+                        <button class="nf-primary" id="sendLead">Отправить</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nf-section" id="contacts">
+                <div class="container">
+                    <h2>Контакты</h2>
+                    <div class="nf-card nf-sheen">
+                        <p>Телефон: <strong>+996 709 139 603</strong></p>
+                        <p>WhatsApp: <a href="https://wa.me/996709139603" target="_blank" rel="noopener">Написать в WhatsApp</a></p>
+                        <p>Email: <strong>support@mukashov.com</strong></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="nf-footer">
+            <div class="container">
+                Nomadform. Модульные дома для гибких решений.
+            </div>
+        </footer>
+    </div>
+
+    <div class="nf-modal" id="leadModal" aria-hidden="true">
+        <div class="nf-modal__panel">
+            <button class="nf-modal__close" type="button" aria-label="Закрыть"></button>
+            <div class="nf-modal__title">Оставьте ваши контакты, мы скоро свяжемся с вами</div>
+            <div class="nf-modal__inputs">
+                <input type="text" id="modalName" placeholder="Ваше имя">
+                <input type="tel" id="modalPhone" placeholder="Ваш телефон">
+            </div>
+            <button class="nf-modal__send" id="modalSend">Отправить</button>
+            <div class="nf-modal__note">Нажимая кнопку «Отправить» вы соглашаетесь с политикой конфиденциальности.</div>
+        </div>
+    </div>
+
+    <script>
+        const areaInput = document.getElementById("area");
+        const areaRange = document.getElementById("areaRange");
+        const calcResult = document.getElementById("calcResult");
+        const pricePerSq = 10000; // 180 000 сом за 18 м²
+
+        const formatSum = (num) => num.toLocaleString("ru-RU") + " сом";
+
+        const updateCalc = () => {
+            const area = Number(areaInput.value || 0);
+            const price = Math.max(180000, area * pricePerSq);
+            calcResult.textContent = `Итого: ${formatSum(price)}`;
+        };
+
+        const syncRange = () => {
+            const value = Number(areaInput.value || 0);
+            areaRange.value = String(value || 10);
+        };
+        const syncInput = () => {
+            areaInput.value = areaRange.value;
+        };
+        areaInput.addEventListener("input", () => {
+            syncRange();
+            updateCalc();
+        });
+        areaRange.addEventListener("input", () => {
+            syncInput();
+            updateCalc();
+        });
+        updateCalc();
+
+        document.getElementById("sendLead").addEventListener("click", () => {
+            const name = document.getElementById("leadName").value.trim();
+            const phone = document.getElementById("leadPhone").value.trim();
+            const area = document.getElementById("leadArea").value.trim();
+            const comment = document.getElementById("leadComment").value.trim();
+            const message = [
+                "Заявка на модульный дом Nomadform",
+                name ? `Имя: ${name}` : null,
+                phone ? `Телефон: ${phone}` : null,
+                area ? `Площадь: ${area} м²` : null,
+                comment ? `Комментарий: ${comment}` : null,
+            ].filter(Boolean).join("\n");
+            const url = `https://wa.me/996709139603?text=${encodeURIComponent(message)}`;
+            window.open(url, "_blank");
+        });
+
+        const leadModal = document.getElementById("leadModal");
+        const openLead = document.getElementById("openLead");
+        if (openLead) {
+            openLead.addEventListener("click", () => {
+                leadModal.classList.add("is-open");
+                leadModal.setAttribute("aria-hidden", "false");
+            });
+        }
+        leadModal.addEventListener("click", (event) => {
+            if (event.target === leadModal) {
+                leadModal.classList.remove("is-open");
+                leadModal.setAttribute("aria-hidden", "true");
+            }
+        });
+        leadModal.querySelector(".nf-modal__close").addEventListener("click", () => {
+            leadModal.classList.remove("is-open");
+            leadModal.setAttribute("aria-hidden", "true");
+        });
+        document.getElementById("modalSend").addEventListener("click", () => {
+            const name = document.getElementById("modalName").value.trim();
+            const phone = document.getElementById("modalPhone").value.trim();
+            const message = [
+                "Заявка на модульный дом Nomadform",
+                name ? `Имя: ${name}` : null,
+                phone ? `Телефон: ${phone}` : null,
+            ].filter(Boolean).join("\n");
+            const url = `https://wa.me/996709139603?text=${encodeURIComponent(message)}`;
+            window.open(url, "_blank");
+        });
+
+        const planTabs = Array.from(document.querySelectorAll(".nf-plans__tab"));
+        const planPanes = Array.from(document.querySelectorAll(".nf-plans__grid"));
+        planTabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+                planTabs.forEach((btn) => btn.classList.remove("is-active"));
+                tab.classList.add("is-active");
+                const key = tab.dataset.tab;
+                planPanes.forEach((pane) => {
+                    pane.style.display = pane.dataset.pane === key ? "grid" : "none";
+                });
+            });
+        });
+
+        const faqItems = Array.from(document.querySelectorAll(".nf-faq-item"));
+        faqItems.forEach((item) => {
+            const btn = item.querySelector(".nf-faq-question");
+            const icon = item.querySelector(".nf-faq-icon");
+            btn.addEventListener("click", () => {
+                const isOpen = item.classList.toggle("is-open");
+                if (icon) icon.textContent = isOpen ? "–" : "+";
+            });
+        });
+    </script>
+</body>
+</html>
