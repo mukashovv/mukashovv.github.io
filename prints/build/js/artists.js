@@ -1,24 +1,9 @@
 import { applyCatalogueAssignment, createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, unwrap } from "./artist-data.js";
+import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js";
 
 const slugCooldownMs = 14 * 24 * 60 * 60 * 1000;
 const authForm = document.querySelector("#artist-auth");
 const status = document.querySelector("#artist-status");
-const photoTypes = ["image/jpeg", "image/png", "image/webp"];
-const validPhoto = (photo) => photoTypes.includes(photo.type) && photo.size > 0 && photo.size <= 5 * 1024 * 1024;
-
-async function imageOrientation(photo) {
-    const source = URL.createObjectURL(photo);
-    const image = new Image();
-    image.src = source;
-    try {
-        await image.decode();
-        if (image.naturalWidth === image.naturalHeight) return "square";
-        return image.naturalWidth > image.naturalHeight ? "landscape" : "portrait";
-    } finally {
-        URL.revokeObjectURL(source);
-    }
-}
-
 const element = (tag, text, className) => {
     const node = document.createElement(tag);
     if (text) node.textContent = text;
@@ -37,9 +22,13 @@ async function run(control, action, fallback) {
         await action();
     } catch (error) {
         console.warn("Prints:", error.code || error.status || error.name);
-        setStatus(Number(error.status) === 429
-            ? "Слишком много попыток. Подождите немного и попробуйте снова."
-            : fallback);
+        if (error instanceof PhotoPreparationError) {
+            setStatus(error.message);
+        } else {
+            setStatus(Number(error.status) === 429
+                ? "Слишком много попыток. Подождите немного и попробуйте снова."
+                : fallback);
+        }
     } finally {
         control.disabled = false;
     }
@@ -166,8 +155,8 @@ function initDashboard(client, storage) {
         if (saved?.profile_slug) profileLink.href = `/${encodeURIComponent(saved.profile_slug)}`;
     }
 
-    async function uploadPhoto(work, photo, interior = false) {
-        unwrap(await storage.upload(photoPath(work, interior), photo, { contentType: photo.type }));
+    async function uploadPhoto(work, { blob }, interior = false) {
+        unwrap(await storage.upload(photoPath(work, interior), blob, { contentType: blob.type }));
     }
 
     async function refreshWorks(owner) {
@@ -281,16 +270,15 @@ function initDashboard(client, storage) {
             form.addEventListener("submit", (event) => {
                 event.preventDefault();
                 run(button, async () => {
+                    setStatus("Подготавливаем изображение…");
+                    const photo = await preparePhoto(input.files[0]);
+                    if (work.artist_id !== userId) return;
                     try {
-                        const photo = input.files[0];
-                        if (!validPhoto(photo)) {
-                            setStatus("Выберите файл JPEG, PNG или WebP размером до 5 МБ.");
-                            return;
-                        }
                         if (!interior) {
-                            const orientation = await imageOrientation(photo);
-                            unwrap(await client.from("prints_artworks").update({ orientation }).eq("id", work.id));
+                            unwrap(await client.from("prints_artworks")
+                                .update({ orientation: photo.orientation }).eq("id", work.id));
                         }
+                        setStatus("Загружаем изображение…");
                         await uploadPhoto(work, photo, interior);
                         setStatus("Фото загружено.");
                     } finally {
@@ -432,19 +420,19 @@ function initDashboard(client, storage) {
                 setStatus("Сохраните профиль и заполните название и категорию работы.");
                 return;
             }
-            if (!validPhoto(photo) || (interior.size && !validPhoto(interior))) {
-                setStatus("Выберите JPEG, PNG или WebP. Максимальный размер каждого файла — 5 МБ.");
-                return;
-            }
-            details.orientation = await imageOrientation(photo);
+            setStatus("Подготавливаем изображения…");
+            const preparedPhoto = await preparePhoto(photo);
+            const preparedInterior = interior?.size ? await preparePhoto(interior) : null;
+            details.orientation = preparedPhoto.orientation;
             if (owner !== userId) return;
+            setStatus("Загружаем изображения…");
             const work = unwrap(await client.from("prints_artworks").insert({ ...details, ...readOfferFields(formData) })
                 .select("id,artist_id").single());
             workForm.reset();
             syncNewOffer();
             try {
-                await uploadPhoto(work, photo);
-                if (interior.size) await uploadPhoto(work, interior, true);
+                await uploadPhoto(work, preparedPhoto);
+                if (preparedInterior) await uploadPhoto(work, preparedInterior, true);
                 setStatus("Черновик сохранён. Теперь его можно опубликовать.");
             } finally {
                 if (owner === userId) {
