@@ -455,11 +455,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ? cartDetails.map((item) => `
                     <article class="drawer-item">
                         <a class="drawer-item__media" href="${buildProductUrl(item.product.slug, { sizeId: item.sizeId })}">
-                            <img src="${item.product.image}" alt="${item.product.title} — ${item.product.artist}" loading="lazy">
+                            <img src="${item.product.image}" alt="${escapeHtml(item.product.title)} — ${item.product.artist}" loading="lazy">
                         </a>
                         <div class="drawer-item__body">
                             <p class="drawer-item__artist">${item.product.artist}</p>
-                            <h3 class="drawer-item__name"><a href="${buildProductUrl(item.product.slug, { sizeId: item.sizeId })}">${item.product.title}</a></h3>
+                            <h3 class="drawer-item__name"><a href="${buildProductUrl(item.product.slug, { sizeId: item.sizeId })}">${escapeHtml(item.product.title)}</a></h3>
                             <p class="drawer-item__meta">${item.size?.label || ""} / ${item.frame?.label || ""}</p>
                             <p class="drawer-item__meta">Количество: ${item.quantity} / ${formatPrice(item.totalPrice)}</p>
                             <div class="drawer-item__actions">
@@ -574,7 +574,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ${product.isArtistWork ? `
                             <span class="print-card__image print-card__image--base">${renderArtworkImage(product)}</span>
                             <span class="print-card__image print-card__image--hover" aria-hidden="true">${renderArtworkImage(product, true)}</span>`
-                            : `<img class="print-card__image print-card__image--base" src="${product.image}" alt="${product.title} — ${product.artist}" loading="lazy">
+                            : `<img class="print-card__image print-card__image--base" src="${product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" loading="lazy">
                             <img class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" loading="lazy" aria-hidden="true">`}
                     </a>
                 </div>
@@ -1177,7 +1177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                     <div class="product-preview" id="productPreview">
                         <div class="product-preview__frame">
-                            <img src="${images[state.activeImageIndex]}" alt="${product.title} — ${product.artist}" data-role="product-image">
+                            <img src="${images[state.activeImageIndex]}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" data-role="product-image">
                         </div>
                     </div>
                 </div>
@@ -1190,7 +1190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="product-panel__head">
                         <div>
                             <p class="eyebrow">${product.series || "Canvas Print"}</p>
-                            <h1>${product.title}</h1>
+                            <h1>${escapeHtml(product.title)}</h1>
                             <p class="product-panel__artist">${product.artist}</p>
                         </div>
                         ${buildFavouriteButton(product.slug)}
@@ -1201,7 +1201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <strong data-role="total-price"></strong>
                     </div>
 
-                    ${product.summary ? `<p class="product-panel__summary">${product.summary}</p>` : ""}
+                    ${product.summary ? `<p class="product-panel__summary artwork-description">${escapeHtml(product.summary)}</p>` : ""}
 
                     ${renderProductOptions((shared.sizes || []).filter((size) => availableSizeIds.includes(size.id)), initialSizeId)}
 
@@ -1365,7 +1365,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (media) {
             media.innerHTML = `
                 <div class="info-page-media">
-                    <img src="${product.hoverImage || product.image}" alt="${product.title} — ${product.artist}">
+                    <img src="${product.hoverImage || product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}">
                 </div>
             `;
         }
@@ -1379,7 +1379,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <article class="info-page-card">
                     <p class="eyebrow">${current.eyebrow}</p>
                     <h1>${current.title}</h1>
-                    <p class="info-page-card__meta">${product.title} / ${product.artist}</p>
+                    <p class="info-page-card__meta">${escapeHtml(product.title)} / ${escapeHtml(product.artist)}</p>
                     <div class="info-page-card__body">
                         ${body}
                     </div>
@@ -1450,7 +1450,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     try {
-        const { loadArtistProducts, loadPublicArtistProfile, loadCatalogArtistAssignments } = await import("./artist-data.js");
+        const { applyCatalogueAssignment, loadArtistProducts, loadPublicArtistProfile, loadCatalogArtistAssignments } = await import("./artist-data.js");
         const timeout = AbortSignal.timeout(8000);
         const [artworks, profile, assignments] = await Promise.race([
             Promise.all([
@@ -1461,10 +1461,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             new Promise((_, reject) => timeout.addEventListener("abort", () => reject(timeout.reason), { once: true }))
         ]);
         const owners = new Map(assignments.map((assignment) => [assignment.product_slug, assignment]));
-        catalog = [...artworks, ...catalog.map((work) => {
-            const owner = owners.get(work.slug);
-            return owner ? { ...work, artistId: owner.artist_id, artistProfileSlug: owner.profile_slug } : work;
-        })];
+        catalog = [...artworks, ...catalog.map((work) => applyCatalogueAssignment(work, owners.get(work.slug)))];
         publicArtist = profile;
         if (profileHandle && !publicArtist) {
             const status = document.querySelector("#catalog-status");

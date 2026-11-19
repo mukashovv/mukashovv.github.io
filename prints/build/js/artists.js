@@ -1,4 +1,4 @@
-import { createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, unwrap } from "./artist-data.js";
+import { applyCatalogueAssignment, createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, unwrap } from "./artist-data.js";
 
 const slugCooldownMs = 14 * 24 * 60 * 60 * 1000;
 const authForm = document.querySelector("#artist-auth");
@@ -177,14 +177,29 @@ function initDashboard(client, storage) {
                 loadCatalogArtistAssignments().catch(() => [])
             ]);
             if (owner !== userId) return;
-            const assignedSlugs = new Set(assignments.filter((entry) => entry.artist_id === owner)
-                .map((entry) => entry.product_slug));
-            const catalogueWorks = (window.printsCatalog || []).filter((work) => assignedSlugs.has(work.slug));
+            const assigned = new Map(assignments.filter((entry) => entry.artist_id === owner)
+                .map((entry) => [entry.product_slug, entry]));
+            const catalogueWorks = (window.printsCatalog || []).filter((work) => assigned.has(work.slug))
+                .map((work) => applyCatalogueAssignment(work, assigned.get(work.slug)));
             worksStatus.textContent = entries.length || catalogueWorks.length ? "" : "У вас пока нет работ.";
             worksList.replaceChildren(...entries.map(dashboardCard), ...catalogueWorks.map(catalogueCard));
         } catch {
             if (owner === userId) worksStatus.textContent = "Не удалось обновить список работ. Перезагрузите страницу.";
         }
+    }
+
+    function artworkDetailsForm(work) {
+        const form = element("form", "", "artist-form");
+        for (const name of ["title", "description", "category"]) {
+            const source = workForm.elements.namedItem(name);
+            const field = source.cloneNode(true);
+            const sourceLabel = source.closest("label");
+            const label = sourceLabel.cloneNode(false);
+            field.value = work[name] ?? "";
+            label.append(document.createTextNode(sourceLabel.firstChild.textContent), field);
+            form.append(label);
+        }
+        return form;
     }
 
     function catalogueCard(work) {
@@ -193,6 +208,51 @@ function initDashboard(client, storage) {
         const link = element("a", "Открыть страницу работы", "button button--line");
         link.href = `./product.html?slug=${encodeURIComponent(work.slug)}`;
         card.append(status, link);
+        if (!work.canEditCatalogue) return card;
+
+        const editor = element("details", "", "artwork-offer-editor");
+        const editForm = artworkDetailsForm({ ...work, description: work.summary });
+        const sizes = (window.printsShared?.sizes || []).filter((size) => Object.hasOwn(work.priceBySize, size.id));
+        for (const size of sizes) {
+            const label = element("label", `${size.label} · цена, сом`);
+            const field = element("input");
+            field.type = "number";
+            field.name = `price_${size.id}`;
+            field.min = "1";
+            field.max = "100000000";
+            field.step = "1";
+            field.required = true;
+            field.value = work.priceBySize[size.id];
+            label.append(field);
+            editForm.append(label);
+        }
+        const save = element("button", "Сохранить изменения", "button button--line");
+        editForm.append(save);
+        editor.append(element("summary", "Редактировать работу"), editForm);
+        card.append(editor);
+
+        editForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const fields = new FormData(editForm);
+            run(save, async () => {
+                const title = fields.get("title").trim();
+                if (!title) {
+                    setStatus("Укажите название работы.");
+                    return;
+                }
+                const prices = Object.fromEntries(sizes.map(({ id }) => [
+                    `price_${id}`, Number(fields.get(`price_${id}`))
+                ]));
+                unwrap(await client.from("prints_catalog_artist_assignments").update({
+                    title,
+                    work_description: fields.get("description").trim(),
+                    category: fields.get("category"),
+                    ...prices
+                }).eq("product_slug", work.slug).eq("artist_id", work.artistId).select("product_slug").single());
+                setStatus("Изменения сохранены.");
+                await refreshWorks(work.artistId);
+            }, "Не удалось сохранить изменения.");
+        });
         return card;
     }
 
@@ -244,15 +304,7 @@ function initDashboard(client, storage) {
         if (!work.imageUrl) editor.append(photoForm(false));
         if (work.imageUrl && !work.interiorUrl) editor.append(photoForm(true));
 
-        const editForm = element("form", "", "artist-form");
-        for (const name of ["title", "description", "category"]) {
-            const source = workForm.elements.namedItem(name);
-            const field = source.cloneNode(true);
-            const label = source.closest("label").cloneNode(false);
-            field.value = work[name] ?? "";
-            label.append(document.createTextNode(source.closest("label").firstChild.textContent), field);
-            editForm.append(label);
-        }
+        const editForm = artworkDetailsForm(work);
 
         const offerFields = element("div");
         offerFields.setAttribute("data-offer-fields", "");

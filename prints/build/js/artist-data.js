@@ -113,8 +113,27 @@ export async function loadPublicArtistProfile(filters) {
 
 export async function loadCatalogArtistAssignments() {
     const client = await createPrintsClient();
-    const { data, error } = await client.rpc("prints_public_catalog_artists")
-        .abortSignal(AbortSignal.timeout(4500));
-    if (error) return [];
-    return data || [];
+    const signal = AbortSignal.timeout(4500);
+    let result = await client.rpc("prints_public_catalog_artists_v2").abortSignal(signal);
+    if (result.error?.code === "PGRST202" || result.error?.code === "42883") {
+        result = await client.rpc("prints_public_catalog_artists").abortSignal(signal);
+    }
+    return result.error ? [] : result.data || [];
+}
+
+export function applyCatalogueAssignment(work, assignment) {
+    if (!assignment) return work;
+    const priceBySize = Object.fromEntries(Object.entries(work.priceBySize).map(([size, price]) => [
+        size, assignment[`price_${size}`] ?? price
+    ]));
+    return {
+        ...work,
+        title: assignment.title ?? work.title,
+        summary: assignment.work_description ?? work.summary,
+        category: assignment.category ?? work.category,
+        priceBySize,
+        artistId: assignment.artist_id,
+        artistProfileSlug: assignment.profile_slug,
+        canEditCatalogue: Object.hasOwn(assignment, "title")
+    };
 }
