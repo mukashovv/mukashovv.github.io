@@ -57,11 +57,57 @@ function workCard(work) {
     return card;
 }
 
+function mountOfferFields(container, work = {}) {
+    container.append(document.querySelector("#artwork-offer-fields").content.cloneNode(true));
+    const select = container.querySelector("select");
+    const kinds = ["original", "print"];
+    const selectedKinds = kinds.filter((kind) => work[`${kind}_price`] != null);
+    select.value = selectedKinds.length === 2 ? "both" : selectedKinds[0] || "";
+
+    for (const input of container.querySelectorAll("input")) {
+        if (input.type === "checkbox") {
+            input.checked = Boolean(work[input.name]);
+        } else {
+            input.value = work[input.name] ?? "";
+        }
+    }
+
+    function sync() {
+        for (const fieldset of container.querySelectorAll("[data-offer-kind]")) {
+            const enabled = select.value === "both" || select.value === fieldset.dataset.offerKind;
+            fieldset.hidden = !enabled;
+            fieldset.disabled = !enabled;
+        }
+    }
+
+    select.addEventListener("change", sync);
+    sync();
+    return sync;
+}
+
+function readOfferFields(formData) {
+    const number = (name) => {
+        const value = formData.get(name);
+        return value == null || value === "" ? null : Number(value);
+    };
+    return {
+        original_price: number("original_price"),
+        original_width: number("original_width"),
+        original_height: number("original_height"),
+        original_sold: formData.has("original_sold"),
+        print_price: number("print_price"),
+        print_width: number("print_width"),
+        print_height: number("print_height"),
+        print_stock: number("print_stock")
+    };
+}
+
 function initDashboard(client, storage) {
     const dashboard = document.querySelector("#artist-dashboard");
     const profilePanel = document.querySelector("#artist-profile");
     const profileForm = document.querySelector("#artist-profile-form");
     const workForm = document.querySelector("#artist-work");
+    const syncNewOffer = mountOfferFields(workForm.querySelector("[data-offer-fields]"));
     const worksList = document.querySelector("#artist-works");
     const worksStatus = document.querySelector("#artist-works-status");
     const email = document.querySelector("#artist-email");
@@ -165,6 +211,25 @@ function initDashboard(client, storage) {
         });
         card.append(categoryForm);
 
+        const offerEditor = element("details", "", "artwork-offer-editor");
+        const offerForm = element("form", "", "artist-form");
+        const offerFields = element("div");
+        offerFields.setAttribute("data-offer-fields", "");
+        const saveOffers = element("button", "Сохранить варианты", "button button--line");
+        mountOfferFields(offerFields, work);
+        offerForm.append(offerFields, saveOffers);
+        offerEditor.append(element("summary", "Цена, размеры и наличие"), offerForm);
+        offerForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            run(saveOffers, async () => {
+                unwrap(await client.from("prints_artworks").update(readOfferFields(new FormData(offerForm)))
+                    .eq("id", work.id).eq("artist_id", work.artist_id).select("id").single());
+                setStatus("Варианты продажи сохранены.");
+                await refreshWorks(work.artist_id);
+            }, "Не удалось сохранить варианты продажи.");
+        });
+        card.append(offerEditor);
+
         if (work.imageUrl || work.is_published) {
             const button = element("button", work.is_published ? "Скрыть" : "Опубликовать", "button button--solid");
             button.type = "button";
@@ -172,6 +237,11 @@ function initDashboard(client, storage) {
                 if (!work.is_published && (!profile || !work.category)) {
                     if (!profile) profilePanel.open = true;
                     setStatus("Перед публикацией сохраните профиль и выберите категорию работы.");
+                    return;
+                }
+                if (!work.is_published && work.original_price == null && work.print_price == null) {
+                    offerEditor.open = true;
+                    setStatus("Перед публикацией сохраните хотя бы один вариант продажи.");
                     return;
                 }
                 unwrap(await client.from("prints_artworks")
@@ -241,9 +311,10 @@ function initDashboard(client, storage) {
             }
             details.orientation = await imageOrientation(photo);
             if (owner !== userId) return;
-            const work = unwrap(await client.from("prints_artworks").insert(details)
+            const work = unwrap(await client.from("prints_artworks").insert({ ...details, ...readOfferFields(formData) })
                 .select("id,artist_id").single());
             workForm.reset();
+            syncNewOffer();
             try {
                 await uploadPhoto(work, photo);
                 if (interior.size) await uploadPhoto(work, interior, true);
@@ -267,6 +338,7 @@ function initDashboard(client, storage) {
         profile = null;
         profileForm.reset();
         workForm.reset();
+        syncNewOffer();
         workForm.hidden = true;
         setStatus(authError && !userId && event === "INITIAL_SESSION"
             ? "Ссылка для входа недействительна или устарела. Запросите новую."

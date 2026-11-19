@@ -1,7 +1,8 @@
 import { projectUrl, publishableKey } from "./supabase-config.js";
 
 const artworkFields = "id,artist_id,artist_name,city,title,description,is_published,created_at";
-const extendedFields = artworkFields + ",category,orientation";
+const categoryFields = artworkFields + ",category,orientation";
+const offerFields = categoryFields + ",original_price,original_width,original_height,original_sold,print_price,print_width,print_height,print_stock";
 export const photoPath = (work, interior = false) =>
     `${work.artist_id}/${work.id}${interior ? "-interior" : ""}`;
 
@@ -39,7 +40,7 @@ export async function fetchWorks(client, { owner, signal } = {}) {
     const pageSize = 50;
     const storage = client.storage.from("prints-artworks");
     const results = [];
-    let fields = extendedFields;
+    let fields = offerFields;
 
     for (let offset = 0; ; offset += pageSize) {
         const page = (selection) => {
@@ -50,15 +51,29 @@ export async function fetchWorks(client, { owner, signal } = {}) {
             return signal ? filter.abortSignal(signal) : filter;
         };
         let response = await page(fields);
-        // The public catalogue can still show older works before the migration is applied.
-        if (response.error?.code === "42703" && !owner && offset === 0) {
-            fields = artworkFields;
-            response = await page(fields);
+        // Keep the public catalogue readable while the migrations are being deployed.
+        if (offset === 0 && !owner) {
+            for (const fallback of [categoryFields, artworkFields]) {
+                if (response.error?.code !== "42703") break;
+                fields = fallback;
+                response = await page(fields);
+            }
         }
         const works = unwrap(response);
         results.push(...await withPhotos(storage, works));
         if (works.length < pageSize) return results;
     }
+}
+
+function publicOffers(work) {
+    return ["original", "print"].filter((type) => work[`${type}_price`] != null).map((type) => ({
+        type,
+        price: work[`${type}_price`],
+        width: work[`${type}_width`],
+        height: work[`${type}_height`],
+        available: type === "original" ? !work.original_sold : work.print_stock !== 0,
+        stock: type === "print" ? work.print_stock : null
+    }));
 }
 
 export async function loadArtistProducts() {
@@ -77,6 +92,7 @@ export async function loadArtistProducts() {
         orientation: work.orientation,
         createdAt: work.created_at,
         isArtistWork: true,
+        offers: publicOffers(work),
         interior: (parseInt(work.id.slice(0, 8), 16) % 4) + 1
     }));
 }

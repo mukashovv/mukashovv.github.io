@@ -118,6 +118,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         return Object.values(product.priceBySize)[0];
     };
     const getCardPrice = (product, sizeId) => formatPrice(getBasePrice(product, sizeId || defaultSizeId));
+    const offerLabels = { original: "Оригинал", print: "Принт" };
+    const formatDimensions = (offer) => `${offer.width} × ${offer.height} см`;
+    const artistPriceLabel = (product) => {
+        const offers = product.offers || [];
+        const prices = offers.filter((offer) => offer.available).map((offer) => offer.price);
+        if (prices.length) {
+            const prefix = new Set(prices).size > 1 ? "от " : "";
+            return prefix + formatPrice(Math.min(...prices));
+        }
+        return offers.length ? "Нет в наличии" : product.city;
+    };
     const isFavourite = (slug) => favourites.includes(slug);
     let productViewportSyncFrame = 0;
     let productViewportEventsBound = false;
@@ -421,7 +432,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <div class="drawer-item__body">
                             <p class="drawer-item__artist">${escapeHtml(product.artist)}</p>
                             <h3 class="drawer-item__name"><a href="${buildProductUrl(product.slug)}">${escapeHtml(product.title)}</a></h3>
-                            <p class="drawer-item__meta">${product.isArtistWork ? escapeHtml(product.city) : `от ${getCardPrice(product, defaultSizeId)}`}</p>
+                            <p class="drawer-item__meta">${product.isArtistWork ? escapeHtml(artistPriceLabel(product)) : `от ${getCardPrice(product, defaultSizeId)}`}</p>
                             <div class="drawer-item__actions">
                                 <button class="drawer-item__button" type="button" data-remove-favourite data-slug="${product.slug}">Remove</button>
                             </div>
@@ -570,7 +581,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <h3 class="print-card__title"><a href="${cardUrl}">${escapeHtml(product.title)}</a></h3>
                     <div class="print-card__meta">
                         ${product.isArtistWork
-                            ? `<span>${escapeHtml(product.city)}</span><span>${escapeHtml(categoryLabel(product))}</span>`
+                            ? `<span>${escapeHtml(artistPriceLabel(product))}</span><span>${escapeHtml(categoryLabel(product))}</span>`
                             : `<span>от ${getCardPrice(product, sizeId)}</span>
                                <span>${size?.shortLabel || "50 x 70"} / 4 багета</span>`}
                     </div>
@@ -649,9 +660,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         items = items.filter((item) => {
-            if (item.isArtistWork) return state.priceMin === defaultPriceMin && state.priceMax === defaultPriceMax;
-            const euroPrice = somToEuro(getBasePrice(item, state.sizeId));
-            return euroPrice >= state.priceMin && euroPrice <= state.priceMax;
+            const isInRange = (price) => {
+                const euroPrice = somToEuro(price);
+                return euroPrice >= state.priceMin && euroPrice <= state.priceMax;
+            };
+            if (!item.isArtistWork) return isInRange(getBasePrice(item, state.sizeId));
+            if (state.priceMin === defaultPriceMin && state.priceMax === defaultPriceMax) return true;
+            return item.offers?.some((offer) => offer.available && isInRange(offer.price));
         });
 
         if (state.orientationId !== "all") {
@@ -974,6 +989,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         syncWaypointVisibility();
     };
 
+    const renderOfferDetails = (offer) => {
+        const availability = offer.available
+            ? offer.stock == null ? "Доступно" : `В наличии: ${offer.stock}`
+            : offer.type === "original" ? "Продано" : "Тираж закончился";
+        return `
+            <div class="product-panel__price-row"><span>${offerLabels[offer.type]}</span><strong>${formatPrice(offer.price)}</strong></div>
+            <div class="selection-summary">
+                <div class="selection-summary__row"><span>Размер</span><strong>${escapeHtml(formatDimensions(offer))}</strong></div>
+                <div class="selection-summary__row"><span>Наличие</span><strong>${availability}</strong></div>
+            </div>`;
+    };
+
     const renderArtistProduct = (product, gallery, summary, featuredGrid) => {
         document.title = `${product.title} — Принты`;
         gallery.innerHTML = `
@@ -984,6 +1011,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
                 <div class="artwork-product-preview" role="img" aria-label="${escapeHtml(product.title)}">${renderArtworkImage(product)}</div>
             </div>`;
+        const offers = product.offers || [];
+        const initialOffer = offers.find((offer) => offer.available) || offers[0];
         summary.innerHTML = `
             <div class="product-panel">
                 <div class="product-panel__head">
@@ -995,11 +1024,23 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ${buildFavouriteButton(product.slug)}
                 </div>
                 ${product.summary ? `<p class="product-panel__summary artwork-description">${escapeHtml(product.summary)}</p>` : ""}
+                ${offers.length > 1 ? `
+                    <label class="option-group">Вариант работы
+                        <select class="select-field" data-artwork-offer>
+                            ${offers.map((offer) => `<option value="${offer.type}"${offer === initialOffer ? " selected" : ""}>${offerLabels[offer.type]}</option>`).join("")}
+                        </select>
+                    </label>` : ""}
+                ${initialOffer ? `<div class="artwork-offer-details" data-artwork-offer-details aria-live="polite">${renderOfferDetails(initialOffer)}</div>` : ""}
                 <div class="summary-actions">
                     <a class="button button--line" href="./?artist=${encodeURIComponent(artistFilterId(product))}">Другие работы автора</a>
                     <a class="button button--ghost" href="./">Каталог</a>
                 </div>
             </div>`;
+        const offerSelector = summary.querySelector("[data-artwork-offer]");
+        offerSelector?.addEventListener("change", () => {
+            const offer = offers.find((entry) => entry.type === offerSelector.value);
+            summary.querySelector("[data-artwork-offer-details]").innerHTML = renderOfferDetails(offer);
+        });
         const preview = gallery.querySelector(".artwork-product-preview");
         const thumbs = Array.from(gallery.querySelectorAll(".product-gallery__thumb"));
         thumbs.forEach((button, index) => button.addEventListener("click", () => {

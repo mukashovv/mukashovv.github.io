@@ -56,6 +56,7 @@
                 <label>Фото работы в интерьере (необязательно)
                     <input name="interior" type="file" accept="image/jpeg,image/png,image/webp">
                 </label>
+                <div data-offer-fields></div>
                 <button class="button button--solid">Сохранить черновик</button>
             </form>
             <section class="artist-gallery" aria-labelledby="my-artworks-title">
@@ -65,5 +66,29 @@
             </section>
         </section>
     </main>
+    <template id="artwork-offer-fields">
+        <label>Что продаётся
+            <select name="offer_type" required>
+                <option value="">Выберите вариант</option>
+                <option value="original">Оригинал</option>
+                <option value="print">Принт</option>
+                <option value="both">Оригинал и принт</option>
+            </select>
+        </label>
+        <fieldset class="artwork-offer-fields" data-offer-kind="original" hidden disabled>
+            <legend>Оригинал</legend>
+            <label>Цена, сом <input type="number" name="original_price" min="1" max="100000000" step="1" required></label>
+            <label>Ширина, см <input type="number" name="original_width" min="0.1" max="1000" step="0.1" required></label>
+            <label>Высота, см <input type="number" name="original_height" min="0.1" max="1000" step="0.1" required></label>
+            <label class="artwork-sold-control"><input type="checkbox" name="original_sold"> Оригинал продан</label>
+        </fieldset>
+        <fieldset class="artwork-offer-fields" data-offer-kind="print" hidden disabled>
+            <legend>Принт</legend>
+            <label>Цена за экземпляр, сом <input type="number" name="print_price" min="1" max="100000000" step="1" required></label>
+            <label>Ширина, см <input type="number" name="print_width" min="0.1" max="1000" step="0.1" required></label>
+            <label>Высота, см <input type="number" name="print_height" min="0.1" max="1000" step="0.1" required></label>
+            <label>Осталось экземпляров <input type="number" name="print_stock" min="0" max="100000" step="1" placeholder="Пусто — без ограничения"></label>
+        </fieldset>
+    </template>
 </body>
 </html>
