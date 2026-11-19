@@ -1019,16 +1019,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (preview && frame) preview.style.setProperty("--preview-frame-color", frame.swatch);
     };
 
-    const renderOfferDetails = (offer) => {
-        const availability = offer.available
-            ? offer.stock == null ? "Доступно" : `В наличии: ${offer.stock}`
-            : offer.type === "original" ? "Продано" : "Тираж закончился";
-        return `
-            <div class="product-panel__price-row"><span>${offerLabels[offer.type]}</span><strong>${formatPrice(offer.price)}</strong></div>
-            <div class="selection-summary">
-                <div class="selection-summary__row"><span>Наличие</span><strong>${availability}</strong></div>
-            </div>`;
-    };
+    const renderOfferDetails = (offer) => `
+        <div class="product-panel__price-row"><span>${offerLabels[offer.type]}</span><strong>${formatPrice(offer.price)}</strong></div>`;
 
     const renderArtistProduct = (product, gallery, summary, featuredGrid, requestedSizeId) => {
         document.title = `${product.title} — Mukashov Gallery`;
@@ -1049,7 +1041,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div>
                         <p class="eyebrow">${escapeHtml(categoryLabel(product))}</p>
                         <h1>${escapeHtml(product.title)}</h1>
-                        <p class="product-panel__artist">${escapeHtml(product.artist)} · ${escapeHtml(product.city)}</p>
+                        <p class="product-panel__artist">${escapeHtml(product.artist)}</p>
                     </div>
                     ${buildFavouriteButton(product.slug)}
                 </div>
