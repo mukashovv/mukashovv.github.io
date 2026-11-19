@@ -1,10 +1,22 @@
-import { projectUrl, publishableKey } from "./supabase-config.js";
+import { createPrintsClient, fetchWorks, photoPath, unwrap } from "./artist-data.js";
 
 const authForm = document.querySelector("#artist-auth");
-const gallery = document.querySelector("#gallery-works");
-const status = document.querySelector(authForm ? "#artist-status" : "#gallery-status");
+const status = document.querySelector("#artist-status");
 const photoTypes = ["image/jpeg", "image/png", "image/webp"];
-const artworkFields = "id,artist_id,artist_name,city,title,description,is_published,created_at";
+const validPhoto = (photo) => photoTypes.includes(photo.type) && photo.size > 0 && photo.size <= 5 * 1024 * 1024;
+
+async function imageOrientation(photo) {
+    const source = URL.createObjectURL(photo);
+    const image = new Image();
+    image.src = source;
+    try {
+        await image.decode();
+        if (image.naturalWidth === image.naturalHeight) return "square";
+        return image.naturalWidth > image.naturalHeight ? "landscape" : "portrait";
+    } finally {
+        URL.revokeObjectURL(source);
+    }
+}
 
 const element = (tag, text, className) => {
     const node = document.createElement(tag);
@@ -14,13 +26,7 @@ const element = (tag, text, className) => {
 };
 
 function setStatus(message) {
-    // Clear the live region before repeating an announcement.
     status.textContent = message;
-}
-
-function unwrap({ data, error }) {
-    if (error) throw error;
-    return data;
 }
 
 async function run(control, action, fallback) {
@@ -38,16 +44,6 @@ async function run(control, action, fallback) {
     }
 }
 
-const photoPath = (work) => `${work.artist_id}/${work.id}`;
-
-async function withPhotos(storage, works) {
-    if (!works.length) return [];
-    const images = unwrap(await storage.createSignedUrls(works.map(photoPath), 3600));
-    const urls = new Map(images.filter((image) => image.signedUrl)
-        .map((image) => [image.path, image.signedUrl]));
-    return works.map((work) => ({ ...work, imageUrl: urls.get(photoPath(work)) }));
-}
-
 function workCard(work) {
     const card = element("article", "", "artist-card");
     if (work.imageUrl) {
@@ -61,42 +57,10 @@ function workCard(work) {
     return card;
 }
 
-function initGallery(client, storage) {
-    const more = document.querySelector("#gallery-more");
-    let cursor;
-    let visible = 0;
-    const pageSize = 12;
-
-    async function load() {
-        let query = client.from("prints_artworks").select(artworkFields).eq("is_published", true);
-        if (cursor) {
-            query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
-        }
-        const works = unwrap(await query.order("created_at", { ascending: false })
-            .order("id", { ascending: false }).limit(pageSize + 1));
-        const page = await withPhotos(storage, works.slice(0, pageSize));
-
-        for (const work of page.filter((entry) => entry.imageUrl)) {
-            gallery.append(workCard(work));
-            visible += 1;
-        }
-        cursor = page.at(-1) || cursor;
-        more.hidden = works.length <= pageSize;
-        setStatus(!visible && more.hidden ? "Опубликованных работ пока нет." : "");
-    }
-
-    const loadPage = () => run(more, load, "Не удалось загрузить работы. Попробуйте ещё раз.");
-    more.addEventListener("click", loadPage);
-    setStatus("Загружаем работы…");
-    loadPage().then(() => {
-        if (!cursor && !visible && status.textContent.startsWith("Не удалось")) {
-            more.hidden = false;
-        }
-    });
-}
-
 function initDashboard(client, storage) {
     const dashboard = document.querySelector("#artist-dashboard");
+    const profilePanel = document.querySelector("#artist-profile");
+    const profileForm = document.querySelector("#artist-profile-form");
     const workForm = document.querySelector("#artist-work");
     const worksList = document.querySelector("#artist-works");
     const worksStatus = document.querySelector("#artist-works-status");
@@ -107,20 +71,29 @@ function initDashboard(client, storage) {
     callback.hash = "";
     let userId = null;
 
-    async function uploadPhoto(work, photo) {
-        if (!photoTypes.includes(photo.type) || !photo.size || photo.size > 5 * 1024 * 1024) {
-            setStatus("Выберите файл JPEG, PNG или WebP размером до 5 МБ.");
-            return false;
+    let profile = null;
+
+    async function loadProfile(owner) {
+        const saved = unwrap(await client.from("prints_artist_profiles")
+            .select("artist_name,city,whatsapp").eq("artist_id", owner).maybeSingle());
+        if (owner !== userId) return;
+        profile = saved;
+        if (saved) {
+            for (const field of ["artist_name", "city", "whatsapp"]) {
+                profileForm.elements.namedItem(field).value = saved[field];
+            }
         }
-        unwrap(await storage.upload(photoPath(work), photo, { contentType: photo.type }));
-        return true;
+        profilePanel.open = !saved;
+        workForm.hidden = !saved;
+    }
+
+    async function uploadPhoto(work, photo, interior = false) {
+        unwrap(await storage.upload(photoPath(work, interior), photo, { contentType: photo.type }));
     }
 
     async function refreshWorks(owner) {
         try {
-            const works = unwrap(await client.from("prints_artworks").select(artworkFields)
-                .eq("artist_id", owner).order("created_at", { ascending: false }));
-            const entries = await withPhotos(storage, works);
+            const entries = await fetchWorks(client, { owner });
             if (owner !== userId) return;
             worksStatus.textContent = entries.length ? "" : "У вас пока нет работ.";
             worksList.replaceChildren(...entries.map(dashboardCard));
@@ -132,9 +105,15 @@ function initDashboard(client, storage) {
     function dashboardCard(work) {
         const card = workCard(work);
         card.append(element("p", work.is_published ? "Опубликовано" : "Черновик"));
-        if (!work.imageUrl) {
+        if (work.is_published) {
+            const link = element("a", "Открыть страницу работы", "button button--line");
+            link.href = `./product.html?slug=artist-${work.id}`;
+            card.append(link);
+        }
+
+        function photoForm(interior) {
             const form = element("form", "", "artist-form");
-            const label = element("label", "Загрузите фото работы");
+            const label = element("label", interior ? "Фото в интерьере" : "Загрузите фото работы");
             const input = element("input");
             input.type = "file";
             input.accept = photoTypes.join(",");
@@ -146,19 +125,55 @@ function initDashboard(client, storage) {
                 event.preventDefault();
                 run(button, async () => {
                     try {
-                        if (await uploadPhoto(work, input.files[0])) setStatus("Фото загружено.");
+                        const photo = input.files[0];
+                        if (!validPhoto(photo)) {
+                            setStatus("Выберите файл JPEG, PNG или WebP размером до 5 МБ.");
+                            return;
+                        }
+                        if (!interior) {
+                            const orientation = await imageOrientation(photo);
+                            unwrap(await client.from("prints_artworks").update({ orientation }).eq("id", work.id));
+                        }
+                        await uploadPhoto(work, photo, interior);
+                        setStatus("Фото загружено.");
                     } finally {
                         await refreshWorks(work.artist_id);
                     }
                 }, "Не удалось загрузить фото. Обновите страницу и попробуйте ещё раз.");
             });
-            card.append(form);
+            return form;
         }
+
+        if (!work.imageUrl) card.append(photoForm(false));
+        if (work.imageUrl && !work.interiorUrl) card.append(photoForm(true));
+
+        const categoryForm = element("form", "", "artist-form");
+        const categoryLabel = element("label", "Категория");
+        const category = workForm.elements.namedItem("category").cloneNode(true);
+        category.value = work.category || "";
+        const saveCategory = element("button", "Сохранить категорию", "button button--line");
+        categoryLabel.append(category);
+        categoryForm.append(categoryLabel, saveCategory);
+        categoryForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            run(saveCategory, async () => {
+                unwrap(await client.from("prints_artworks").update({ category: category.value })
+                    .eq("id", work.id).eq("artist_id", work.artist_id).select("id").single());
+                setStatus("Категория сохранена.");
+                await refreshWorks(work.artist_id);
+            }, "Не удалось сохранить категорию.");
+        });
+        card.append(categoryForm);
 
         if (work.imageUrl || work.is_published) {
             const button = element("button", work.is_published ? "Скрыть" : "Опубликовать", "button button--solid");
             button.type = "button";
             button.addEventListener("click", () => run(button, async () => {
+                if (!work.is_published && (!profile || !work.category)) {
+                    if (!profile) profilePanel.open = true;
+                    setStatus("Перед публикацией сохраните профиль и выберите категорию работы.");
+                    return;
+                }
                 unwrap(await client.from("prints_artworks")
                     .update({ is_published: !work.is_published }).eq("id", work.id)
                     .eq("artist_id", work.artist_id).select("id").single());
@@ -185,32 +200,58 @@ function initDashboard(client, storage) {
         unwrap(await client.auth.signOut({ scope: "local" }));
     }, "Не удалось выйти. Попробуйте ещё раз."));
 
+    profileForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const owner = userId;
+        const fields = new FormData(profileForm);
+        const artist_name = fields.get("artist_name").trim();
+        const city = fields.get("city").trim();
+        const whatsapp = fields.get("whatsapp").replace(/[\s().-]/g, "");
+
+        run(event.submitter, async () => {
+            if (!artist_name || !city || !/^\+[1-9]\d{7,14}$/.test(whatsapp)) {
+                setStatus("Укажите имя, город и номер WhatsApp в международном формате, например +996 700 123 456.");
+                return;
+            }
+            unwrap(await client.from("prints_artist_profiles")
+                .upsert({ artist_id: owner, artist_name, city, whatsapp }));
+            if (owner !== userId) return;
+            await loadProfile(owner);
+            setStatus("Профиль сохранён.");
+            await refreshWorks(owner);
+        }, "Не удалось сохранить профиль. Попробуйте ещё раз.");
+    });
+
     workForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const owner = userId;
         const formData = new FormData(workForm);
         const photo = formData.get("photo");
-        const details = Object.fromEntries(["artist_name", "city", "title", "description"]
+        const interior = formData.get("interior");
+        const details = Object.fromEntries(["title", "description", "category"]
             .map((field) => [field, formData.get(field).trim()]));
         run(event.submitter, async () => {
-            if (!details.artist_name || !details.city || !details.title) {
-                setStatus("Заполните имя, город и название работы.");
+            if (!profile || !details.title || !details.category) {
+                setStatus("Сохраните профиль и заполните название и категорию работы.");
                 return;
             }
-            if (!photoTypes.includes(photo.type) || !photo.size || photo.size > 5 * 1024 * 1024) {
-                setStatus("Выберите файл JPEG, PNG или WebP размером до 5 МБ.");
+            if (!validPhoto(photo) || (interior.size && !validPhoto(interior))) {
+                setStatus("Выберите JPEG, PNG или WebP. Максимальный размер каждого файла — 5 МБ.");
                 return;
             }
+            details.orientation = await imageOrientation(photo);
+            if (owner !== userId) return;
             const work = unwrap(await client.from("prints_artworks").insert(details)
                 .select("id,artist_id").single());
             workForm.reset();
             try {
                 await uploadPhoto(work, photo);
+                if (interior.size) await uploadPhoto(work, interior, true);
                 setStatus("Черновик сохранён. Опубликуйте работу в разделе «Мои работы».");
             } finally {
                 await refreshWorks(owner);
             }
-        }, "Не удалось сохранить работу полностью. Проверьте «Мои работы» и повторите загрузку фото, если черновик появился.");
+        }, "Не удалось сохранить работу полностью. Если черновик появился в «Моих работах», недостающие фото можно добавить там.");
     });
 
     const authError = new URLSearchParams(window.location.hash.slice(1)).has("error")
@@ -223,7 +264,10 @@ function initDashboard(client, storage) {
         dashboard.hidden = !userId;
         email.textContent = session?.user.email || "";
         worksList.replaceChildren();
+        profile = null;
+        profileForm.reset();
         workForm.reset();
+        workForm.hidden = true;
         setStatus(authError && !userId && event === "INITIAL_SESSION"
             ? "Ссылка для входа недействительна или устарела. Запросите новую."
             : "");
@@ -231,24 +275,19 @@ function initDashboard(client, storage) {
             worksStatus.textContent = "Загружаем ваши работы…";
             // Supabase processes auth callbacks under a lock. Query after it returns.
             setTimeout(() => {
-                if (nextId === userId) refreshWorks(nextId);
+                if (nextId !== userId) return;
+                loadProfile(nextId).catch(() => {
+                    if (nextId === userId) setStatus("Не удалось загрузить профиль. Обновите страницу.");
+                });
+                refreshWorks(nextId);
             }, 0);
         }
     });
 }
 
 async function init() {
-    if (!projectUrl || !publishableKey) {
-        setStatus(authForm ? "Регистрация пока недоступна." : "Галерея художников скоро откроется.");
-        return;
-    }
-    const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
-    const client = createClient(projectUrl, publishableKey, {
-        auth: { storageKey: "mukashov-prints-session", detectSessionInUrl: Boolean(authForm) }
-    });
-    const storage = client.storage.from("prints-artworks");
-    if (authForm) initDashboard(client, storage);
-    if (gallery) initGallery(client, storage);
+    const client = await createPrintsClient({ account: true });
+    initDashboard(client, client.storage.from("prints-artworks"));
 }
 
 init().catch(() => setStatus("Сервис сейчас недоступен. Попробуйте обновить страницу."));

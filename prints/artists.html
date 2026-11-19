@@ -12,7 +12,7 @@
 <body>
     <header class="container artists-header">
         <a class="prints-brand" href="./">MUKASHOV PRINTS</a>
-        <a href="./#artist-gallery">Работы художников</a>
+        <a href="./">Работы художников</a>
     </header>
     <main class="container artists-page">
         <h1>Кабинет художника</h1>
@@ -28,14 +28,33 @@
                 <span id="artist-email"></span>
                 <button class="button button--ghost" id="artist-signout" type="button">Выйти</button>
             </div>
-            <h2>Добавить работу</h2>
-            <form id="artist-work" class="artist-form">
-                <label>Имя художника или псевдоним <input name="artist_name" maxlength="80" required></label>
-                <label>Город <input name="city" maxlength="80" required></label>
+            <details id="artist-profile">
+                <summary>Профиль художника</summary>
+                <form id="artist-profile-form" class="artist-form">
+                    <label>Имя художника или псевдоним <input name="artist_name" maxlength="80" required></label>
+                    <label>Город <input name="city" maxlength="80" autocomplete="address-level2" required></label>
+                    <label>WhatsApp <input name="whatsapp" type="tel" autocomplete="tel" placeholder="+996 700 123 456" maxlength="25" required></label>
+                    <button class="button button--solid">Сохранить профиль</button>
+                </form>
+            </details>
+            <form id="artist-work" class="artist-form" hidden>
+                <h2>Добавить работу</h2>
+                <label>Категория
+                    <select name="category" required>
+                        <option value="">Выберите категорию</option>
+                        <option value="abstract">Абстракция</option>
+                        <option value="figurative">Фигуративное искусство</option>
+                        <option value="still-life">Натюрморт</option>
+                        <option value="landscape">Пейзаж</option>
+                    </select>
+                </label>
                 <label>Название работы <input name="title" maxlength="120" required></label>
                 <label>Описание <textarea name="description" rows="4" maxlength="2000"></textarea></label>
                 <label>Фото работы (JPEG, PNG или WebP, до 5 МБ)
                     <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+                </label>
+                <label>Фото работы в интерьере (необязательно)
+                    <input name="interior" type="file" accept="image/jpeg,image/png,image/webp">
                 </label>
                 <button class="button button--solid">Сохранить черновик</button>
             </form>

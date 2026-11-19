@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="build/css/styles.css">
     <link rel="stylesheet" href="build/css/artists.css">
-    <script type="module" src="build/js/artists.js"></script>
 </head>
 <body data-prints-page="catalog">
     <div class="prints-page">
@@ -63,15 +62,9 @@
 
             <section class="catalog" id="catalog">
                 <div class="container">
+                    <p id="catalog-status" role="status" hidden></p>
                     <div class="prints-grid" id="printsGrid"></div>
                 </div>
-            </section>
-            <section class="container artist-gallery" id="artist-gallery" aria-labelledby="artist-gallery-title">
-                <h2 id="artist-gallery-title">Работы художников</h2>
-                <a href="./artists.html">Выставить свою работу</a>
-                <p id="gallery-status" role="status"></p>
-                <div id="gallery-works" class="artist-grid"></div>
-                <button class="button button--solid" id="gallery-more" type="button" hidden>Показать ещё</button>
             </section>
         </main>
 

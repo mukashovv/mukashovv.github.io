@@ -1,6 +1,6 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const shared = window.printsShared || {};
-    const catalog = window.printsCatalog || [];
+    let catalog = window.printsCatalog || [];
     const page = document.body.dataset.printsPage;
 
     if (!catalog.length) {
@@ -51,6 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ? readStorage(storageKeys.cart, [])
         : [];
 
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[character]);
+
     const slugify = (value) => String(value || "")
         .trim()
         .toLowerCase()
@@ -59,17 +63,19 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
 
+    const artistFilterId = (work) => work.artistId || slugify(work.artist);
+    const categoryLabel = (work) => shared.categories?.find((category) => category.id === work.category)?.label;
     const formatPrice = (value) => `${new Intl.NumberFormat("ru-RU").format(value)} сом`;
     const formatEuro = (value) => `${new Intl.NumberFormat("en-US").format(value)} €`;
     const findSize = (sizeId) => (shared.sizes || []).find((size) => size.id === sizeId);
     const findFrame = (frameId) => (shared.frames || []).find((frame) => frame.id === frameId);
-    const getProductBySlug = (slug) => catalog.find((item) => item.slug === slug) || catalog[0];
+    const getProductBySlug = (slug) => catalog.find((item) => item.slug === slug) || catalog.find((item) => !item.isArtistWork);
     const getGalleryImages = (product) => product.galleryImages?.filter(Boolean).length
         ? product.galleryImages.filter(Boolean)
         : [product.image].filter(Boolean);
     const getArtists = () => Array.from(
         new Map(
-            catalog.map((product) => [slugify(product.artist), { id: slugify(product.artist), label: product.artist }])
+            catalog.map((product) => [artistFilterId(product), { id: artistFilterId(product), label: product.artist }])
         ).values()
     );
     const somToEuro = (value) => Math.round(Number(value || 0) / euroRate);
@@ -136,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const params = new URLSearchParams();
         params.set("slug", slug);
 
-        if (options.sizeId) {
+        if (options.sizeId && !slug.startsWith("artist-")) {
             params.set("size", options.sizeId);
         }
 
@@ -253,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const buildFavouriteButton = (slug) => `
-        <button class="favorite-toggle" type="button" data-favourite-toggle data-slug="${slug}" aria-pressed="${String(isFavourite(slug))}" aria-label="Добавить в избранное">
+        <button class="favorite-toggle" type="button" data-favourite-toggle data-slug="${escapeHtml(slug)}" aria-pressed="${String(isFavourite(slug))}" aria-label="Добавить в избранное">
             ${heartIcon}
         </button>
     `;
@@ -299,20 +305,21 @@ document.addEventListener("DOMContentLoaded", () => {
         productViewportEventsBound = true;
     };
 
-    const getCartDetails = () => cart.map((item) => {
-        const product = getProductBySlug(item.slug);
+    const getCartDetails = () => cart.flatMap((item) => {
+        const product = catalog.find((work) => work.slug === item.slug && !work.isArtistWork);
+        if (!product) return [];
         const size = findSize(item.sizeId) || findSize(defaultSizeId);
         const frame = findFrame(item.frameId) || findFrame(defaultFrameId);
         const unitPrice = getBasePrice(product, item.sizeId) + (frame?.surcharge || 0);
 
-        return {
+        return [{
             ...item,
             product,
             size,
             frame,
             unitPrice,
             totalPrice: unitPrice * item.quantity
-        };
+        }];
     });
 
     const getCartCount = () => getCartDetails().reduce((sum, item) => sum + item.quantity, 0);
@@ -401,7 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const cartBody = document.querySelector("[data-cart-body]");
         const cartFooter = document.querySelector("[data-cart-footer]");
 
-        const favouriteProducts = favourites.map((slug) => getProductBySlug(slug));
+        const favouriteProducts = favourites.map((slug) => catalog.find((work) => work.slug === slug)).filter(Boolean);
         const cartDetails = getCartDetails();
 
         if (favouritesBody) {
@@ -409,12 +416,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? favouriteProducts.map((product) => `
                     <article class="drawer-item">
                         <a class="drawer-item__media" href="${buildProductUrl(product.slug)}">
-                            <img src="${product.image}" alt="${product.title} — ${product.artist}" loading="lazy">
+                            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" loading="lazy">
                         </a>
                         <div class="drawer-item__body">
-                            <p class="drawer-item__artist">${product.artist}</p>
-                            <h3 class="drawer-item__name"><a href="${buildProductUrl(product.slug)}">${product.title}</a></h3>
-                            <p class="drawer-item__meta">от ${getCardPrice(product, defaultSizeId)}</p>
+                            <p class="drawer-item__artist">${escapeHtml(product.artist)}</p>
+                            <h3 class="drawer-item__name"><a href="${buildProductUrl(product.slug)}">${escapeHtml(product.title)}</a></h3>
+                            <p class="drawer-item__meta">${product.isArtistWork ? escapeHtml(product.city) : `от ${getCardPrice(product, defaultSizeId)}`}</p>
                             <div class="drawer-item__actions">
                                 <button class="drawer-item__button" type="button" data-remove-favourite data-slug="${product.slug}">Remove</button>
                             </div>
@@ -531,6 +538,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return rotated.slice(0, 4);
     };
 
+    const renderArtworkImage = (product, interior = false) => {
+        if (interior && product.hoverImage) {
+            return `<span class="artwork-scene artwork-scene--photo"><img src="${escapeHtml(product.hoverImage)}" alt=""></span>`;
+        }
+        const scene = interior ? ` artwork-scene--interior artwork-scene--${product.interior}` : "";
+        return `<span class="artwork-scene${scene}"><span class="artwork-scene__mount">
+            <img src="${escapeHtml(product.image)}" alt="" loading="lazy">
+        </span></span>`;
+    };
+
     const buildCardMarkup = (product, sizeId) => {
         const cardUrl = buildProductUrl(product.slug, { sizeId });
         const hoverImage = product.hoverImage || product.image;
@@ -540,17 +557,22 @@ document.addEventListener("DOMContentLoaded", () => {
             <article class="print-card">
                 <div class="print-card__media-wrap">
                     ${buildFavouriteButton(product.slug)}
-                    <a class="print-card__media" href="${cardUrl}" aria-label="Открыть ${product.title}">
-                        <img class="print-card__image print-card__image--base" src="${product.image}" alt="${product.title} — ${product.artist}" loading="lazy">
-                        <img class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" loading="lazy" aria-hidden="true">
+                    <a class="print-card__media" href="${cardUrl}" aria-label="Открыть ${escapeHtml(product.title)}">
+                        ${product.isArtistWork ? `
+                            <span class="print-card__image print-card__image--base">${renderArtworkImage(product)}</span>
+                            <span class="print-card__image print-card__image--hover" aria-hidden="true">${renderArtworkImage(product, true)}</span>`
+                            : `<img class="print-card__image print-card__image--base" src="${product.image}" alt="${product.title} — ${product.artist}" loading="lazy">
+                            <img class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" loading="lazy" aria-hidden="true">`}
                     </a>
                 </div>
                 <div class="print-card__body">
-                    <p class="print-card__artist">${product.artist}</p>
-                    <h3 class="print-card__title"><a href="${cardUrl}">${product.title}</a></h3>
+                    <p class="print-card__artist">${escapeHtml(product.artist)}</p>
+                    <h3 class="print-card__title"><a href="${cardUrl}">${escapeHtml(product.title)}</a></h3>
                     <div class="print-card__meta">
-                        <span>от ${getCardPrice(product, sizeId)}</span>
-                        <span>${size?.shortLabel || "50 x 70"} / 4 багета</span>
+                        ${product.isArtistWork
+                            ? `<span>${escapeHtml(product.city)}</span><span>${escapeHtml(categoryLabel(product))}</span>`
+                            : `<span>от ${getCardPrice(product, sizeId)}</span>
+                               <span>${size?.shortLabel || "50 x 70"} / 4 багета</span>`}
                     </div>
                 </div>
             </article>
@@ -603,11 +625,15 @@ document.addEventListener("DOMContentLoaded", () => {
         let items = [...catalog];
 
         if (state.sortId === "new") {
-            items.sort((a, b) => b.releaseRank - a.releaseRank);
+            items.sort((a, b) => {
+                if (a.isArtistWork && b.isArtistWork) return new Date(b.createdAt) - new Date(a.createdAt);
+                if (a.isArtistWork || b.isArtistWork) return Number(Boolean(b.isArtistWork)) - Number(Boolean(a.isArtistWork));
+                return b.releaseRank - a.releaseRank;
+            });
         }
 
         if (state.sortId === "popular") {
-            items.sort((a, b) => b.popularityRank - a.popularityRank);
+            items.sort((a, b) => (b.popularityRank || 0) - (a.popularityRank || 0));
         }
 
         if (state.sortId === "large") {
@@ -619,10 +645,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (state.artistId !== "all") {
-            items = items.filter((item) => slugify(item.artist) === state.artistId);
+            items = items.filter((item) => artistFilterId(item) === state.artistId);
         }
 
         items = items.filter((item) => {
+            if (item.isArtistWork) return state.priceMin === defaultPriceMin && state.priceMax === defaultPriceMax;
             const euroPrice = somToEuro(getBasePrice(item, state.sizeId));
             return euroPrice >= state.priceMin && euroPrice <= state.priceMax;
         });
@@ -666,7 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         data-filter-key="${key}"
                         data-filter-value="${option.id}"
                     >
-                        ${optionLabel(option)}
+                        ${escapeHtml(optionLabel(option))}
                     </button>
                 `).join("")}
             </div>
@@ -947,6 +974,50 @@ document.addEventListener("DOMContentLoaded", () => {
         syncWaypointVisibility();
     };
 
+    const renderArtistProduct = (product, gallery, summary, featuredGrid) => {
+        document.title = `${product.title} — Принты`;
+        gallery.innerHTML = `
+            <div class="product-gallery artwork-product-gallery" aria-label="Фотографии работы">
+                <div class="product-gallery__thumbs">
+                    <button type="button" class="product-gallery__thumb is-active" aria-label="Работа" aria-pressed="true">${renderArtworkImage(product)}</button>
+                    <button type="button" class="product-gallery__thumb" aria-label="Работа в интерьере" aria-pressed="false">${renderArtworkImage(product, true)}</button>
+                </div>
+                <div class="artwork-product-preview" role="img" aria-label="${escapeHtml(product.title)}">${renderArtworkImage(product)}</div>
+            </div>`;
+        summary.innerHTML = `
+            <div class="product-panel">
+                <div class="product-panel__head">
+                    <div>
+                        <p class="eyebrow">${escapeHtml(categoryLabel(product))}</p>
+                        <h1>${escapeHtml(product.title)}</h1>
+                        <p class="product-panel__artist">${escapeHtml(product.artist)} · ${escapeHtml(product.city)}</p>
+                    </div>
+                    ${buildFavouriteButton(product.slug)}
+                </div>
+                ${product.summary ? `<p class="product-panel__summary artwork-description">${escapeHtml(product.summary)}</p>` : ""}
+                <div class="summary-actions">
+                    <a class="button button--line" href="./?artist=${encodeURIComponent(artistFilterId(product))}">Другие работы автора</a>
+                    <a class="button button--ghost" href="./">Каталог</a>
+                </div>
+            </div>`;
+        const preview = gallery.querySelector(".artwork-product-preview");
+        const thumbs = Array.from(gallery.querySelectorAll(".product-gallery__thumb"));
+        thumbs.forEach((button, index) => button.addEventListener("click", () => {
+            preview.innerHTML = renderArtworkImage(product, index === 1);
+            preview.setAttribute("aria-label", index === 1 ? `${product.title} в интерьере` : product.title);
+            thumbs.forEach((thumb) => {
+                const active = thumb === button;
+                thumb.classList.toggle("is-active", active);
+                thumb.setAttribute("aria-pressed", String(active));
+            });
+        }));
+        if (featuredGrid) {
+            featuredGrid.innerHTML = getFeaturedProducts(product.slug)
+                .map((work) => buildCardMarkup(work, defaultSizeId)).join("");
+        }
+        renderGlobalUi();
+    };
+
     const renderProductPage = () => {
         const params = new URLSearchParams(window.location.search);
         const slug = params.get("slug");
@@ -956,6 +1027,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const summary = document.querySelector("#productSummary");
         const featuredGrid = document.querySelector("#featuredGrid");
         const footerMenu = document.querySelector("#productFooterMenu");
+
+        if (slug?.startsWith("artist-")) {
+            if (product.slug === slug) {
+                renderArtistProduct(product, gallery, summary, featuredGrid);
+            } else {
+                document.title = "Работа недоступна — Принты";
+                summary.innerHTML = '<div class="product-panel"><h1>Работа недоступна</h1><a class="button button--line" href="./">Каталог</a></div>';
+            }
+            return;
+        }
 
         const availableSizeIds = Object.keys(product.priceBySize);
         const initialSizeId = availableSizeIds.includes(requestedSizeId)
@@ -1179,6 +1260,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const renderInfoPage = () => {
         const params = new URLSearchParams(window.location.search);
         const slug = params.get("slug");
+        if (slug?.startsWith("artist-")) {
+            window.location.replace(buildProductUrl(slug));
+            return;
+        }
         const sectionParam = params.get("section") || "about";
         const product = getProductBySlug(slug);
         const sections = getInfoSections(product);
@@ -1283,6 +1368,23 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         }
     });
+
+    try {
+        const { loadArtistProducts } = await import("./artist-data.js");
+        const timeout = AbortSignal.timeout(8000);
+        const artworks = await Promise.race([
+            loadArtistProducts(),
+            new Promise((_, reject) => timeout.addEventListener("abort", () => reject(timeout.reason), { once: true }))
+        ]);
+        catalog = [...artworks, ...catalog];
+    } catch (error) {
+        const status = document.querySelector("#catalog-status");
+        if (status) {
+            status.hidden = false;
+            status.textContent = "Работы художников временно недоступны. Попробуйте обновить страницу.";
+        }
+        console.warn("Prints: gallery unavailable", error.code || error.name);
+    }
 
     renderGlobalUi();
 

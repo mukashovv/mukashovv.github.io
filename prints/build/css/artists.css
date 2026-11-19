@@ -83,3 +83,132 @@
 .artists-page [hidden], .artist-gallery [hidden] {
     display: none;
 }
+
+#artist-profile {
+    margin-block: 0 2rem;
+    padding-block: 1rem;
+    border-block: 1px solid var(--line);
+}
+
+#artist-profile summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+#artist-profile form {
+    margin-top: 1rem;
+}
+
+.artist-form select {
+    width: 100%;
+    padding: .7rem;
+    font: inherit;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid #8a847e;
+    border-radius: 3px;
+}
+
+.artist-card .artist-form {
+    margin-top: 1rem;
+}
+
+.artwork-scene {
+    position: relative;
+    display: grid;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    place-items: center;
+    background: #ebeae7;
+    container-type: size;
+}
+
+.artwork-scene__mount {
+    display: flex;
+    max-width: 74%;
+    max-height: 74%;
+    padding: clamp(1px, 1.6cqmin, 13px);
+    border: clamp(1px, 1.2cqmin, 9px) solid #272622;
+    background: #faf9f6;
+    box-shadow: 2px 4px 10px #241c1a40;
+}
+
+.artwork-scene__mount img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 67cqw;
+    max-height: 64cqh;
+    object-fit: contain;
+}
+
+.artwork-scene--interior {
+    place-items: start center;
+    background-position: center;
+    background-size: 100% 100%;
+}
+
+.artwork-scene--interior .artwork-scene__mount {
+    margin-top: 17cqh;
+    max-width: 55%;
+    padding: clamp(1px, 1.2cqmin, 9px);
+}
+
+.artwork-scene--interior .artwork-scene__mount img {
+    max-width: 47cqw;
+    max-height: 43cqh;
+}
+
+.artwork-scene--photo > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artwork-product-preview > .artwork-scene--photo > img {
+    object-fit: contain;
+}
+
+.artwork-product-gallery {
+    --gallery-thumb-count: 2;
+}
+
+.artwork-product-gallery .product-gallery__thumbs {
+    height: auto;
+    grid-template-rows: auto;
+}
+
+.artwork-product-gallery .product-gallery__thumb,
+.artwork-product-preview {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+}
+
+.artwork-product-preview {
+    max-width: min(100%, 66svh);
+    justify-self: center;
+}
+
+.artwork-description {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+#catalog-status {
+    padding-bottom: 1rem;
+}
+
+@media (max-width: 760px) {
+    .artwork-product-gallery .product-gallery__thumbs {
+        max-width: 12rem;
+    }
+}
+
+.artwork-scene--1 { background-image: url('../img/interiors/room-1.jpg'); }
+
+.artwork-scene--2 { background-image: url('../img/interiors/room-2.jpg'); }
+
+.artwork-scene--3 { background-image: url('../img/interiors/room-3.jpg'); }
+
+.artwork-scene--4 { background-image: url('../img/interiors/room-4.jpg'); }
