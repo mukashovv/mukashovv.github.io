@@ -401,11 +401,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const updateHeaderCounts = () => {
         document.querySelectorAll("[data-favourites-count]").forEach((node) => {
-            node.textContent = String(favourites.length);
+            node.textContent = favourites.length || "";
         });
 
+        const cartCount = getCartCount();
         document.querySelectorAll("[data-cart-count]").forEach((node) => {
-            node.textContent = String(getCartCount());
+            node.textContent = cartCount || "";
         });
     };
 
@@ -546,13 +547,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderGlobalUi();
     };
 
-    const getFeaturedProducts = (currentSlug) => {
-        const currentIndex = catalog.findIndex((item) => item.slug === currentSlug);
-        const rotated = currentIndex >= 0
-            ? [...catalog.slice(currentIndex + 1), ...catalog.slice(0, currentIndex)]
-            : catalog;
-
-        return rotated.slice(0, 4);
+    const renderRelatedWorks = (product, sizeId, grid) => {
+        if (!grid) return;
+        const others = catalog.filter((work) => work.slug !== product.slug);
+        const authorWorks = others.filter((work) => artistFilterId(work) === artistFilterId(product)
+            || (work.artist && work.artist === product.artist));
+        const heading = document.querySelector("#featuredHeading");
+        if (heading) heading.textContent = authorWorks.length ? "More from this artist" : "More from the gallery";
+        grid.innerHTML = (authorWorks.length ? authorWorks : others).slice(0, 4)
+            .map((work) => buildCardMarkup(work, sizeId)).join("");
     };
 
     const renderArtworkImage = (product, interior = false) => {
@@ -1039,7 +1042,47 @@ document.addEventListener("DOMContentLoaded", async () => {
             <select class="select-field" id="product-frame" data-role="frame-select">
                 ${(shared.frames || []).map((frame) => `<option value="${frame.id}"${frame.id === defaultFrameId ? " selected" : ""}>${frame.label}</option>`).join("")}
             </select>
+            <div class="frame-swatches" role="group" aria-label="Frame colour">
+                ${(shared.frames || []).map((frame) => `
+                    <button class="frame-swatch" type="button" data-product-frame="${frame.id}"
+                        aria-label="${escapeHtml(frame.label)}" title="${escapeHtml(frame.label)}"
+                        aria-pressed="${frame.id === defaultFrameId}">
+                        <span class="frame-swatch__dot" style="--swatch: ${frame.swatch}" aria-hidden="true"></span>
+                    </button>`).join("")}
+            </div>
         </div>`;
+
+    const bindFrameSwatches = (summary, select) => {
+        if (!select) return;
+        const buttons = Array.from(summary.querySelectorAll("[data-product-frame]"));
+        const sync = () => buttons.forEach((button) => {
+            button.setAttribute("aria-pressed", String(button.dataset.productFrame === select.value));
+        });
+        select.addEventListener("change", sync);
+        buttons.forEach((button) => button.addEventListener("click", () => {
+            select.value = button.dataset.productFrame;
+            select.dispatchEvent(new Event("change"));
+        }));
+        sync();
+    };
+
+    const renderProductDetails = (product) => `
+        <div class="product-details">
+            ${product.summary ? `<details>
+                <summary>About the artwork</summary>
+                <p class="artwork-description">${escapeHtml(product.summary)}</p>
+            </details>` : ""}
+            ${!product.isArtistWork && shared.included?.length ? `<details>
+                <summary>Framing</summary>
+                <ul>${shared.included.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+            </details>` : ""}
+            <details>
+                <summary>Delivery</summary>
+                <p>Delivery costs and timing are agreed when you place your order.</p>
+            </details>
+        </div>`;
+
+
 
     const applyFramePreview = (preview, frame) => {
         if (preview && frame) preview.style.setProperty("--preview-frame-color", frame.swatch);
@@ -1071,7 +1114,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                     ${buildFavouriteButton(product.slug)}
                 </div>
-                ${product.summary ? `<p class="product-panel__summary artwork-description">${escapeHtml(product.summary)}</p>` : ""}
                 ${offers.length > 1 ? `
                     <label class="option-group">Artwork option
                         <select class="select-field" data-artwork-offer>
@@ -1084,6 +1126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <a class="button button--line" data-author-profile href="./?artist=${encodeURIComponent(artistFilterId(product))}">More from this artist</a>
                     <a class="button button--ghost" href="./">Catalogue</a>
                 </div>
+                ${renderProductDetails(product)}
             </div>`;
         const offerSelector = summary.querySelector("[data-artwork-offer]");
         offerSelector?.addEventListener("change", () => {
@@ -1123,6 +1166,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (isInterior && product.hoverImage) showArtwork(false);
             updateFrame(frameSelect.value);
         });
+        bindFrameSwatches(summary, frameSelect);
         updateSize(initialSizeId);
         updateFrame(defaultFrameId);
         const profileLink = summary.querySelector("[data-author-profile]");
@@ -1132,10 +1176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             profileLink.href = `./?author=${encodeURIComponent(profile.slug)}`;
             profileLink.textContent = "Artist profile";
         }).catch(() => {});
-        if (featuredGrid) {
-            featuredGrid.innerHTML = getFeaturedProducts(product.slug)
-                .map((work) => buildCardMarkup(work, defaultSizeId)).join("");
-        }
+        renderRelatedWorks(product, defaultSizeId, featuredGrid);
         renderGlobalUi();
     };
 
@@ -1174,13 +1215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const thumbCount = Math.max(images.length, 1);
 
         document.title = `${product.title} — Mukashov Gallery`;
-        const renderFeatured = () => {
-            if (featuredGrid) {
-                featuredGrid.innerHTML = getFeaturedProducts(product.slug)
-                    .map((item) => buildCardMarkup(item, state.sizeId))
-                    .join("");
-            }
-        };
+        const renderFeatured = () => renderRelatedWorks(product, state.sizeId, featuredGrid);
 
         if (gallery) {
             gallery.style.setProperty("--gallery-thumb-count", String(thumbCount));
@@ -1188,7 +1223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <div class="product-gallery">
                     <div class="product-gallery__thumbs">
                         ${images.map((image, index) => `
-                            <button class="product-gallery__thumb${index === state.activeImageIndex ? " is-active" : ""}" type="button" data-gallery-thumb="${index}">
+                            <button class="product-gallery__thumb${index === state.activeImageIndex ? " is-active" : ""}" type="button" data-gallery-thumb="${index}" aria-label="Photo ${index + 1}" aria-pressed="${index === state.activeImageIndex}">
                                 <img src="${image}" alt="" loading="lazy" aria-hidden="true">
                             </button>
                         `).join("")}
@@ -1215,13 +1250,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
 
                     <div class="product-panel__price-row">
-                        <span>From</span>
-                        <strong data-role="total-price"></strong>
+                        <span>Total</span>
+                        <strong data-role="total-price" aria-live="polite"></strong>
                     </div>
 
-                    ${product.summary ? `<p class="product-panel__summary artwork-description">${escapeHtml(product.summary)}</p>` : ""}
 
                     ${renderProductOptions((shared.sizes || []).filter((size) => availableSizeIds.includes(size.id)), initialSizeId)}
+
+                    <div class="summary-actions">
+                        <button class="button button--solid" type="button" data-role="add-to-cart">Add to Bag</button>
+                        <a class="button button--line" data-role="order-link" href="${product.referenceUrl}" target="_blank" rel="noopener">Order via Telegram</a>
+                        ${product.artistProfileSlug ? `<a class="button button--ghost" href="./?author=${encodeURIComponent(product.artistProfileSlug)}">Artist profile</a>` : ""}
+                        <a class="button button--ghost" href="./">Catalog</a>
+                    </div>
 
                     <div class="selection-summary">
                         <div class="selection-summary__row">
@@ -1233,13 +1274,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             <strong>${product.leadTime}</strong>
                         </div>
                     </div>
-
-                    <div class="summary-actions">
-                        <button class="button button--solid" type="button" data-role="add-to-cart">Add to Bag</button>
-                        <a class="button button--line" data-role="order-link" href="${product.referenceUrl}" target="_blank" rel="noopener">Order via Telegram</a>
-                        ${product.artistProfileSlug ? `<a class="button button--ghost" href="./?author=${encodeURIComponent(product.artistProfileSlug)}">Artist profile</a>` : ""}
-                        <a class="button button--ghost" href="./">Catalog</a>
-                    </div>
+                    ${renderProductDetails(product)}
                 </div>
             `;
         }
@@ -1279,6 +1314,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             galleryThumbs.forEach((button) => {
                 const isActive = Number(button.dataset.galleryThumb) === state.activeImageIndex;
                 button.classList.toggle("is-active", isActive);
+                button.setAttribute("aria-pressed", String(isActive));
             });
 
             if (sizeSelect) {
@@ -1332,6 +1368,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }
 
+        bindFrameSwatches(summary, frameSelect);
         galleryThumbs.forEach((button) => {
             button.addEventListener("click", () => {
                 state.activeImageIndex = Number(button.dataset.galleryThumb) || 0;

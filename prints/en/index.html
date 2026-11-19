@@ -18,9 +18,7 @@
     <div class="prints-page">
         <div class="announcement-bar">
             <div class="container announcement-bar__inner">
-                <span>Framing included</span>
-                <span>Four sizes available</span>
-                <span>Made to order</span>
+                <span>Worldwide delivery</span>
             </div>
         </div>
 
@@ -54,24 +52,22 @@
                             <p class="profile-menu__notice" role="status" hidden></p>
                         </div>
                     </details>
-                    <button class="nav-action" type="button" data-favourites-open aria-label="Open favourites">
+                    <button class="nav-action" type="button" data-favourites-open aria-describedby="favourites-count" aria-label="Open favourites">
                         <span class="nav-action__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" focusable="false">
                                 <path d="M12 21.35 10.55 20C5.4 15.36 2 12.27 2 8.5 2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09A6.01 6.01 0 0 1 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.54L12 21.35Z"></path>
                             </svg>
                         </span>
-                        <span class="nav-action__label">Favourites</span>
-                        <span class="nav-action__count" data-favourites-count>0</span>
+                        <span class="nav-action__count" id="favourites-count" data-favourites-count></span>
                     </button>
-                    <button class="nav-action" type="button" data-cart-open aria-label="Open cart">
+                    <button class="nav-action" type="button" data-cart-open aria-describedby="cart-count" aria-label="Open cart">
                         <span class="nav-action__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" focusable="false">
                                 <path d="M7 7.5V6a5 5 0 0 1 10 0v1.5"></path>
                                 <path d="M5 7.5h14l-1.2 13H6.2L5 7.5Z"></path>
                             </svg>
                         </span>
-                        <span class="nav-action__label">Cart</span>
-                        <span class="nav-action__count" data-cart-count>0</span>
+                        <span class="nav-action__count" id="cart-count" data-cart-count></span>
                     </button>
                 </div>
             </div>

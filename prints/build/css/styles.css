@@ -62,16 +62,12 @@ select {
 }
 
 .announcement-bar__inner {
-    min-height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 28px;
-    flex-wrap: wrap;
-    padding: 8px 0;
+    min-height: 24px;
+    display: grid;
+    place-items: center;
+    padding: 3px 0;
     font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+    letter-spacing: 0.07em;
     color: var(--muted);
 }
 
@@ -142,24 +138,26 @@ select {
     border: 0;
     background: transparent;
     padding: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
     cursor: pointer;
     color: var(--muted);
     transition: color 0.2s ease;
 }
 
 .nav-action__icon {
-    width: 17px;
-    height: 17px;
+    width: 21px;
+    height: 21px;
     display: grid;
     place-items: center;
 }
 
 .nav-action__icon svg {
-    width: 17px;
-    height: 17px;
+    width: 21px;
+    height: 21px;
     fill: none;
     stroke: currentColor;
     stroke-width: 1.35;
@@ -172,16 +170,24 @@ select {
     color: var(--text);
 }
 
-.nav-action__label,
 .nav-action__count {
-    min-width: 16px;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+    position: absolute;
+    top: 1px;
+    left: 26px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: #343c32;
+    color: #fff;
+    font-size: 10px;
+    line-height: 17px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
 }
 
-.nav-action__count {
-    text-align: right;
+.nav-action__count:empty {
+    display: none;
 }
 
 .filter-waypoint {
@@ -1209,7 +1215,6 @@ select {
         margin-bottom: 12px;
     }
 
-    .announcement-bar__inner,
     .prints-footer__inner {
         justify-content: center;
     }
@@ -1541,5 +1546,111 @@ select {
 
     .gallery-feature__image {
         min-height: clamp(240px, 75vw, 360px);
+    }
+}
+
+.product-shell {
+    column-gap: clamp(24px, 4.5vw, 72px);
+}
+
+.product-panel {
+    gap: 14px;
+    padding: clamp(18px, 3vw, 32px);
+    border: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.product-panel h1 {
+    margin: 8px 0;
+    font-size: clamp(2.6rem, 4.2vw, 4.4rem);
+    overflow-wrap: anywhere;
+}
+
+.product-panel .summary-actions [data-role="add-to-cart"] {
+    width: 100%;
+    --button: #343c32;
+}
+
+.product-panel .option-group {
+    gap: 8px;
+}
+
+.product-panel .select-field {
+    min-height: 46px;
+}
+
+.product-panel .frame-swatches {
+    gap: 8px;
+}
+
+.product-panel .frame-swatch[aria-pressed="true"] {
+    border-color: var(--text);
+}
+
+.product-details {
+    border-top: 1px solid var(--line);
+}
+
+.product-details details {
+    border-bottom: 1px solid var(--line);
+}
+
+.product-details summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.product-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.product-details summary::after {
+    content: "+";
+    font-size: 1.15rem;
+    font-weight: 400;
+}
+
+.product-details details[open] summary::after {
+    content: "−";
+}
+
+.product-details :is(p, ul) {
+    margin: 0 0 14px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.product-details ul {
+    padding-left: 1.25em;
+}
+
+@media (min-width: 981px) and (max-width: 1160px) {
+    .product-shell {
+        grid-template-columns: minmax(0, 1fr) minmax(340px, 0.8fr);
+    }
+}
+
+@media (min-width: 761px) {
+    .product-gallery {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+    }
+
+    .product-gallery .product-gallery__thumbs {
+        order: 2;
+        display: flex;
+        flex-wrap: wrap;
+        height: auto;
+        justify-content: center;
+    }
+
+    .product-gallery .product-gallery__thumb {
+        width: clamp(58px, 7vw, 88px);
+        aspect-ratio: 4 / 5;
     }
 }
