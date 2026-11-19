@@ -2,7 +2,7 @@ import { projectUrl, publishableKey } from "./supabase-config.js";
 
 const artworkFields = "id,artist_id,artist_name,city,title,description,is_published,created_at";
 const categoryFields = artworkFields + ",category,orientation";
-const offerFields = categoryFields + ",original_price,original_width,original_height,original_sold,print_price,print_width,print_height,print_stock";
+const offerFields = categoryFields + ",original_price,original_sold,print_price,print_stock";
 export const photoPath = (work, interior = false) =>
     `${work.artist_id}/${work.id}${interior ? "-interior" : ""}`;
 
@@ -80,8 +80,6 @@ function publicOffers(work) {
     return ["original", "print"].filter((type) => work[`${type}_price`] != null).map((type) => ({
         type,
         price: work[`${type}_price`],
-        width: work[`${type}_width`],
-        height: work[`${type}_height`],
         available: type === "original" ? !work.original_sold : work.print_stock !== 0,
         stock: type === "print" ? work.print_stock : null
     }));
@@ -106,4 +104,9 @@ export async function loadArtistProducts() {
         offers: publicOffers(work),
         interior: (parseInt(work.id.slice(0, 8), 16) % 4) + 1
     }));
+}
+
+export async function loadPublicArtistProfile(filters) {
+    const client = await createPrintsClient();
+    return unwrap(await client.rpc("prints_public_artist_profile", filters).abortSignal(AbortSignal.timeout(8000)));
 }

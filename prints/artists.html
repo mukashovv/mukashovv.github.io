@@ -65,6 +65,15 @@
                     <label>Имя художника или псевдоним <input name="artist_name" maxlength="80" required></label>
                     <label>Город <input name="city" maxlength="80" autocomplete="address-level2" required></label>
                     <label>WhatsApp <input name="whatsapp" type="tel" autocomplete="tel" placeholder="+996 700 123 456" maxlength="25" required></label>
+                    <label>Короткий адрес профиля
+                        <span class="artist-profile-address">
+                            <span aria-hidden="true">mukashov.com/</span>
+                            <input name="profile_slug" type="text" placeholder="janybekmukash" maxlength="40"
+                                autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="artist-address-hint">
+                        </span>
+                        <small id="artist-address-hint">От 3 до 40 символов. Латинские буквы, цифры и дефис.</small>
+                    </label>
+                    <a id="artist-profile-link" href="./" target="_blank" rel="noopener" hidden>Открыть публичный профиль</a>
                     <button class="button button--solid">Сохранить профиль</button>
                 </form>
             </section>
@@ -124,15 +133,11 @@
         <fieldset class="artwork-offer-fields" data-offer-kind="original" hidden disabled>
             <legend>Оригинал</legend>
             <label>Цена, сом <input type="number" name="original_price" min="1" max="100000000" step="1" required></label>
-            <label>Ширина, см <input type="number" name="original_width" min="0.1" max="1000" step="0.1" required></label>
-            <label>Высота, см <input type="number" name="original_height" min="0.1" max="1000" step="0.1" required></label>
             <label class="artwork-sold-control"><input type="checkbox" name="original_sold"> Оригинал продан</label>
         </fieldset>
         <fieldset class="artwork-offer-fields" data-offer-kind="print" hidden disabled>
             <legend>Принт</legend>
             <label>Цена за экземпляр, сом <input type="number" name="print_price" min="1" max="100000000" step="1" required></label>
-            <label>Ширина, см <input type="number" name="print_width" min="0.1" max="1000" step="0.1" required></label>
-            <label>Высота, см <input type="number" name="print_height" min="0.1" max="1000" step="0.1" required></label>
             <label>Осталось экземпляров <input type="number" name="print_stock" min="0" max="100000" step="1" placeholder="Пусто — без ограничения"></label>
         </fieldset>
     </template>

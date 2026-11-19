@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const shared = window.printsShared || {};
     let catalog = window.printsCatalog || [];
     const page = document.body.dataset.printsPage;
+    const profileHandle = page === "catalog" ? new URLSearchParams(window.location.search).get("author") : null;
+    let publicArtist;
 
     if (!catalog.length) {
         return;
@@ -119,7 +121,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     const getCardPrice = (product, sizeId) => formatPrice(getBasePrice(product, sizeId || defaultSizeId));
     const offerLabels = { original: "Оригинал", print: "Принт" };
-    const formatDimensions = (offer) => `${offer.width} × ${offer.height} см`;
     const artistPriceLabel = (product) => {
         const offers = product.offers || [];
         const prices = offers.filter((offer) => offer.available).map((offer) => offer.price);
@@ -153,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const params = new URLSearchParams();
         params.set("slug", slug);
 
-        if (options.sizeId && !slug.startsWith("artist-")) {
+        if (options.sizeId) {
             params.set("size", options.sizeId);
         }
 
@@ -162,6 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const buildCatalogQuery = (state) => {
         const params = new URLSearchParams();
+        if (profileHandle) params.set("author", profileHandle);
 
         if (state.sortId && state.sortId !== "all") {
             params.set("sort", state.sortId);
@@ -598,7 +600,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const categoryId = (shared.categories || []).some((category) => category.id === params.get("category"))
             ? params.get("category")
             : "all";
-        const artistId = getArtists().some((artist) => artist.id === params.get("artist"))
+        const artistId = !publicArtist && getArtists().some((artist) => artist.id === params.get("artist"))
             ? params.get("artist")
             : "all";
         const initialPriceRange = normalizePriceRange(
@@ -633,7 +635,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     const getCatalogProducts = (state) => {
-        let items = [...catalog];
+        let items = publicArtist
+            ? catalog.filter((work) => work.artistId === publicArtist.artistId)
+            : [...catalog];
 
         if (state.sortId === "new") {
             items.sort((a, b) => {
@@ -846,7 +850,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     options: shared.colours || [],
                     optionLabel: (option) => option.label
                 })}
-                ${buildFilterDropdown({
+                ${publicArtist ? "" : buildFilterDropdown({
                     label: "Artist",
                     key: "artist",
                     selectedId: state.artistId,
@@ -989,6 +993,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         syncWaypointVisibility();
     };
 
+    const renderProductOptions = (sizes, initialSizeId) => `
+        <div class="option-group">
+            <div class="option-group__label-row">
+                <label class="option-group__label" for="product-size">Size</label>
+                <span class="option-group__hint" data-role="size-hint"></span>
+            </div>
+            <select class="select-field" id="product-size" data-role="size-select">
+                ${sizes.map((size) => `<option value="${size.id}"${size.id === initialSizeId ? " selected" : ""}>${size.label}</option>`).join("")}
+            </select>
+        </div>
+        <div class="option-group">
+            <div class="option-group__label-row">
+                <label class="option-group__label" for="product-frame">Frame</label>
+                <span class="option-group__hint" data-role="frame-hint"></span>
+            </div>
+            <select class="select-field" id="product-frame" data-role="frame-select">
+                ${(shared.frames || []).map((frame) => `<option value="${frame.id}"${frame.id === defaultFrameId ? " selected" : ""}>${frame.label}</option>`).join("")}
+            </select>
+        </div>`;
+
+    const applyFramePreview = (preview, frame) => {
+        if (preview && frame) preview.style.setProperty("--preview-frame-color", frame.swatch);
+    };
+
     const renderOfferDetails = (offer) => {
         const availability = offer.available
             ? offer.stock == null ? "Доступно" : `В наличии: ${offer.stock}`
@@ -996,12 +1024,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `
             <div class="product-panel__price-row"><span>${offerLabels[offer.type]}</span><strong>${formatPrice(offer.price)}</strong></div>
             <div class="selection-summary">
-                <div class="selection-summary__row"><span>Размер</span><strong>${escapeHtml(formatDimensions(offer))}</strong></div>
                 <div class="selection-summary__row"><span>Наличие</span><strong>${availability}</strong></div>
             </div>`;
     };
 
-    const renderArtistProduct = (product, gallery, summary, featuredGrid) => {
+    const renderArtistProduct = (product, gallery, summary, featuredGrid, requestedSizeId) => {
         document.title = `${product.title} — Mukashov Gallery`;
         gallery.innerHTML = `
             <div class="product-gallery artwork-product-gallery" aria-label="Фотографии работы">
@@ -1013,6 +1040,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>`;
         const offers = product.offers || [];
         const initialOffer = offers.find((offer) => offer.available) || offers[0];
+        const initialSizeId = findSize(requestedSizeId)?.id || defaultSizeId;
         summary.innerHTML = `
             <div class="product-panel">
                 <div class="product-panel__head">
@@ -1031,8 +1059,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                         </select>
                     </label>` : ""}
                 ${initialOffer ? `<div class="artwork-offer-details" data-artwork-offer-details aria-live="polite">${renderOfferDetails(initialOffer)}</div>` : ""}
+                ${renderProductOptions(shared.sizes || [], initialSizeId)}
                 <div class="summary-actions">
-                    <a class="button button--line" href="./?artist=${encodeURIComponent(artistFilterId(product))}">Другие работы автора</a>
+                    <a class="button button--line" data-author-profile href="./?artist=${encodeURIComponent(artistFilterId(product))}">Другие работы автора</a>
                     <a class="button button--ghost" href="./">Каталог</a>
                 </div>
             </div>`;
@@ -1043,15 +1072,46 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         const preview = gallery.querySelector(".artwork-product-preview");
         const thumbs = Array.from(gallery.querySelectorAll(".product-gallery__thumb"));
-        thumbs.forEach((button, index) => button.addEventListener("click", () => {
-            preview.innerHTML = renderArtworkImage(product, index === 1);
-            preview.setAttribute("aria-label", index === 1 ? `${product.title} в интерьере` : product.title);
-            thumbs.forEach((thumb) => {
-                const active = thumb === button;
+        let isInterior = false;
+        const showArtwork = (interior) => {
+            isInterior = interior;
+            preview.innerHTML = renderArtworkImage(product, interior);
+            preview.setAttribute("aria-label", interior ? `${product.title} в интерьере` : product.title);
+            thumbs.forEach((thumb, index) => {
+                const active = index === Number(interior);
                 thumb.classList.toggle("is-active", active);
                 thumb.setAttribute("aria-pressed", String(active));
             });
-        }));
+        };
+        thumbs.forEach((button, index) => button.addEventListener("click", () => showArtwork(index === 1)));
+
+        const sizeSelect = summary.querySelector("[data-role='size-select']");
+        const frameSelect = summary.querySelector("[data-role='frame-select']");
+        const sizeHint = summary.querySelector("[data-role='size-hint']");
+        const frameHint = summary.querySelector("[data-role='frame-hint']");
+        const updateSize = (sizeId) => {
+            sizeHint.textContent = findSize(sizeId)?.note || "";
+        };
+        const updateFrame = (frameId) => {
+            const frame = findFrame(frameId);
+            if (!frame) return;
+            applyFramePreview(preview, frame);
+            frameHint.textContent = frame.description;
+        };
+        sizeSelect.addEventListener("change", () => updateSize(sizeSelect.value));
+        frameSelect.addEventListener("change", () => {
+            if (isInterior && product.hoverImage) showArtwork(false);
+            updateFrame(frameSelect.value);
+        });
+        updateSize(initialSizeId);
+        updateFrame(defaultFrameId);
+        const profileLink = summary.querySelector("[data-author-profile]");
+        import("./artist-data.js").then(async ({ loadPublicArtistProfile }) => {
+            const profile = await loadPublicArtistProfile({ work_id: product.slug.slice("artist-".length) });
+            if (!profile?.slug) return;
+            profileLink.href = `/${encodeURIComponent(profile.slug)}`;
+            profileLink.textContent = "Профиль автора";
+        }).catch(() => {});
         if (featuredGrid) {
             featuredGrid.innerHTML = getFeaturedProducts(product.slug)
                 .map((work) => buildCardMarkup(work, defaultSizeId)).join("");
@@ -1071,7 +1131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (slug?.startsWith("artist-")) {
             if (product.slug === slug) {
-                renderArtistProduct(product, gallery, summary, featuredGrid);
+                renderArtistProduct(product, gallery, summary, featuredGrid, requestedSizeId);
             } else {
                 document.title = "Работа недоступна — Mukashov Gallery";
                 summary.innerHTML = '<div class="product-panel"><h1>Работа недоступна</h1><a class="button button--line" href="./">Каталог</a></div>';
@@ -1141,29 +1201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     ${product.summary ? `<p class="product-panel__summary">${product.summary}</p>` : ""}
 
-                    <div class="option-group">
-                        <div class="option-group__label-row">
-                            <span class="option-group__label">Size</span>
-                            <span class="option-group__hint" data-role="size-hint"></span>
-                        </div>
-                        <select class="select-field" data-role="size-select" aria-label="Выбор размера">
-                            ${(shared.sizes || []).filter((size) => availableSizeIds.includes(size.id)).map((size) => `
-                                <option value="${size.id}">${size.label}</option>
-                            `).join("")}
-                        </select>
-                    </div>
-
-                    <div class="option-group">
-                        <div class="option-group__label-row">
-                            <span class="option-group__label">Frame</span>
-                            <span class="option-group__hint" data-role="frame-hint">выберите цвет</span>
-                        </div>
-                        <select class="select-field" data-role="frame-select" aria-label="Выбор цвета рамки">
-                            ${(shared.frames || []).map((frame) => `
-                                <option value="${frame.id}">${frame.label}</option>
-                            `).join("")}
-                        </select>
-                    </div>
+                    ${renderProductOptions((shared.sizes || []).filter((size) => availableSizeIds.includes(size.id)), initialSizeId)}
 
                     <div class="selection-summary">
                         <div class="selection-summary__row">
@@ -1193,6 +1231,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderGlobalUi();
         bindProductViewportEvents();
 
+        const preview = gallery?.querySelector("#productPreview");
         const previewImage = document.querySelector("[data-role='product-image']");
         const selectionValue = document.querySelector("[data-role='selection-value']");
         const totalPrice = document.querySelector("[data-role='total-price']");
@@ -1229,6 +1268,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 frameSelect.value = state.frameId;
             }
 
+            applyFramePreview(preview, frame);
+            preview?.classList.toggle("is-framed", state.activeImageIndex === 0);
             if (previewImage) {
                 previewImage.src = images[state.activeImageIndex];
             }
@@ -1265,6 +1306,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (frameSelect) {
             frameSelect.addEventListener("change", () => {
                 state.frameId = frameSelect.value;
+                state.activeImageIndex = 0;
                 syncState();
             });
         }
@@ -1405,25 +1447,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     try {
-        const { loadArtistProducts } = await import("./artist-data.js");
+        const { loadArtistProducts, loadPublicArtistProfile } = await import("./artist-data.js");
         const timeout = AbortSignal.timeout(8000);
-        const artworks = await Promise.race([
-            loadArtistProducts(),
+        const [artworks, profile] = await Promise.race([
+            Promise.all([
+                loadArtistProducts(),
+                profileHandle ? loadPublicArtistProfile({ profile_handle: profileHandle }) : null
+            ]),
             new Promise((_, reject) => timeout.addEventListener("abort", () => reject(timeout.reason), { once: true }))
         ]);
         catalog = [...artworks, ...catalog];
+        publicArtist = profile;
+        if (profileHandle && !publicArtist) {
+            const status = document.querySelector("#catalog-status");
+            status.hidden = false;
+            status.textContent = "Профиль автора не найден.";
+            renderGlobalUi();
+            return;
+        }
+        if (publicArtist) {
+            document.title = `${publicArtist.name} — Mukashov Gallery`;
+            document.querySelector("#public-artist-name").textContent = publicArtist.name;
+            document.querySelector("#public-artist-city").textContent = publicArtist.city;
+            document.querySelector("#public-artist-heading").hidden = false;
+        }
     } catch (error) {
         const status = document.querySelector("#catalog-status");
         if (status) {
             status.hidden = false;
-            status.textContent = "Работы художников временно недоступны. Попробуйте обновить страницу.";
+            status.textContent = profileHandle
+                ? "Не удалось открыть профиль автора. Попробуйте обновить страницу."
+                : "Работы художников временно недоступны. Попробуйте обновить страницу.";
         }
         console.warn("Prints: gallery unavailable", error.code || error.name);
     }
 
     renderGlobalUi();
 
-    if (page === "catalog") {
+    if (page === "catalog" && (!profileHandle || publicArtist)) {
         renderCatalogPage();
     }
 

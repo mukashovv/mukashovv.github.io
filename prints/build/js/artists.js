@@ -1,5 +1,6 @@
 import { createPrintsClient, fetchWorks, photoPath, unwrap } from "./artist-data.js";
 
+const slugCooldownMs = 14 * 24 * 60 * 60 * 1000;
 const authForm = document.querySelector("#artist-auth");
 const status = document.querySelector("#artist-status");
 const photoTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -91,12 +92,8 @@ function readOfferFields(formData) {
     };
     return {
         original_price: number("original_price"),
-        original_width: number("original_width"),
-        original_height: number("original_height"),
         original_sold: formData.has("original_sold"),
         print_price: number("print_price"),
-        print_width: number("print_width"),
-        print_height: number("print_height"),
         print_stock: number("print_stock")
     };
 }
@@ -113,6 +110,9 @@ function initDashboard(client, storage) {
     authForm.querySelector("button").textContent = isRegistration ? "Получить ссылку для регистрации" : "Получить ссылку для входа";
     authPanel.querySelector(`[data-auth-mode="${authMode}"]`).setAttribute("aria-current", "page");
     const profileForm = document.querySelector("#artist-profile-form");
+    const addressInput = profileForm.elements.namedItem("profile_slug");
+    const addressHint = document.querySelector("#artist-address-hint");
+    const profileLink = document.querySelector("#artist-profile-link");
     const workForm = document.querySelector("#artist-work");
     const syncNewOffer = mountOfferFields(workForm.querySelector("[data-offer-fields]"));
     const worksList = document.querySelector("#artist-works");
@@ -146,7 +146,7 @@ function initDashboard(client, storage) {
 
     async function loadProfile(owner) {
         const saved = unwrap(await client.from("prints_artist_profiles")
-            .select("artist_name,city,whatsapp").eq("artist_id", owner).maybeSingle());
+            .select("artist_name,city,whatsapp,profile_slug,profile_slug_changed_at").eq("artist_id", owner).maybeSingle());
         if (owner !== userId) return;
         profile = saved;
         if (saved) {
@@ -154,7 +154,16 @@ function initDashboard(client, storage) {
                 profileForm.elements.namedItem(field).value = saved[field];
             }
         }
-
+        addressInput.value = saved?.profile_slug || "";
+        const availableAt = Date.parse(saved?.profile_slug_changed_at) + slugCooldownMs;
+        addressInput.disabled = availableAt > Date.now();
+        addressHint.textContent = addressInput.disabled
+            ? `Адрес можно изменить с ${new Intl.DateTimeFormat("ru-RU", {
+                dateStyle: "long", timeStyle: "short"
+            }).format(availableAt)}.`
+            : "От 3 до 40 символов. Латинские буквы, цифры и дефис. Менять адрес можно раз в 14 дней.";
+        profileLink.hidden = !saved?.profile_slug;
+        if (saved?.profile_slug) profileLink.href = `/${encodeURIComponent(saved.profile_slug)}`;
     }
 
     async function uploadPhoto(work, photo, interior = false) {
@@ -310,8 +319,28 @@ function initDashboard(client, storage) {
                 setStatus("Укажите имя, город и номер WhatsApp в международном формате, например +996 700 123 456.");
                 return;
             }
-            unwrap(await client.from("prints_artist_profiles")
-                .upsert({ artist_id: owner, artist_name, city, whatsapp }));
+            const details = { artist_id: owner, artist_name, city, whatsapp };
+            if (fields.has("profile_slug")) {
+                const slug = fields.get("profile_slug").trim().toLowerCase();
+                if (slug && !/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(slug)) {
+                    setStatus("Укажите от 3 до 40 символов. Начните и закончите адрес латинской буквой или цифрой.");
+                    return;
+                }
+                details.profile_slug = slug || null;
+            }
+            const response = await client.from("prints_artist_profiles").upsert(details);
+            if (response.error?.code === "23505" || response.error?.code === "23514") {
+                setStatus("Этот адрес недоступен. Выберите другой.");
+                return;
+            }
+            if (response.error?.code === "PT409") {
+                if (owner === userId) {
+                    await loadProfile(owner);
+                    setStatus("Короткий адрес можно менять только раз в 14 дней.");
+                }
+                return;
+            }
+            unwrap(response);
             if (owner !== userId) return;
             await loadProfile(owner);
             if (owner !== userId) return;

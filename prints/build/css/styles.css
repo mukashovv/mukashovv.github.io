@@ -609,6 +609,10 @@ select {
     background: #ebeae7;
 }
 
+.product-preview.is-framed .product-preview__frame {
+    border: clamp(3px, .75vw, 10px) solid var(--preview-frame-color, #272622);
+}
+
 .product-preview__frame img {
     width: 100%;
     height: 100%;

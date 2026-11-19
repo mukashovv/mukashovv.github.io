@@ -109,7 +109,7 @@
     max-width: 74%;
     max-height: 74%;
     padding: clamp(1px, 1.6cqmin, 13px);
-    border: clamp(1px, 1.2cqmin, 9px) solid #272622;
+    border: clamp(1px, 1.2cqmin, 9px) solid var(--preview-frame-color, #272622);
     background: #faf9f6;
     box-shadow: 2px 4px 10px #241c1a40;
 }
@@ -327,4 +327,35 @@
     .artist-sidebar nav {
         flex-direction: row;
     }
+}
+
+.artist-profile-address {
+    display: flex;
+    align-items: center;
+    border: 1px solid #8a847e;
+    border-radius: 3px;
+}
+
+.artist-profile-address > span {
+    padding-inline-start: .7rem;
+    color: var(--muted);
+}
+
+.artist-form .artist-profile-address input {
+    border: 0;
+}
+
+.public-artist-heading {
+    margin-bottom: 1.5rem;
+}
+
+.public-artist-heading h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+}
+
+.public-artist-heading p {
+    margin: .15rem 0 .6rem;
+    color: var(--muted);
 }
