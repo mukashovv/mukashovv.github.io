@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="description" content="Mukashov Prints — коллекция принтов в багете с выбором размеров и оформления.">
-    <title>Принты — Mukashov Prints</title>
+    <meta name="description" content="Mukashov Gallery — коллекция принтов в багете с выбором размеров и оформления.">
+    <title>Принты — Mukashov Gallery</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="build/css/styles.css">
     <link rel="stylesheet" href="build/css/artists.css">
+    <script type="module" src="build/js/profile-menu.js"></script>
 </head>
 <body data-prints-page="catalog">
     <div class="prints-page">
@@ -25,15 +26,33 @@
         <header class="prints-header">
             <div class="container prints-header__inner">
                 <nav class="prints-nav prints-nav--left" aria-label="Основная навигация">
-                    <a href="./">Prints</a>
                     <a href="./?category=abstract">Abstract</a>
                     <a href="./?category=figurative">Figurative</a>
                     <a href="./?category=landscape">Landscape</a>
                 </nav>
-                <a class="prints-brand" href="./">MUKASHOV PRINTS</a>
+                <a class="prints-brand" href="./">MUKASHOV GALLERY</a>
                 <div class="prints-nav prints-nav--right">
-                    <a href="./artists.html">Художникам</a>
-                    <a class="prints-nav__text-link" href="../">Main Site</a>
+                    <details class="profile-menu" data-profile-menu>
+                        <summary aria-label="Профиль" title="Профиль">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="8" r="3.25"></circle>
+                                <path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"></path>
+                            </svg>
+                        </summary>
+                        <div class="profile-menu__panel">
+                            <div data-profile-guest>
+                                <a href="./artists.html?mode=login">Войти</a>
+                                <a href="./artists.html?mode=register">Зарегистрироваться</a>
+                            </div>
+                            <div data-profile-account hidden>
+                                <a href="./artists.html#works">Мои работы</a>
+                                <a href="./artists.html#new-work">Добавить работу</a>
+                                <a href="./artists.html#profile">Настройки профиля</a>
+                                <button type="button" data-profile-signout>Выйти</button>
+                            </div>
+                            <p class="profile-menu__notice" role="status" hidden></p>
+                        </div>
+                    </details>
                     <button class="nav-action" type="button" data-favourites-open aria-label="Открыть избранное">
                         <span class="nav-action__icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" focusable="false">
@@ -70,8 +89,12 @@
 
         <footer class="prints-footer">
             <div class="container prints-footer__inner">
-                <p>© 2026 Mukashov Prints</p>
-                <a href="../">Вернуться на главную</a>
+                <p>© 2026 Mukashov Gallery</p>
+                <nav class="prints-footer__links" aria-label="Документы галереи">
+                    <a href="./offer.html">Публичная оферта</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="./privacy.html">Политика обработки персональных данных</a>
+                </nav>
             </div>
         </footer>
     </div>

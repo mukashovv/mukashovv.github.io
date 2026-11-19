@@ -1,4 +1,4 @@
-.artists-header, .artist-actions {
+.artists-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -11,11 +11,11 @@
     border-bottom: 1px solid #d8d4cf;
 }
 
-.artists-page, .artist-gallery {
+.artists-page {
     padding-block: clamp(2rem, 6vw, 5rem);
 }
 
-.artists-page h1, .artists-page h2, .artist-gallery h2 {
+.artists-page h1, .artists-page h2 {
     font: 600 clamp(2rem, 5vw, 3.5rem)/1.1 "Cormorant Garamond", Georgia, serif;
     margin-block: 0 1rem;
 }
@@ -47,11 +47,6 @@
     margin-top: .5rem;
 }
 
-.artist-actions {
-    margin-bottom: 2rem;
-    overflow-wrap: anywhere;
-}
-
 .artist-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
@@ -80,23 +75,8 @@
     white-space: pre-wrap;
 }
 
-.artists-page [hidden], .artist-gallery [hidden] {
+.artists-page [hidden] {
     display: none;
-}
-
-#artist-profile {
-    margin-block: 0 2rem;
-    padding-block: 1rem;
-    border-block: 1px solid var(--line);
-}
-
-#artist-profile summary {
-    cursor: pointer;
-    font-weight: 700;
-}
-
-#artist-profile form {
-    margin-top: 1rem;
 }
 
 .artist-form select {
@@ -247,4 +227,104 @@
 
 .artwork-offer-details {
     margin-block: 1rem;
+}
+
+.artist-dashboard {
+    display: grid;
+    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+    gap: clamp(1.25rem, 3vw, 3rem);
+    align-items: start;
+}
+
+.artist-sidebar {
+    min-width: 0;
+}
+
+.artist-sidebar > p {
+    margin: .3rem 0 1rem;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.artist-sidebar nav,
+.artist-auth-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+}
+
+.artist-sidebar nav {
+    flex-direction: column;
+}
+
+.artist-sidebar nav a,
+.artist-auth-links a {
+    padding: .6rem .75rem;
+    text-decoration: none;
+    font-size: .875rem;
+}
+
+.artist-sidebar nav a[aria-current],
+.artist-auth-links a[aria-current],
+.artist-sidebar nav a:hover,
+.artist-auth-links a:hover {
+    background: var(--surface-soft);
+}
+
+.artist-surface {
+    min-width: 0;
+    padding: clamp(1rem, 3vw, 2rem);
+    background: var(--surface);
+    border: 1px solid var(--line);
+}
+
+.artist-auth-panel {
+    max-width: 32rem;
+}
+
+.artist-auth-links {
+    margin-bottom: 1.25rem;
+}
+
+.artist-works-header,
+.artist-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .6rem;
+}
+
+.artist-works-header {
+    justify-content: space-between;
+}
+
+.artist-works-header h2 {
+    margin: 0;
+}
+
+.artist-card {
+    padding: .875rem;
+    border: 1px solid var(--line);
+    align-self: start;
+}
+
+.artist-card__status {
+    color: var(--muted);
+    font-size: .875rem;
+}
+
+.artist-card .artwork-offer-editor {
+    margin: .75rem 0 0;
+    padding-top: .75rem;
+    border-top: 1px solid var(--line);
+}
+
+@media (max-width: 760px) {
+    .artist-dashboard {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .artist-sidebar nav {
+        flex-direction: row;
+    }
 }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Публичная оферта — Mukashov Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="build/css/styles.css">
+    <script type="module" src="build/js/profile-menu.js"></script>
+</head>
+<body>
+    <header class="container gallery-document__header">
+        <a class="prints-brand" href="./">MUKASHOV GALLERY</a>
+        <details class="profile-menu" data-profile-menu>
+            <summary aria-label="Профиль" title="Профиль">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="3.25"></circle>
+                    <path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"></path>
+                </svg>
+            </summary>
+            <div class="profile-menu__panel">
+                <div data-profile-guest>
+                    <a href="./artists.html?mode=login">Войти</a>
+                    <a href="./artists.html?mode=register">Зарегистрироваться</a>
+                </div>
+                <div data-profile-account hidden>
+                    <a href="./artists.html#works">Мои работы</a>
+                    <a href="./artists.html#new-work">Добавить работу</a>
+                    <a href="./artists.html#profile">Настройки профиля</a>
+                    <button type="button" data-profile-signout>Выйти</button>
+                </div>
+                <p class="profile-menu__notice" role="status" hidden></p>
+            </div>
+        </details>
+    </header>
+    <main class="container gallery-document">
+        <h1>Публичная оферта</h1>
+        <p class="gallery-document__note">Проект условий галереи. Реквизиты продавца, способы оплаты, доставки и возврата будут указаны перед приёмом заказов.</p>
+        <h2>Работы в каталоге</h2>
+        <p>Mukashov Gallery показывает оригиналы и принты. В карточке могут быть указаны автор, вариант работы, цена, размеры и наличие.</p>
+        <h2>Подтверждение заказа</h2>
+        <p>Перед подтверждением покупки уточните у продавца конкретный экземпляр, итоговую цену, условия оплаты и способ получения. Добавление работы в избранное или корзину само по себе не оформляет заказ.</p>
+        <h2>Доставка и возврат</h2>
+        <p>Срок, стоимость и способ передачи работы согласуются при подтверждении заказа. Порядок обращений по качеству и возврату определяется условиями продавца и применимым законодательством.</p>
+    </main>
+    <footer class="prints-footer">
+        <div class="container prints-footer__inner">
+            <p>© 2026 Mukashov Gallery</p>
+            <nav class="prints-footer__links" aria-label="Документы галереи">
+                <a href="./offer.html">Публичная оферта</a>
+                <span aria-hidden="true">·</span>
+                <a href="./privacy.html">Политика обработки персональных данных</a>
+            </nav>
+        </div>
+    </footer>
+</body>
+</html>

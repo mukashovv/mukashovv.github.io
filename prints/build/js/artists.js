@@ -53,7 +53,6 @@ function workCard(work) {
         card.append(img);
     }
     card.append(element("h3", work.title), element("p", `${work.artist_name} · ${work.city}`));
-    if (work.description) card.append(element("p", work.description));
     return card;
 }
 
@@ -104,20 +103,46 @@ function readOfferFields(formData) {
 
 function initDashboard(client, storage) {
     const dashboard = document.querySelector("#artist-dashboard");
-    const profilePanel = document.querySelector("#artist-profile");
+    const authPanel = document.querySelector("#artist-auth-panel");
+    const authMode = new URLSearchParams(window.location.search).get("mode") === "register"
+        ? "register"
+        : "login";
+    const isRegistration = authMode === "register";
+    const authTitle = document.querySelector("#artist-auth-title");
+    authTitle.textContent = isRegistration ? "Регистрация" : "Вход в кабинет";
+    authForm.querySelector("button").textContent = isRegistration ? "Получить ссылку для регистрации" : "Получить ссылку для входа";
+    authPanel.querySelector(`[data-auth-mode="${authMode}"]`).setAttribute("aria-current", "page");
     const profileForm = document.querySelector("#artist-profile-form");
     const workForm = document.querySelector("#artist-work");
     const syncNewOffer = mountOfferFields(workForm.querySelector("[data-offer-fields]"));
     const worksList = document.querySelector("#artist-works");
     const worksStatus = document.querySelector("#artist-works-status");
     const email = document.querySelector("#artist-email");
-    const signOut = document.querySelector("#artist-signout");
+    const sections = Array.from(dashboard.querySelectorAll("[data-artist-panel]"));
+    const sectionLinks = dashboard.querySelectorAll("[data-artist-view]");
+    const requestedSection = () => window.location.hash.slice(1);
     const callback = new URL(window.location.href);
     callback.search = "";
     callback.hash = "";
     let userId = null;
-
     let profile = null;
+
+    function showSection(view) {
+        const requested = sections.some((section) => section.dataset.artistPanel === view)
+            ? view
+            : profile ? "works" : "profile";
+        const selected = requested === "new-work" && !profile ? "profile" : requested;
+        for (const section of sections) section.hidden = section.dataset.artistPanel !== selected;
+        for (const link of sectionLinks) {
+            if (link.dataset.artistView === selected) link.setAttribute("aria-current", "page");
+            else link.removeAttribute("aria-current");
+        }
+        if (requested !== selected) setStatus("Сначала сохраните профиль художника.");
+    }
+
+    window.addEventListener("hashchange", () => {
+        if (userId) showSection(requestedSection());
+    });
 
     async function loadProfile(owner) {
         const saved = unwrap(await client.from("prints_artist_profiles")
@@ -129,8 +154,7 @@ function initDashboard(client, storage) {
                 profileForm.elements.namedItem(field).value = saved[field];
             }
         }
-        profilePanel.open = !saved;
-        workForm.hidden = !saved;
+
     }
 
     async function uploadPhoto(work, photo, interior = false) {
@@ -150,11 +174,14 @@ function initDashboard(client, storage) {
 
     function dashboardCard(work) {
         const card = workCard(work);
-        card.append(element("p", work.is_published ? "Опубликовано" : "Черновик"));
+        card.append(element("p", work.is_published ? "Опубликовано" : "Черновик", "artist-card__status"));
+        const actions = element("div", "", "artist-card__actions");
+        const editor = element("details", "", "artwork-offer-editor");
+        editor.append(element("summary", "Редактировать работу"));
         if (work.is_published) {
             const link = element("a", "Открыть страницу работы", "button button--line");
             link.href = `./product.html?slug=artist-${work.id}`;
-            card.append(link);
+            actions.append(link);
         }
 
         function photoForm(interior) {
@@ -190,57 +217,60 @@ function initDashboard(client, storage) {
             return form;
         }
 
-        if (!work.imageUrl) card.append(photoForm(false));
-        if (work.imageUrl && !work.interiorUrl) card.append(photoForm(true));
+        if (!work.imageUrl) editor.append(photoForm(false));
+        if (work.imageUrl && !work.interiorUrl) editor.append(photoForm(true));
 
-        const categoryForm = element("form", "", "artist-form");
-        const categoryLabel = element("label", "Категория");
-        const category = workForm.elements.namedItem("category").cloneNode(true);
-        category.value = work.category || "";
-        const saveCategory = element("button", "Сохранить категорию", "button button--line");
-        categoryLabel.append(category);
-        categoryForm.append(categoryLabel, saveCategory);
-        categoryForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            run(saveCategory, async () => {
-                unwrap(await client.from("prints_artworks").update({ category: category.value })
-                    .eq("id", work.id).eq("artist_id", work.artist_id).select("id").single());
-                setStatus("Категория сохранена.");
-                await refreshWorks(work.artist_id);
-            }, "Не удалось сохранить категорию.");
-        });
-        card.append(categoryForm);
+        const editForm = element("form", "", "artist-form");
+        for (const name of ["title", "description", "category"]) {
+            const source = workForm.elements.namedItem(name);
+            const field = source.cloneNode(true);
+            const label = source.closest("label").cloneNode(false);
+            field.value = work[name] ?? "";
+            label.append(document.createTextNode(source.closest("label").firstChild.textContent), field);
+            editForm.append(label);
+        }
 
-        const offerEditor = element("details", "", "artwork-offer-editor");
-        const offerForm = element("form", "", "artist-form");
         const offerFields = element("div");
         offerFields.setAttribute("data-offer-fields", "");
-        const saveOffers = element("button", "Сохранить варианты", "button button--line");
         mountOfferFields(offerFields, work);
-        offerForm.append(offerFields, saveOffers);
-        offerEditor.append(element("summary", "Цена, размеры и наличие"), offerForm);
-        offerForm.addEventListener("submit", (event) => {
+        const offerType = offerFields.querySelector("select");
+        offerType.required = false;
+        offerType.options[0].textContent = "Без вариантов продажи";
+        const saveWork = element("button", "Сохранить изменения", "button button--line");
+        editForm.append(offerFields, saveWork);
+        editor.append(editForm);
+        editForm.addEventListener("submit", (event) => {
             event.preventDefault();
-            run(saveOffers, async () => {
-                unwrap(await client.from("prints_artworks").update(readOfferFields(new FormData(offerForm)))
-                    .eq("id", work.id).eq("artist_id", work.artist_id).select("id").single());
-                setStatus("Варианты продажи сохранены.");
+            const fields = new FormData(editForm);
+            run(saveWork, async () => {
+                const title = fields.get("title").trim();
+                if (!title) {
+                    setStatus("Укажите название работы.");
+                    return;
+                }
+                unwrap(await client.from("prints_artworks").update({
+                    title,
+                    description: fields.get("description").trim(),
+                    category: fields.get("category"),
+                    ...readOfferFields(fields)
+                }).eq("id", work.id).eq("artist_id", work.artist_id).select("id").single());
+                setStatus("Изменения сохранены.");
                 await refreshWorks(work.artist_id);
-            }, "Не удалось сохранить варианты продажи.");
+            }, "Не удалось сохранить изменения.");
         });
-        card.append(offerEditor);
 
         if (work.imageUrl || work.is_published) {
             const button = element("button", work.is_published ? "Скрыть" : "Опубликовать", "button button--solid");
             button.type = "button";
             button.addEventListener("click", () => run(button, async () => {
                 if (!work.is_published && (!profile || !work.category)) {
-                    if (!profile) profilePanel.open = true;
+                    if (!profile) showSection("profile");
+                    else editor.open = true;
                     setStatus("Перед публикацией сохраните профиль и выберите категорию работы.");
                     return;
                 }
                 if (!work.is_published && work.original_price == null && work.print_price == null) {
-                    offerEditor.open = true;
+                    editor.open = true;
                     setStatus("Перед публикацией сохраните хотя бы один вариант продажи.");
                     return;
                 }
@@ -250,8 +280,9 @@ function initDashboard(client, storage) {
                 setStatus(work.is_published ? "Работа скрыта." : "Работа опубликована.");
                 await refreshWorks(work.artist_id);
             }, "Не удалось изменить статус работы. Попробуйте ещё раз."));
-            card.append(button);
+            actions.append(button);
         }
+        card.append(actions, editor);
         return card;
     }
 
@@ -260,15 +291,11 @@ function initDashboard(client, storage) {
         run(event.submitter, async () => {
             unwrap(await client.auth.signInWithOtp({
                 email: new FormData(authForm).get("email").trim(),
-                options: { emailRedirectTo: callback.href }
+                options: { emailRedirectTo: callback.href, shouldCreateUser: isRegistration }
             }));
-            setStatus("Ссылка отправлена. Откройте письмо, чтобы войти в кабинет.");
+            setStatus("Проверьте почту. Откройте ссылку из письма, чтобы продолжить.");
         }, "Не удалось отправить ссылку. Проверьте адрес и попробуйте ещё раз.");
     });
-
-    signOut.addEventListener("click", () => run(signOut, async () => {
-        unwrap(await client.auth.signOut({ scope: "local" }));
-    }, "Не удалось выйти. Попробуйте ещё раз."));
 
     profileForm.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -287,6 +314,10 @@ function initDashboard(client, storage) {
                 .upsert({ artist_id: owner, artist_name, city, whatsapp }));
             if (owner !== userId) return;
             await loadProfile(owner);
+            if (owner !== userId) return;
+            const nextSection = requestedSection() === "new-work" ? "new-work" : "works";
+            window.history.replaceState(null, "", `#${nextSection}`);
+            showSection(nextSection);
             setStatus("Профиль сохранён.");
             await refreshWorks(owner);
         }, "Не удалось сохранить профиль. Попробуйте ещё раз.");
@@ -318,9 +349,13 @@ function initDashboard(client, storage) {
             try {
                 await uploadPhoto(work, photo);
                 if (interior.size) await uploadPhoto(work, interior, true);
-                setStatus("Черновик сохранён. Опубликуйте работу в разделе «Мои работы».");
+                setStatus("Черновик сохранён. Теперь его можно опубликовать.");
             } finally {
-                await refreshWorks(owner);
+                if (owner === userId) {
+                    window.history.replaceState(null, "", "#works");
+                    showSection("works");
+                    await refreshWorks(owner);
+                }
             }
         }, "Не удалось сохранить работу полностью. Если черновик появился в «Моих работах», недостающие фото можно добавить там.");
     });
@@ -331,7 +366,7 @@ function initDashboard(client, storage) {
         const nextId = session?.user.id || null;
         if (event !== "INITIAL_SESSION" && nextId === userId) return;
         userId = nextId;
-        authForm.hidden = Boolean(userId);
+        authPanel.hidden = Boolean(userId);
         dashboard.hidden = !userId;
         email.textContent = session?.user.email || "";
         worksList.replaceChildren();
@@ -339,7 +374,7 @@ function initDashboard(client, storage) {
         profileForm.reset();
         workForm.reset();
         syncNewOffer();
-        workForm.hidden = true;
+        for (const section of sections) section.hidden = true;
         setStatus(authError && !userId && event === "INITIAL_SESSION"
             ? "Ссылка для входа недействительна или устарела. Запросите новую."
             : "");
@@ -348,7 +383,9 @@ function initDashboard(client, storage) {
             // Supabase processes auth callbacks under a lock. Query after it returns.
             setTimeout(() => {
                 if (nextId !== userId) return;
-                loadProfile(nextId).catch(() => {
+                loadProfile(nextId).then(() => {
+                    if (nextId === userId) showSection(requestedSection());
+                }).catch(() => {
                     if (nextId === userId) setStatus("Не удалось загрузить профиль. Обновите страницу.");
                 });
                 refreshWorks(nextId);

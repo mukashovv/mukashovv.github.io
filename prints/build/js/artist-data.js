@@ -11,7 +11,18 @@ export function unwrap({ data, error }) {
     return data;
 }
 
-export async function createPrintsClient({ account = false } = {}) {
+let accountClient;
+
+export function createPrintsClient({ account = false } = {}) {
+    if (!account) return openPrintsClient(false);
+    accountClient ||= openPrintsClient(true).catch((error) => {
+        accountClient = undefined;
+        throw error;
+    });
+    return accountClient;
+}
+
+async function openPrintsClient(account) {
     const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
     return createClient(projectUrl, publishableKey, {
         auth: {

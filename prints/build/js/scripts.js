@@ -1002,7 +1002,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     const renderArtistProduct = (product, gallery, summary, featuredGrid) => {
-        document.title = `${product.title} — Принты`;
+        document.title = `${product.title} — Mukashov Gallery`;
         gallery.innerHTML = `
             <div class="product-gallery artwork-product-gallery" aria-label="Фотографии работы">
                 <div class="product-gallery__thumbs">
@@ -1073,7 +1073,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (product.slug === slug) {
                 renderArtistProduct(product, gallery, summary, featuredGrid);
             } else {
-                document.title = "Работа недоступна — Принты";
+                document.title = "Работа недоступна — Mukashov Gallery";
                 summary.innerHTML = '<div class="product-panel"><h1>Работа недоступна</h1><a class="button button--line" href="./">Каталог</a></div>';
             }
             return;
@@ -1093,7 +1093,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
         const thumbCount = Math.max(images.length, 1);
 
-        document.title = `${product.title} — Принты`;
+        document.title = `${product.title} — Mukashov Gallery`;
         const renderFeatured = () => {
             if (featuredGrid) {
                 featuredGrid.innerHTML = getFeaturedProducts(product.slug)
@@ -1193,7 +1193,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderGlobalUi();
         bindProductViewportEvents();
 
-        const preview = document.querySelector("#productPreview");
         const previewImage = document.querySelector("[data-role='product-image']");
         const selectionValue = document.querySelector("[data-role='selection-value']");
         const totalPrice = document.querySelector("[data-role='total-price']");
@@ -1228,11 +1227,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (frameSelect) {
                 frameSelect.value = state.frameId;
-            }
-
-            if (preview) {
-                preview.style.setProperty("--frame-tone", frame.swatch);
-                preview.style.setProperty("--frame-shadow", frame.accent);
             }
 
             if (previewImage) {

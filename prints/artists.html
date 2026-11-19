@@ -3,69 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Кабинет художника — Mukashov Prints</title>
+    <title>Кабинет художника — Mukashov Gallery</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="build/css/styles.css">
     <link rel="stylesheet" href="build/css/artists.css">
     <script type="module" src="build/js/artists.js"></script>
+    <script type="module" src="build/js/profile-menu.js"></script>
 </head>
 <body>
     <header class="container artists-header">
-        <a class="prints-brand" href="./">MUKASHOV PRINTS</a>
-        <a href="./">Работы художников</a>
+        <a class="prints-brand" href="./">MUKASHOV GALLERY</a>
+        <details class="profile-menu" data-profile-menu>
+            <summary aria-label="Профиль" title="Профиль">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="3.25"></circle>
+                    <path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"></path>
+                </svg>
+            </summary>
+            <div class="profile-menu__panel">
+                <div data-profile-guest>
+                    <a href="./artists.html?mode=login">Войти</a>
+                    <a href="./artists.html?mode=register">Зарегистрироваться</a>
+                </div>
+                <div data-profile-account hidden>
+                    <a href="./artists.html#works">Мои работы</a>
+                    <a href="./artists.html#new-work">Добавить работу</a>
+                    <a href="./artists.html#profile">Настройки профиля</a>
+                    <button type="button" data-profile-signout>Выйти</button>
+                </div>
+                <p class="profile-menu__notice" role="status" hidden></p>
+            </div>
+        </details>
     </header>
     <main class="container artists-page">
         <h1>Кабинет художника</h1>
         <p id="artist-status" role="status" aria-live="polite">Загрузка кабинета…</p>
         <noscript>Для работы кабинета включите JavaScript.</noscript>
-        <form id="artist-auth" class="artist-form" hidden>
-            <p>Зарегистрируйтесь или войдите по одноразовой ссылке из письма.</p>
-            <label>Электронная почта <input type="email" name="email" autocomplete="email" required></label>
-            <button class="button button--solid">Получить ссылку</button>
-        </form>
-        <section id="artist-dashboard" hidden>
-            <div class="artist-actions">
-                <span id="artist-email"></span>
-                <button class="button button--ghost" id="artist-signout" type="button">Выйти</button>
-            </div>
-            <details id="artist-profile">
-                <summary>Профиль художника</summary>
+        <section id="artist-auth-panel" class="artist-surface artist-auth-panel" hidden>
+            <nav class="artist-auth-links" aria-label="Доступ к кабинету">
+                <a href="./artists.html?mode=login" data-auth-mode="login">Войти</a>
+                <a href="./artists.html?mode=register" data-auth-mode="register">Регистрация</a>
+            </nav>
+            <h2 id="artist-auth-title">Войти</h2>
+            <form id="artist-auth" class="artist-form">
+                <label>Электронная почта <input type="email" name="email" autocomplete="email" required></label>
+                <button class="button button--solid">Получить ссылку для входа</button>
+            </form>
+        </section>
+        <section id="artist-dashboard" class="artist-dashboard" hidden>
+            <aside class="artist-sidebar">
+                <p id="artist-email"></p>
+                <nav aria-label="Разделы кабинета">
+                    <a href="#works" data-artist-view="works">Мои работы</a>
+                    <a href="#new-work" data-artist-view="new-work">Добавить работу</a>
+                    <a href="#profile" data-artist-view="profile">Настройки профиля</a>
+                </nav>
+            </aside>
+            <section class="artist-surface" data-artist-panel="profile" hidden>
+                <h2>Настройки профиля</h2>
                 <form id="artist-profile-form" class="artist-form">
                     <label>Имя художника или псевдоним <input name="artist_name" maxlength="80" required></label>
                     <label>Город <input name="city" maxlength="80" autocomplete="address-level2" required></label>
                     <label>WhatsApp <input name="whatsapp" type="tel" autocomplete="tel" placeholder="+996 700 123 456" maxlength="25" required></label>
                     <button class="button button--solid">Сохранить профиль</button>
                 </form>
-            </details>
-            <form id="artist-work" class="artist-form" hidden>
+            </section>
+            <section class="artist-surface" data-artist-panel="new-work" hidden>
                 <h2>Добавить работу</h2>
-                <label>Категория
-                    <select name="category" required>
-                        <option value="">Выберите категорию</option>
-                        <option value="abstract">Абстракция</option>
-                        <option value="figurative">Фигуративное искусство</option>
-                        <option value="still-life">Натюрморт</option>
-                        <option value="landscape">Пейзаж</option>
-                    </select>
-                </label>
-                <label>Название работы <input name="title" maxlength="120" required></label>
-                <label>Описание <textarea name="description" rows="4" maxlength="2000"></textarea></label>
-                <label>Фото работы (JPEG, PNG или WebP, до 5 МБ)
-                    <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
-                </label>
-                <label>Фото работы в интерьере (необязательно)
-                    <input name="interior" type="file" accept="image/jpeg,image/png,image/webp">
-                </label>
-                <div data-offer-fields></div>
-                <button class="button button--solid">Сохранить черновик</button>
-            </form>
-            <section class="artist-gallery" aria-labelledby="my-artworks-title">
-                <h2 id="my-artworks-title">Мои работы</h2>
+                <form id="artist-work" class="artist-form">
+                    <label>Категория
+                        <select name="category" required>
+                            <option value="">Выберите категорию</option>
+                            <option value="abstract">Абстракция</option>
+                            <option value="figurative">Фигуративное искусство</option>
+                            <option value="still-life">Натюрморт</option>
+                            <option value="landscape">Пейзаж</option>
+                        </select>
+                    </label>
+                    <label>Название работы <input name="title" maxlength="120" required></label>
+                    <label>Описание <textarea name="description" rows="4" maxlength="2000"></textarea></label>
+                    <label>Фото работы (JPEG, PNG или WebP, до 5 МБ)
+                        <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+                    </label>
+                    <label>Фото работы в интерьере (необязательно)
+                        <input name="interior" type="file" accept="image/jpeg,image/png,image/webp">
+                    </label>
+                    <div data-offer-fields></div>
+                    <button class="button button--solid">Сохранить черновик</button>
+                </form>
+            </section>
+            <section class="artist-surface" data-artist-panel="works" aria-labelledby="my-artworks-title" hidden>
+                <div class="artist-works-header">
+                    <h2 id="my-artworks-title">Мои работы</h2>
+                    <a class="button button--solid" href="#new-work">Добавить работу</a>
+                </div>
                 <p id="artist-works-status" role="status"></p>
                 <div id="artist-works" class="artist-grid"></div>
             </section>
         </section>
     </main>
+    <footer class="prints-footer">
+        <div class="container prints-footer__inner">
+            <p>© 2026 Mukashov Gallery</p>
+            <nav class="prints-footer__links" aria-label="Документы галереи">
+                <a href="./offer.html">Публичная оферта</a>
+                <span aria-hidden="true">·</span>
+                <a href="./privacy.html">Политика обработки персональных данных</a>
+            </nav>
+        </div>
+    </footer>
     <template id="artwork-offer-fields">
         <label>Что продаётся
             <select name="offer_type" required>
