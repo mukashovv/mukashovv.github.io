@@ -1,5 +1,7 @@
 import { createPrintsClient } from "./artist-data.js";
 
+const english = document.documentElement.lang === "en";
+
 for (const menu of document.querySelectorAll("[data-profile-menu]")) {
     const guest = menu.querySelector("[data-profile-guest]");
     const account = menu.querySelector("[data-profile-account]");
@@ -13,7 +15,7 @@ for (const menu of document.querySelectorAll("[data-profile-menu]")) {
         connecting = true;
         guest.hidden = true;
         notice.hidden = false;
-        notice.textContent = "Проверяем вход…";
+        notice.textContent = english ? "Checking sign-in…" : "Проверяем вход…";
         try {
             client = await createPrintsClient({ account: true });
             client.auth.onAuthStateChange((_event, session) => {
@@ -52,7 +54,7 @@ for (const menu of document.querySelectorAll("[data-profile-menu]")) {
             menu.open = false;
             menu.querySelector("summary").focus();
         } catch {
-            notice.textContent = "Не удалось выйти. Попробуйте ещё раз.";
+            notice.textContent = english ? "Could not log out. Try again." : "Не удалось выйти. Попробуйте ещё раз.";
             notice.hidden = false;
         } finally {
             signOut.disabled = false;

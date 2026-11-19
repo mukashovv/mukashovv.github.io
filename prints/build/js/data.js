@@ -1,5 +1,5 @@
 window.printsShared = {
-    catalogLabel: "Launch selection / prints",
+    catalogLabel: "Стартовая подборка принтов",
     launchNote: "Временные изображения для запуска витрины взяты с The Poster Club. Позже заменим их на ваши работы без переделки структуры.",
     defaultSizeId: "50x70",
     defaultFrameId: "oak-slim",
@@ -10,43 +10,43 @@ window.printsShared = {
         rate: 95
     },
     sortTabs: [
-        { id: "all", label: "All Prints" },
-        { id: "new", label: "New Arrivals" },
-        { id: "popular", label: "Most Popular" },
-        { id: "large", label: "Large Scale" }
+        { id: "all", label: "Все работы" },
+        { id: "new", label: "Сначала новые" },
+        { id: "popular", label: "Самые популярные" },
+        { id: "large", label: "Крупный формат" }
     ],
     priceRanges: [
-        { id: "all", label: "All Prices" },
-        { id: "under-20000", label: "Under 20 000" },
+        { id: "all", label: "Любая цена" },
+        { id: "under-20000", label: "До 20 000" },
         { id: "20000-30000", label: "20 000 - 30 000" },
         { id: "30000-plus", label: "30 000+" }
     ],
     orientations: [
-        { id: "all", label: "All Orientations" },
-        { id: "portrait", label: "Portrait" },
-        { id: "landscape", label: "Landscape" },
-        { id: "square", label: "Square" }
+        { id: "all", label: "Любая ориентация" },
+        { id: "portrait", label: "Вертикальная" },
+        { id: "landscape", label: "Горизонтальная" },
+        { id: "square", label: "Квадратная" }
     ],
     colours: [
-        { id: "all", label: "All Colours" },
-        { id: "warm", label: "Warm" },
-        { id: "neutral", label: "Neutral" },
-        { id: "earth", label: "Earth" },
-        { id: "contrast", label: "Contrast" }
+        { id: "all", label: "Все цвета" },
+        { id: "warm", label: "Тёплая гамма" },
+        { id: "neutral", label: "Нейтральная гамма" },
+        { id: "earth", label: "Природные оттенки" },
+        { id: "contrast", label: "Контрастная гамма" }
     ],
     collections: [
-        { id: "all", label: "All Collections" },
-        { id: "studio-selection", label: "Studio Selection" },
-        { id: "colour-studies", label: "Colour Studies" },
-        { id: "figurative-moments", label: "Figurative Moments" },
-        { id: "nordic-quiet", label: "Nordic Quiet" }
+        { id: "all", label: "Все коллекции" },
+        { id: "studio-selection", label: "Подборка студии" },
+        { id: "colour-studies", label: "Этюды цвета" },
+        { id: "figurative-moments", label: "Фигуративные мотивы" },
+        { id: "nordic-quiet", label: "Северная тишина" }
     ],
     categories: [
-        { id: "all", label: "All Categories" },
-        { id: "abstract", label: "Abstract" },
-        { id: "figurative", label: "Figurative" },
-        { id: "still-life", label: "Still Life" },
-        { id: "landscape", label: "Landscape" }
+        { id: "all", label: "Все категории" },
+        { id: "abstract", label: "Абстракция" },
+        { id: "figurative", label: "Фигуративное искусство" },
+        { id: "still-life", label: "Натюрморт" },
+        { id: "landscape", label: "Пейзаж" }
     ],
     sizes: [
         {
@@ -125,8 +125,9 @@ window.printsCatalog = [
     {
         slug: "last-sunlight-in-ala-archa",
         title: "Last Sunlight in Ala-Archa",
+        titleRu: "Последние лучи солнца в Ала-Арче",
         artist: "Janybek Mukash",
-        series: "JanybekOgraphY Fine Arts",
+        series: "Работы JanybekOgraphY",
         image: "build/img/last-sunlight-in-ala-archa.webp",
         hoverImage: "build/img/last-sunlight-in-ala-archa-in-action.webp",
         detailImage: "build/img/silence-of-the-kyrgyz-mountains-in-stone-and-light.webp",
@@ -156,8 +157,9 @@ window.printsCatalog = [
     {
         slug: "hidden-heart-of-teskey-ala-too",
         title: "Hidden Heart of Teskey Ala-Too",
+        titleRu: "Потаённое сердце Терскей-Ала-Тоо",
         artist: "Janybek Mukash",
-        series: "JanybekOgraphY Fine Arts",
+        series: "Работы JanybekOgraphY",
         image: "build/img/hidden-heart-of-teskey-ala-too.webp",
         hoverImage: "build/img/hidden-heart-of-teskey-ala-too-interior.webp",
         detailImage: "build/img/hidden-heart-of-teskey-ala-too-interior.webp",
@@ -186,6 +188,7 @@ window.printsCatalog = [
     {
         slug: "archabek",
         title: "Good Morning",
+        titleRu: "Доброе утро",
         artist: "Arch",
         series: "Arch",
         image: "build/img/archabek.webp",
@@ -216,6 +219,7 @@ window.printsCatalog = [
     {
         slug: "arch-2",
         title: "Night Time",
+        titleRu: "Ночное время",
         artist: "Arch",
         series: "Arch",
         image: "build/img/night-time.webp",
@@ -246,6 +250,7 @@ window.printsCatalog = [
     {
         slug: "airplane-stump",
         title: "Airplane Stump",
+        titleRu: "Обломок самолёта",
         artist: "Toetiee",
         image: "https://cdn.theposterclub.com/wp-content/uploads/2026/03/CA-CPR-17356-7_Toetiee_Airplane_Stump_Oak_Frame-800x1120.jpg",
         hoverImage: "https://theposterclub.com/wp-content/uploads/2026/03/Toetiee_Airplane_Stump_Canvas_Lifestyle_Low_Res-800x1100.jpg",
@@ -258,7 +263,7 @@ window.printsCatalog = [
         referenceUrl: "https://theposterclub.com/product/toetiee-airplane-stump-canvas/",
         summary: "Более графичная композиция с ощущением движения и собранной формы.",
         intro: [
-            "Airplane Stump смотрится строже и динамичнее, поэтому особенно удачно входит в современные интерьеры с чистыми линиями.",
+            "Обломок самолёта смотрится строже и динамичнее, поэтому особенно удачно входит в современные интерьеры с чистыми линиями.",
             "Если нужен принт для рабочей зоны, холла или пространства с архитектурным характером, эта работа дает хороший баланс энергии и сдержанности."
         ],
         category: "abstract",
@@ -279,6 +284,7 @@ window.printsCatalog = [
     {
         slug: "cat-cat",
         title: "Cat Cat",
+        titleRu: "Кот, кот",
         artist: "Rut Pedreno Criado",
         image: "https://cdn.theposterclub.com/wp-content/uploads/2026/03/CA-CPR-17599-07_Rut_Pedreno_Criado_Cat_Cat_Oak_Frame-800x1120.jpg",
         hoverImage: "https://theposterclub.com/wp-content/uploads/2026/03/Rut_Pedreno_Criado_Cat_Cat_Canvas_Lifestyle_Low_Res-800x1100.jpg",
@@ -291,7 +297,7 @@ window.printsCatalog = [
         referenceUrl: "https://theposterclub.com/product/rut-pedreno-criado-cat-cat-canvas/",
         summary: "Фигуративная работа с легким характером и живой домашней интонацией.",
         intro: [
-            "Cat Cat добавляет в пространство мягкость и личность, поэтому особенно хорошо чувствует себя в кухне, детской или в неформальной гостиной.",
+            "Кот, кот добавляет в пространство мягкость и личность, поэтому особенно хорошо чувствует себя в кухне, детской или в неформальной гостиной.",
             "Эта работа раскрывается в светлых багетах, когда хочется сохранить легкость, и в графитовом профиле, когда нужен более собранный силуэт."
         ],
         category: "figurative",
@@ -312,6 +318,7 @@ window.printsCatalog = [
     {
         slug: "the-vase",
         title: "The Vase",
+        titleRu: "Ваза",
         artist: "Rut Pedreno Criado",
         image: "https://cdn.theposterclub.com/wp-content/uploads/2026/03/CA-CPR-17597-07_Rut_Pedreno_Criado_The_Vase_Oak_Frame-800x1120.jpg",
         hoverImage: "https://theposterclub.com/wp-content/uploads/2026/03/Rut_Pedreno_Criado_The_Vase_Canvas_Lifestyle_Low_Res-800x1100.jpg",
@@ -324,7 +331,7 @@ window.printsCatalog = [
         referenceUrl: "https://theposterclub.com/product/rut-pedreno-criado-the-vase-canvas/",
         summary: "Спокойный натюрморт с коллекционным ощущением и мягкой вертикалью.",
         intro: [
-            "The Vase легко встраивается в интерьер как одиночная работа над консолью, комодом или обеденной зоной.",
+            "Ваза легко встраивается в интерьер как одиночная работа над консолью, комодом или обеденной зоной.",
             "Если хочется подчеркнуть предметность и галерейное настроение, лучше всего выбирать ореховый или терракотовый багет."
         ],
         category: "still-life",
@@ -345,6 +352,7 @@ window.printsCatalog = [
     {
         slug: "colour-trio",
         title: "Colour Trio",
+        titleRu: "Цветовое трио",
         artist: "Teklan",
         image: "https://cdn.theposterclub.com/wp-content/uploads/2026/03/CA-CPR-17283-7_Teklan_Color_Trio_Oak_Frame-800x1120.jpg",
         hoverImage: "https://theposterclub.com/wp-content/uploads/2026/03/Teklan_Colour_Trio_Canvas_Lifestyle_Low_Res-800x1100.jpg",
@@ -357,7 +365,7 @@ window.printsCatalog = [
         referenceUrl: "https://theposterclub.com/product/teklan-colour-trio-canvas/",
         summary: "Минималистичная композиция, собранная на крупных цветовых блоках.",
         intro: [
-            "Colour Trio хорошо держит стену даже в небольшом формате и особенно подходит интерьерам, где уже есть предметы с ярким характером.",
+            "Цветовое трио хорошо держит стену даже в небольшом формате и особенно подходит интерьерам, где уже есть предметы с ярким характером.",
             "Работа дает возможность играть багетом: дуб оставляет ее спокойной, а графит и терракота делают подачу более дизайнерской."
         ],
         category: "abstract",
@@ -378,6 +386,7 @@ window.printsCatalog = [
     {
         slug: "between-columns",
         title: "Between Columns",
+        titleRu: "Между колоннами",
         artist: "Teklan",
         image: "https://cdn.theposterclub.com/wp-content/uploads/2026/03/CA-CPR-17281-7_Teklan_Between_Columns_Oak_Frame-800x1120.jpg",
         hoverImage: "https://theposterclub.com/wp-content/uploads/2026/03/Teklan_Between_Columns_Canvas_Lifestyle_Low_Res-800x1100.jpg",
@@ -390,7 +399,7 @@ window.printsCatalog = [
         referenceUrl: "https://theposterclub.com/product/teklan-between-columns-canvas/",
         summary: "Архитектурный ритм и вертикальная композиция для более собранных пространств.",
         intro: [
-            "Between Columns особенно хорошо выглядит там, где интерьер уже построен на пропорциях, вертикалях и чистом свете.",
+            "Между колоннами особенно хорошо выглядит там, где интерьер уже построен на пропорциях, вертикалях и чистом свете.",
             "Это удачный выбор для кабинета, лестничной зоны или приемной, где нужен аккуратный графичный акцент без визуального шума."
         ],
         category: "abstract",
@@ -411,6 +420,7 @@ window.printsCatalog = [
     {
         slug: "tatuagem",
         title: "Tatuagem",
+        titleRu: "Татуировка",
         artist: "Antonia Figueiredo",
         image: "https://cdn.theposterclub.com/wp-content/uploads/2026/03/CA-CPR-17602-07_Antonia_Figueiredo_Tatuagem_Frame_Oak_Low_Res-800x1120.jpg",
         hoverImage: "https://theposterclub.com/wp-content/uploads/2026/03/Antonia_Figueiredo_Tatuagem_Canvas_Lifestyle_Low_Res-800x1100.jpg",
@@ -423,7 +433,7 @@ window.printsCatalog = [
         referenceUrl: "https://theposterclub.com/product/canvas-antonia-figueiredo-tatuagem/",
         summary: "Лаконичная работа с мягкой линией и теплой пластикой формы.",
         intro: [
-            "Tatuagem создает более интимное настроение и хорошо работает в спальне, гардеробной или камерной гостевой зоне.",
+            "Татуировка создает более интимное настроение и хорошо работает в спальне, гардеробной или камерной гостевой зоне.",
             "Если хочется подчеркнуть телесность и глубину, лучше выбирать ореховый багет; для более легкой подачи подойдет дуб."
         ],
         category: "figurative",
@@ -444,6 +454,7 @@ window.printsCatalog = [
     {
         slug: "cuillin-ridge-vii",
         title: "Cuillin Ridge VII",
+        titleRu: "Хребет Куиллин VII",
         artist: "Mandy Maria",
         image: "https://cdn.theposterclub.com/wp-content/uploads/2026/03/CA-CPR-17004-7_Mandy_Maria_Cuillin_Ridge_VII_Frame_Oak_Low_Res-800x1120.jpg",
         hoverImage: "https://theposterclub.com/wp-content/uploads/2026/03/Mandy_Maria_01-800x1100.jpg",
@@ -456,7 +467,7 @@ window.printsCatalog = [
         referenceUrl: "https://theposterclub.com/product/canvas-mandy-maria-cuillin-ridge-vii/",
         summary: "Пейзажная абстракция с глубиной дистанции и прохладным воздухом.",
         intro: [
-            "Cuillin Ridge VII хорошо собирает просторные стены и особенно сильна в крупных форматах, где появляется ощущение пространства впереди.",
+            "Хребет Куиллин VII хорошо собирает просторные стены и особенно сильна в крупных форматах, где появляется ощущение пространства впереди.",
             "Такой принт уместен в гостиной, переговорной или тихом общественном интерьере, где нужен более атмосферный визуальный слой."
         ],
         category: "landscape",

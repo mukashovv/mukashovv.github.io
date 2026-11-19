@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const shared = window.printsShared || {};
-    let catalog = window.printsCatalog || [];
+    const baseCatalog = window.printsCatalog || [];
+    const localizeWorkTitle = (work, original = work) =>
+        original.titleRu && work.title === original.title ? { ...work, title: original.titleRu } : work;
+    let catalog = baseCatalog.map((work) => localizeWorkTitle(work));
     const page = document.body.dataset.printsPage;
     const profileHandle = page === "catalog" ? new URLSearchParams(window.location.search).get("author") : null;
     let publicArtist;
@@ -225,8 +228,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (Array.isArray(product.intro) && product.intro.length) {
             sections.about = {
-                navLabel: "About",
-                eyebrow: "About",
+                navLabel: "О работе",
+                eyebrow: "О работе",
                 title: "Об изображении",
                 type: "paragraphs",
                 content: product.intro
@@ -234,16 +237,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         sections.framing = {
-            navLabel: "Framing",
-            eyebrow: "Framing",
+            navLabel: "Багет",
+            eyebrow: "Багет",
             title: "Оформление",
             type: "list",
             content: shared.included || []
         };
 
         sections.details = {
-            navLabel: "Details",
-            eyebrow: "Details",
+            navLabel: "Детали заказа",
+            eyebrow: "Детали заказа",
             title: "Детали заказа",
             type: "list",
             content: shared.framingNotes || []
@@ -349,8 +352,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             <aside class="drawer-panel" data-drawer-panel="favourites" aria-hidden="true">
                 <div class="drawer-panel__header">
                     <div class="drawer-panel__title-row">
-                        <p class="drawer-panel__title">Favourites</p>
-                        <button class="drawer-close" type="button" data-drawer-close>Close</button>
+                        <p class="drawer-panel__title">Избранное</p>
+                        <button class="drawer-close" type="button" data-drawer-close>Закрыть</button>
                     </div>
                 </div>
                 <div class="drawer-panel__body" data-favourites-body></div>
@@ -360,8 +363,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             <aside class="drawer-panel" data-drawer-panel="cart" aria-hidden="true">
                 <div class="drawer-panel__header">
                     <div class="drawer-panel__title-row">
-                        <p class="drawer-panel__title">Cart</p>
-                        <button class="drawer-close" type="button" data-drawer-close>Close</button>
+                        <p class="drawer-panel__title">Корзина</p>
+                        <button class="drawer-close" type="button" data-drawer-close>Закрыть</button>
                     </div>
                 </div>
                 <div class="drawer-panel__body" data-cart-body></div>
@@ -436,7 +439,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             <h3 class="drawer-item__name"><a href="${buildProductUrl(product.slug)}">${escapeHtml(product.title)}</a></h3>
                             <p class="drawer-item__meta">${product.isArtistWork ? escapeHtml(artistPriceLabel(product)) : `от ${getCardPrice(product, defaultSizeId)}`}</p>
                             <div class="drawer-item__actions">
-                                <button class="drawer-item__button" type="button" data-remove-favourite data-slug="${product.slug}">Remove</button>
+                                <button class="drawer-item__button" type="button" data-remove-favourite data-slug="${product.slug}">Удалить</button>
                             </div>
                         </div>
                     </article>
@@ -446,8 +449,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (favouritesFooter) {
             favouritesFooter.innerHTML = favouriteProducts.length
-                ? `<a class="button button--solid" href="./">Continue Browsing</a>`
-                : `<a class="button button--line" href="./">Open Catalog</a>`;
+                ? `<a class="button button--solid" href="./">Продолжить просмотр</a>`
+                : `<a class="button button--line" href="./">Открыть каталог</a>`;
         }
 
         if (cartBody) {
@@ -465,7 +468,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             <div class="drawer-item__actions">
                                 <button class="drawer-item__button" type="button" data-cart-adjust="decrease" data-cart-key="${cartItemKey(item)}">- 1</button>
                                 <button class="drawer-item__button" type="button" data-cart-adjust="increase" data-cart-key="${cartItemKey(item)}">+ 1</button>
-                                <button class="drawer-item__button" type="button" data-remove-cart data-cart-key="${cartItemKey(item)}">Remove</button>
+                                <button class="drawer-item__button" type="button" data-remove-cart data-cart-key="${cartItemKey(item)}">Удалить</button>
                             </div>
                         </div>
                     </article>
@@ -477,13 +480,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             cartFooter.innerHTML = cartDetails.length
                 ? `
                     <p class="drawer-total">
-                        <span>Subtotal</span>
+                        <span>Подытог</span>
                         <strong>${formatPrice(getCartTotal())}</strong>
                     </p>
                     <p class="drawer-empty">Онлайн-оплату и доставку подключим следующим этапом. Пока корзина собирает конфигурации принтов.</p>
-                    <a class="button button--solid" href="./">Continue Browsing</a>
+                    <a class="button button--solid" href="./">Продолжить просмотр</a>
                 `
-                : `<a class="button button--line" href="./">Open Catalog</a>`;
+                : `<a class="button button--line" href="./">Открыть каталог</a>`;
         }
     };
 
@@ -729,7 +732,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `
             <details class="filter-dropdown filter-dropdown--price${isActive ? " is-active" : ""}">
                 <summary class="filter-dropdown__summary">
-                    <span>Price</span>
+                    <span>Цена</span>
                     <span class="filter-dropdown__arrow" aria-hidden="true">
                         <svg viewBox="0 0 16 16" focusable="false">
                             <path d="m4 6 4 4 4-4"></path>
@@ -824,21 +827,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         waypoint.innerHTML = `
             <div class="container filter-waypoint__inner">
                 ${buildFilterDropdown({
-                    label: "Sort By",
+                    label: "Сортировка",
                     key: "sort",
                     selectedId: state.sortId,
                     options: shared.sortTabs || [],
                     optionLabel: (option) => option.label
                 })}
                 ${buildFilterDropdown({
-                    label: "Size",
+                    label: "Размер",
                     key: "size",
                     selectedId: state.sizeId,
                     options: shared.sizes || [],
                     optionLabel: (option) => option.shortLabel || option.label
                 })}
                 ${buildFilterDropdown({
-                    label: "Orientation",
+                    label: "Ориентация",
                     key: "orientation",
                     selectedId: state.orientationId,
                     options: shared.orientations || [],
@@ -846,28 +849,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                 })}
                 ${buildPriceDropdown(state)}
                 ${buildFilterDropdown({
-                    label: "Colour",
+                    label: "Цвет",
                     key: "colour",
                     selectedId: state.colourId,
                     options: shared.colours || [],
                     optionLabel: (option) => option.label
                 })}
                 ${publicArtist ? "" : buildFilterDropdown({
-                    label: "Artist",
+                    label: "Автор",
                     key: "artist",
                     selectedId: state.artistId,
-                    options: [{ id: "all", label: "All Artists" }, ...getArtists()],
+                    options: [{ id: "all", label: "Все авторы" }, ...getArtists()],
                     optionLabel: (option) => option.label
                 })}
                 ${buildFilterDropdown({
-                    label: "Category",
+                    label: "Категория",
                     key: "category",
                     selectedId: state.categoryId,
                     options: shared.categories || [],
                     optionLabel: (option) => option.label
                 })}
                 ${buildFilterDropdown({
-                    label: "Collection",
+                    label: "Коллекция",
                     key: "collection",
                     selectedId: state.collectionId,
                     options: shared.collections || [],
@@ -998,7 +1001,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const renderProductOptions = (sizes, initialSizeId) => `
         <div class="option-group">
             <div class="option-group__label-row">
-                <label class="option-group__label" for="product-size">Size</label>
+                <label class="option-group__label" for="product-size">Размер</label>
                 <span class="option-group__hint" data-role="size-hint"></span>
             </div>
             <select class="select-field" id="product-size" data-role="size-select">
@@ -1007,7 +1010,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
         <div class="option-group">
             <div class="option-group__label-row">
-                <label class="option-group__label" for="product-frame">Frame</label>
+                <label class="option-group__label" for="product-frame">Багет</label>
                 <span class="option-group__hint" data-role="frame-hint"></span>
             </div>
             <select class="select-field" id="product-frame" data-role="frame-select">
@@ -1181,7 +1184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <div class="product-panel">
                     <div class="product-panel__head">
                         <div>
-                            <p class="eyebrow">${product.series || "Canvas Print"}</p>
+                            <p class="eyebrow">${product.series || "Арт-принт"}</p>
                             <h1>${escapeHtml(product.title)}</h1>
                             <p class="product-panel__artist">${product.artist}</p>
                         </div>
@@ -1189,7 +1192,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
 
                     <div class="product-panel__price-row">
-                        <span>From</span>
+                        <span>От</span>
                         <strong data-role="total-price"></strong>
                     </div>
 
@@ -1199,20 +1202,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     <div class="selection-summary">
                         <div class="selection-summary__row">
-                            <span>Selected</span>
+                            <span>Выбрано</span>
                             <strong data-role="selection-value"></strong>
                         </div>
                         <div class="selection-summary__row">
-                            <span>Production</span>
+                            <span>Срок изготовления</span>
                             <strong>${product.leadTime}</strong>
                         </div>
                     </div>
 
                     <div class="summary-actions">
-                        <button class="button button--solid" type="button" data-role="add-to-cart">Add to Bag</button>
-                        <a class="button button--line" data-role="order-link" href="${product.referenceUrl}" target="_blank" rel="noopener">Order via Telegram</a>
+                        <button class="button button--solid" type="button" data-role="add-to-cart">В корзину</button>
+                        <a class="button button--line" data-role="order-link" href="${product.referenceUrl}" target="_blank" rel="noopener">Заказать через Telegram</a>
                         ${product.artistProfileSlug ? `<a class="button button--ghost" href="/${encodeURIComponent(product.artistProfileSlug)}">Профиль автора</a>` : ""}
-                        <a class="button button--ghost" href="./">Catalog</a>
+                        <a class="button button--ghost" href="./">Каталог</a>
                     </div>
                 </div>
             `;
@@ -1376,7 +1379,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ${body}
                     </div>
                     <div class="summary-actions">
-                        <a class="button button--solid" href="./product.html?slug=${product.slug}">Back to Print</a>
+                        <a class="button button--solid" href="./product.html?slug=${product.slug}">К работе</a>
                     </div>
                 </article>
             `;
@@ -1453,7 +1456,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             new Promise((_, reject) => timeout.addEventListener("abort", () => reject(timeout.reason), { once: true }))
         ]);
         const owners = new Map(assignments.map((assignment) => [assignment.product_slug, assignment]));
-        catalog = [...artworks, ...catalog.map((work) => applyCatalogueAssignment(work, owners.get(work.slug)))];
+        catalog = [...artworks, ...baseCatalog.map((work) => localizeWorkTitle(applyCatalogueAssignment(work, owners.get(work.slug)), work))];
         publicArtist = profile;
         if (profileHandle && !publicArtist) {
             const status = document.querySelector("#catalog-status");

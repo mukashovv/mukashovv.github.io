@@ -1,0 +1,1495 @@
+document.addEventListener("DOMContentLoaded", async () => {
+    const shared = window.printsShared || {};
+    let catalog = window.printsCatalog || [];
+    const page = document.body.dataset.printsPage;
+    const profileHandle = page === "catalog" ? new URLSearchParams(window.location.search).get("author") : null;
+    let publicArtist;
+
+    if (!catalog.length) {
+        return;
+    }
+
+    const storageKeys = {
+        favourites: "mukashov_prints_favourites",
+        cart: "mukashov_prints_cart"
+    };
+
+    const defaultSizeId = shared.defaultSizeId || "50x70";
+    const defaultFrameId = shared.defaultFrameId || "oak-slim";
+    const priceFilter = shared.priceFilter || {};
+    const defaultPriceMin = Number(priceFilter.min) || 20;
+    const defaultPriceMax = Number(priceFilter.max) || 800;
+    const priceStep = Number(priceFilter.step) || 5;
+    const euroRate = Number(priceFilter.rate) || 95;
+
+    const safeJsonParse = (value, fallback) => {
+        try {
+            return JSON.parse(value) || fallback;
+        } catch (error) {
+            return fallback;
+        }
+    };
+
+    const readStorage = (key, fallback) => {
+        try {
+            return safeJsonParse(window.localStorage.getItem(key), fallback);
+        } catch (error) {
+            return fallback;
+        }
+    };
+
+    const writeStorage = (key, value) => {
+        try {
+            window.localStorage.setItem(key, JSON.stringify(value));
+        } catch (error) {
+            return;
+        }
+    };
+
+    let favourites = Array.isArray(readStorage(storageKeys.favourites, []))
+        ? readStorage(storageKeys.favourites, [])
+        : [];
+    let cart = Array.isArray(readStorage(storageKeys.cart, []))
+        ? readStorage(storageKeys.cart, [])
+        : [];
+
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[character]);
+
+    const slugify = (value) => String(value || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+    const artistFilterId = (work) => work.artistId || slugify(work.artist);
+    const categoryLabel = (work) => shared.categories?.find((category) => category.id === work.category)?.label;
+    const formatPrice = (value) => `${new Intl.NumberFormat("en-GB").format(value)} KGS`;
+    const formatEuro = (value) => `${new Intl.NumberFormat("en-US").format(value)} €`;
+    const findSize = (sizeId) => (shared.sizes || []).find((size) => size.id === sizeId);
+    const findFrame = (frameId) => (shared.frames || []).find((frame) => frame.id === frameId);
+    const getProductBySlug = (slug) => catalog.find((item) => item.slug === slug) || catalog.find((item) => !item.isArtistWork);
+    const getGalleryImages = (product) => product.galleryImages?.filter(Boolean).length
+        ? product.galleryImages.filter(Boolean)
+        : [product.image].filter(Boolean);
+    const getArtists = () => Array.from(
+        new Map(
+            catalog.map((product) => [artistFilterId(product), { id: artistFilterId(product), label: product.artist }])
+        ).values()
+    );
+    const somToEuro = (value) => Math.round(Number(value || 0) / euroRate);
+    const clampPrice = (value, fallback) => {
+        const numericValue = Number(value);
+
+        if (Number.isNaN(numericValue)) {
+            return fallback;
+        }
+
+        return Math.min(defaultPriceMax, Math.max(defaultPriceMin, numericValue));
+    };
+    const normalizePriceRange = (minValue, maxValue, changedBound = "initial") => {
+        let min = clampPrice(minValue, defaultPriceMin);
+        let max = clampPrice(maxValue, defaultPriceMax);
+
+        if (min > max - priceStep) {
+            if (changedBound === "min") {
+                max = Math.min(defaultPriceMax, min + priceStep);
+            } else if (changedBound === "max") {
+                min = Math.max(defaultPriceMin, max - priceStep);
+            } else {
+                min = defaultPriceMin;
+                max = defaultPriceMax;
+            }
+        }
+
+        if (min > max) {
+            min = defaultPriceMin;
+            max = defaultPriceMax;
+        }
+
+        return { min, max };
+    };
+    const getBasePrice = (product, sizeId) => {
+        if (product.priceBySize[sizeId]) {
+            return product.priceBySize[sizeId];
+        }
+
+        return Object.values(product.priceBySize)[0];
+    };
+    const getCardPrice = (product, sizeId) => formatPrice(getBasePrice(product, sizeId || defaultSizeId));
+    const offerLabels = { original: "Original", print: "Print" };
+    const artistPriceLabel = (product) => {
+        const offers = product.offers || [];
+        const prices = offers.filter((offer) => offer.available).map((offer) => offer.price);
+        if (prices.length) {
+            const prefix = new Set(prices).size > 1 ? "From " : "";
+            return prefix + formatPrice(Math.min(...prices));
+        }
+        return offers.length ? "Out of stock" : product.city;
+    };
+    const isFavourite = (slug) => favourites.includes(slug);
+    let productViewportSyncFrame = 0;
+    let productViewportEventsBound = false;
+
+    const cartItemKey = (item) => `${item.slug}::${item.sizeId}::${item.frameId}`;
+    const normalizeCartItem = (item) => ({
+        slug: item.slug,
+        sizeId: item.sizeId || defaultSizeId,
+        frameId: item.frameId || defaultFrameId,
+        quantity: Math.max(1, Number(item.quantity) || 1)
+    });
+
+    cart = cart.map(normalizeCartItem);
+
+    const heartIcon = `
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 21.35 10.55 20C5.4 15.36 2 12.27 2 8.5 2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09A6.01 6.01 0 0 1 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.54L12 21.35Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path>
+        </svg>
+    `;
+
+    const buildProductUrl = (slug, options = {}) => {
+        const params = new URLSearchParams();
+        params.set("slug", slug);
+
+        if (options.sizeId) {
+            params.set("size", options.sizeId);
+        }
+
+        return `./product.html?${params.toString()}`;
+    };
+
+    const buildCatalogQuery = (state) => {
+        const params = new URLSearchParams();
+        if (profileHandle) params.set("author", profileHandle);
+
+        if (state.sortId && state.sortId !== "all") {
+            params.set("sort", state.sortId);
+        }
+
+        if (state.categoryId && state.categoryId !== "all") {
+            params.set("category", state.categoryId);
+        }
+
+        if (state.artistId && state.artistId !== "all") {
+            params.set("artist", state.artistId);
+        }
+
+        if (state.priceMin !== defaultPriceMin) {
+            params.set("price_min", state.priceMin);
+        }
+
+        if (state.priceMax !== defaultPriceMax) {
+            params.set("price_max", state.priceMax);
+        }
+
+        if (state.orientationId && state.orientationId !== "all") {
+            params.set("orientation", state.orientationId);
+        }
+
+        if (state.colourId && state.colourId !== "all") {
+            params.set("colour", state.colourId);
+        }
+
+        if (state.collectionId && state.collectionId !== "all") {
+            params.set("collection", state.collectionId);
+        }
+
+        if (state.sizeId && state.sizeId !== defaultSizeId) {
+            params.set("size", state.sizeId);
+        }
+
+        return params.toString();
+    };
+
+    const buildTelegramLink = (product, size, frame, total) => {
+        const productUrl = `https://mukashov.com/prints/product.html?slug=${product.slug}`;
+        const message = [
+            `I would like to order the print "${product.title}"`,
+            `Artist: ${product.artist}`,
+            `Size: ${size.label}`,
+            `Frame: ${frame.label}`,
+            `Total: ${formatPrice(total)}`
+        ].join("\n");
+        const params = new URLSearchParams({
+            url: productUrl,
+            text: message
+        });
+        return `${shared.contactLink}?${params.toString()}`;
+    };
+
+    const getInfoSections = (product) => {
+        const sections = {};
+
+        if (Array.isArray(product.intro) && product.intro.length) {
+            sections.about = {
+                navLabel: "About",
+                eyebrow: "About",
+                title: "About the artwork",
+                type: "paragraphs",
+                content: product.intro
+            };
+        }
+
+        sections.framing = {
+            navLabel: "Framing",
+            eyebrow: "Framing",
+            title: "Framing",
+            type: "list",
+            content: shared.included || []
+        };
+
+        sections.details = {
+            navLabel: "Details",
+            eyebrow: "Details",
+            title: "Order details",
+            type: "list",
+            content: shared.framingNotes || []
+        };
+
+        return sections;
+    };
+
+    const buildInfoMenu = (slug, activeSection, sectionsMap) => {
+        const sections = Object.entries(sectionsMap || {}).map(([id, section]) => ({
+            id,
+            label: section.navLabel
+        }));
+
+        return `
+            <div class="container footer-links-bar__inner">
+                <nav class="footer-links-nav" aria-label="Additional information">
+                    ${sections.map((section) => `
+                        <a class="footer-links-nav__link${activeSection === section.id ? " is-active" : ""}" href="./info.html?slug=${slug}&section=${section.id}">
+                            ${section.label}
+                        </a>
+                    `).join("")}
+                </nav>
+            </div>
+        `;
+    };
+
+    const buildFavouriteButton = (slug) => `
+        <button class="favorite-toggle" type="button" data-favourite-toggle data-slug="${escapeHtml(slug)}" aria-pressed="${String(isFavourite(slug))}" aria-label="Add to favourites">
+            ${heartIcon}
+        </button>
+    `;
+
+    const syncProductViewportHeight = () => {
+        const galleryElement = document.querySelector(".product-gallery");
+        const previewElement = document.querySelector(".product-preview");
+
+        if (!galleryElement || !previewElement) {
+            return;
+        }
+
+        const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight || 0);
+        const galleryTop = Math.max(galleryElement.getBoundingClientRect().top, 0);
+        const previewStyles = window.getComputedStyle(previewElement);
+        const previewPadding = (parseFloat(previewStyles.paddingTop) || 0)
+            + (parseFloat(previewStyles.paddingBottom) || 0);
+        const bottomOffset = window.innerWidth <= 760 ? 14 : 20;
+        const availableHeight = Math.floor(viewportHeight - galleryTop - previewPadding - bottomOffset);
+
+        if (availableHeight > 0) {
+            galleryElement.style.setProperty("--product-preview-height", `${availableHeight}px`);
+        }
+    };
+
+    const queueProductViewportHeightSync = () => {
+        window.cancelAnimationFrame(productViewportSyncFrame);
+        productViewportSyncFrame = window.requestAnimationFrame(syncProductViewportHeight);
+    };
+
+    const bindProductViewportEvents = () => {
+        if (productViewportEventsBound) {
+            return;
+        }
+
+        window.addEventListener("resize", queueProductViewportHeightSync, { passive: true });
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", queueProductViewportHeightSync, { passive: true });
+        }
+
+        window.addEventListener("load", queueProductViewportHeightSync, { once: true });
+        productViewportEventsBound = true;
+    };
+
+    const getCartDetails = () => cart.flatMap((item) => {
+        const product = catalog.find((work) => work.slug === item.slug && !work.isArtistWork);
+        if (!product) return [];
+        const size = findSize(item.sizeId) || findSize(defaultSizeId);
+        const frame = findFrame(item.frameId) || findFrame(defaultFrameId);
+        const unitPrice = getBasePrice(product, item.sizeId) + (frame?.surcharge || 0);
+
+        return [{
+            ...item,
+            product,
+            size,
+            frame,
+            unitPrice,
+            totalPrice: unitPrice * item.quantity
+        }];
+    });
+
+    const getCartCount = () => getCartDetails().reduce((sum, item) => sum + item.quantity, 0);
+    const getCartTotal = () => getCartDetails().reduce((sum, item) => sum + item.totalPrice, 0);
+
+    const ensureDrawers = () => {
+        if (document.querySelector("[data-drawer-overlay]")) {
+            return;
+        }
+
+        document.body.insertAdjacentHTML("beforeend", `
+            <div class="drawer-overlay" data-drawer-overlay></div>
+
+            <aside class="drawer-panel" data-drawer-panel="favourites" aria-hidden="true">
+                <div class="drawer-panel__header">
+                    <div class="drawer-panel__title-row">
+                        <p class="drawer-panel__title">Favourites</p>
+                        <button class="drawer-close" type="button" data-drawer-close>Close</button>
+                    </div>
+                </div>
+                <div class="drawer-panel__body" data-favourites-body></div>
+                <div class="drawer-panel__footer" data-favourites-footer></div>
+            </aside>
+
+            <aside class="drawer-panel" data-drawer-panel="cart" aria-hidden="true">
+                <div class="drawer-panel__header">
+                    <div class="drawer-panel__title-row">
+                        <p class="drawer-panel__title">Cart</p>
+                        <button class="drawer-close" type="button" data-drawer-close>Close</button>
+                    </div>
+                </div>
+                <div class="drawer-panel__body" data-cart-body></div>
+                <div class="drawer-panel__footer" data-cart-footer></div>
+            </aside>
+        `);
+    };
+
+    ensureDrawers();
+
+    const overlay = document.querySelector("[data-drawer-overlay]");
+    const drawerPanels = Array.from(document.querySelectorAll("[data-drawer-panel]"));
+
+    const closeDrawers = () => {
+        document.body.classList.remove("drawer-open");
+        overlay.classList.remove("is-open");
+        drawerPanels.forEach((panel) => {
+            panel.classList.remove("is-open");
+            panel.setAttribute("aria-hidden", "true");
+        });
+    };
+
+    const openDrawer = (name) => {
+        document.body.classList.add("drawer-open");
+        overlay.classList.add("is-open");
+
+        drawerPanels.forEach((panel) => {
+            const isTarget = panel.dataset.drawerPanel === name;
+            panel.classList.toggle("is-open", isTarget);
+            panel.setAttribute("aria-hidden", String(!isTarget));
+        });
+    };
+
+    const updateHeaderCounts = () => {
+        document.querySelectorAll("[data-favourites-count]").forEach((node) => {
+            node.textContent = String(favourites.length);
+        });
+
+        document.querySelectorAll("[data-cart-count]").forEach((node) => {
+            node.textContent = String(getCartCount());
+        });
+    };
+
+    const updateFavouriteButtons = () => {
+        document.querySelectorAll("[data-favourite-toggle]").forEach((button) => {
+            const slug = button.dataset.slug;
+            const active = isFavourite(slug);
+            button.classList.toggle("is-active", active);
+            button.setAttribute("aria-pressed", String(active));
+            button.innerHTML = heartIcon;
+        });
+    };
+
+    const renderDrawers = () => {
+        const favouritesBody = document.querySelector("[data-favourites-body]");
+        const favouritesFooter = document.querySelector("[data-favourites-footer]");
+        const cartBody = document.querySelector("[data-cart-body]");
+        const cartFooter = document.querySelector("[data-cart-footer]");
+
+        const favouriteProducts = favourites.map((slug) => catalog.find((work) => work.slug === slug)).filter(Boolean);
+        const cartDetails = getCartDetails();
+
+        if (favouritesBody) {
+            favouritesBody.innerHTML = favouriteProducts.length
+                ? favouriteProducts.map((product) => `
+                    <article class="drawer-item">
+                        <a class="drawer-item__media" href="${buildProductUrl(product.slug)}">
+                            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" loading="lazy">
+                        </a>
+                        <div class="drawer-item__body">
+                            <p class="drawer-item__artist">${escapeHtml(product.artist)}</p>
+                            <h3 class="drawer-item__name"><a href="${buildProductUrl(product.slug)}">${escapeHtml(product.title)}</a></h3>
+                            <p class="drawer-item__meta">${product.isArtistWork ? escapeHtml(artistPriceLabel(product)) : `From ${getCardPrice(product, defaultSizeId)}`}</p>
+                            <div class="drawer-item__actions">
+                                <button class="drawer-item__button" type="button" data-remove-favourite data-slug="${product.slug}">Remove</button>
+                            </div>
+                        </div>
+                    </article>
+                `).join("")
+                : `<p class="drawer-empty">Your saved artworks will appear here. Browse the catalogue to find your favourites.</p>`;
+        }
+
+        if (favouritesFooter) {
+            favouritesFooter.innerHTML = favouriteProducts.length
+                ? `<a class="button button--solid" href="./">Continue Browsing</a>`
+                : `<a class="button button--line" href="./">Open Catalog</a>`;
+        }
+
+        if (cartBody) {
+            cartBody.innerHTML = cartDetails.length
+                ? cartDetails.map((item) => `
+                    <article class="drawer-item">
+                        <a class="drawer-item__media" href="${buildProductUrl(item.product.slug, { sizeId: item.sizeId })}">
+                            <img src="${item.product.image}" alt="${escapeHtml(item.product.title)} — ${item.product.artist}" loading="lazy">
+                        </a>
+                        <div class="drawer-item__body">
+                            <p class="drawer-item__artist">${item.product.artist}</p>
+                            <h3 class="drawer-item__name"><a href="${buildProductUrl(item.product.slug, { sizeId: item.sizeId })}">${escapeHtml(item.product.title)}</a></h3>
+                            <p class="drawer-item__meta">${item.size?.label || ""} / ${item.frame?.label || ""}</p>
+                            <p class="drawer-item__meta">Quantity: ${item.quantity} / ${formatPrice(item.totalPrice)}</p>
+                            <div class="drawer-item__actions">
+                                <button class="drawer-item__button" type="button" data-cart-adjust="decrease" data-cart-key="${cartItemKey(item)}">- 1</button>
+                                <button class="drawer-item__button" type="button" data-cart-adjust="increase" data-cart-key="${cartItemKey(item)}">+ 1</button>
+                                <button class="drawer-item__button" type="button" data-remove-cart data-cart-key="${cartItemKey(item)}">Remove</button>
+                            </div>
+                        </div>
+                    </article>
+                `).join("")
+                : `<p class="drawer-empty">Your cart is empty. Add a print with your chosen size and frame.</p>`;
+        }
+
+        if (cartFooter) {
+            cartFooter.innerHTML = cartDetails.length
+                ? `
+                    <p class="drawer-total">
+                        <span>Subtotal</span>
+                        <strong>${formatPrice(getCartTotal())}</strong>
+                    </p>
+                    <p class="drawer-empty">Online payment and delivery will be added later. You can save your print selections here.</p>
+                    <a class="button button--solid" href="./">Continue Browsing</a>
+                `
+                : `<a class="button button--line" href="./">Open Catalog</a>`;
+        }
+    };
+
+    const renderGlobalUi = () => {
+        updateHeaderCounts();
+        updateFavouriteButtons();
+        renderDrawers();
+    };
+
+    const saveFavourites = () => writeStorage(storageKeys.favourites, favourites);
+    const saveCart = () => writeStorage(storageKeys.cart, cart);
+
+    const toggleFavourite = (slug) => {
+        if (isFavourite(slug)) {
+            favourites = favourites.filter((item) => item !== slug);
+        } else {
+            favourites = [...favourites, slug];
+        }
+
+        saveFavourites();
+        renderGlobalUi();
+    };
+
+    const addToCart = (payload) => {
+        const nextItem = normalizeCartItem(payload);
+        const existing = cart.find((item) => cartItemKey(item) === cartItemKey(nextItem));
+
+        if (existing) {
+            existing.quantity += nextItem.quantity;
+        } else {
+            cart = [...cart, nextItem];
+        }
+
+        saveCart();
+        renderGlobalUi();
+        openDrawer("cart");
+    };
+
+    const adjustCartItem = (key, delta) => {
+        cart = cart.map(normalizeCartItem).flatMap((item) => {
+            if (cartItemKey(item) !== key) {
+                return [item];
+            }
+
+            const nextQuantity = item.quantity + delta;
+            return nextQuantity > 0 ? [{ ...item, quantity: nextQuantity }] : [];
+        });
+
+        saveCart();
+        renderGlobalUi();
+    };
+
+    const removeCartItem = (key) => {
+        cart = cart.filter((item) => cartItemKey(item) !== key);
+        saveCart();
+        renderGlobalUi();
+    };
+
+    const getFeaturedProducts = (currentSlug) => {
+        const currentIndex = catalog.findIndex((item) => item.slug === currentSlug);
+        const rotated = currentIndex >= 0
+            ? [...catalog.slice(currentIndex + 1), ...catalog.slice(0, currentIndex)]
+            : catalog;
+
+        return rotated.slice(0, 4);
+    };
+
+    const renderArtworkImage = (product, interior = false) => {
+        if (interior && product.hoverImage) {
+            return `<span class="artwork-scene artwork-scene--photo"><img src="${escapeHtml(product.hoverImage)}" alt=""></span>`;
+        }
+        const scene = interior ? ` artwork-scene--interior artwork-scene--${product.interior}` : "";
+        return `<span class="artwork-scene${scene}"><span class="artwork-scene__mount">
+            <img src="${escapeHtml(product.image)}" alt="" loading="lazy">
+        </span></span>`;
+    };
+
+    const buildCardMarkup = (product, sizeId) => {
+        const cardUrl = buildProductUrl(product.slug, { sizeId });
+        const hoverImage = product.hoverImage || product.image;
+        const size = findSize(sizeId) || findSize(defaultSizeId) || shared.sizes?.[0];
+
+        return `
+            <article class="print-card">
+                <div class="print-card__media-wrap">
+                    ${buildFavouriteButton(product.slug)}
+                    <a class="print-card__media" href="${cardUrl}" aria-label="Open ${escapeHtml(product.title)}">
+                        ${product.isArtistWork ? `
+                            <span class="print-card__image print-card__image--base">${renderArtworkImage(product)}</span>
+                            <span class="print-card__image print-card__image--hover" aria-hidden="true">${renderArtworkImage(product, true)}</span>`
+                            : `<img class="print-card__image print-card__image--base" src="${product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" loading="lazy">
+                            <img class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" loading="lazy" aria-hidden="true">`}
+                    </a>
+                </div>
+                <div class="print-card__body">
+                    <p class="print-card__artist">${escapeHtml(product.artist)}</p>
+                    <h3 class="print-card__title"><a href="${cardUrl}">${escapeHtml(product.title)}</a></h3>
+                    <div class="print-card__meta">
+                        ${product.isArtistWork
+                            ? `<span>${escapeHtml(artistPriceLabel(product))}</span><span>${escapeHtml(categoryLabel(product))}</span>`
+                            : `<span>From ${getCardPrice(product, sizeId)}</span>
+                               <span>${size?.shortLabel || "50 x 70"} / 4 frame options</span>`}
+                    </div>
+                </div>
+            </article>
+        `;
+    };
+
+    const getInitialCatalogState = () => {
+        const params = new URLSearchParams(window.location.search);
+        const sortId = (shared.sortTabs || []).some((tab) => tab.id === params.get("sort"))
+            ? params.get("sort")
+            : "all";
+        const categoryId = (shared.categories || []).some((category) => category.id === params.get("category"))
+            ? params.get("category")
+            : "all";
+        const requestedArtist = params.get("artist");
+        const artists = getArtists();
+        const matchedArtist = artists.find((artist) => artist.id === requestedArtist)
+            || artists.find((artist) => slugify(artist.label) === requestedArtist);
+        const artistId = publicArtist ? "all" : matchedArtist?.id || "all";
+        const initialPriceRange = normalizePriceRange(
+            params.get("price_min"),
+            params.get("price_max"),
+            "initial"
+        );
+        const orientationId = (shared.orientations || []).some((item) => item.id === params.get("orientation"))
+            ? params.get("orientation")
+            : "all";
+        const colourId = (shared.colours || []).some((item) => item.id === params.get("colour"))
+            ? params.get("colour")
+            : "all";
+        const collectionId = (shared.collections || []).some((item) => item.id === params.get("collection"))
+            ? params.get("collection")
+            : "all";
+        const sizeId = (shared.sizes || []).some((size) => size.id === params.get("size"))
+            ? params.get("size")
+            : defaultSizeId;
+
+        return {
+            sortId,
+            categoryId,
+            artistId,
+            priceMin: initialPriceRange.min,
+            priceMax: initialPriceRange.max,
+            orientationId,
+            colourId,
+            collectionId,
+            sizeId
+        };
+    };
+
+    const getCatalogProducts = (state) => {
+        let items = publicArtist
+            ? catalog.filter((work) => work.artistId === publicArtist.artistId)
+            : [...catalog];
+
+        if (state.sortId === "new") {
+            items.sort((a, b) => {
+                if (a.isArtistWork && b.isArtistWork) return new Date(b.createdAt) - new Date(a.createdAt);
+                if (a.isArtistWork || b.isArtistWork) return Number(Boolean(b.isArtistWork)) - Number(Boolean(a.isArtistWork));
+                return b.releaseRank - a.releaseRank;
+            });
+        }
+
+        if (state.sortId === "popular") {
+            items.sort((a, b) => (b.popularityRank || 0) - (a.popularityRank || 0));
+        }
+
+        if (state.sortId === "large") {
+            items = items.filter((item) => item.isLargeScale);
+        }
+
+        if (state.categoryId !== "all") {
+            items = items.filter((item) => item.category === state.categoryId);
+        }
+
+        if (state.artistId !== "all") {
+            items = items.filter((item) => artistFilterId(item) === state.artistId);
+        }
+
+        items = items.filter((item) => {
+            const isInRange = (price) => {
+                const euroPrice = somToEuro(price);
+                return euroPrice >= state.priceMin && euroPrice <= state.priceMax;
+            };
+            if (!item.isArtistWork) return isInRange(getBasePrice(item, state.sizeId));
+            if (state.priceMin === defaultPriceMin && state.priceMax === defaultPriceMax) return true;
+            return item.offers?.some((offer) => offer.available && isInRange(offer.price));
+        });
+
+        if (state.orientationId !== "all") {
+            items = items.filter((item) => item.orientation === state.orientationId);
+        }
+
+        if (state.colourId !== "all") {
+            items = items.filter((item) => item.colour === state.colourId);
+        }
+
+        if (state.collectionId !== "all") {
+            items = items.filter((item) => item.collection === state.collectionId);
+        }
+
+        return items;
+    };
+
+    const syncCatalogUrl = (state) => {
+        const queryString = buildCatalogQuery(state);
+        const nextUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+        window.history.replaceState({}, "", nextUrl);
+    };
+
+    const buildFilterDropdown = ({ label, key, selectedId, options, optionLabel, arrow = "down" }) => `
+        <details class="filter-dropdown${selectedId !== "all" && selectedId !== defaultSizeId ? " is-active" : ""}">
+            <summary class="filter-dropdown__summary">
+                <span>${label}</span>
+                <span class="filter-dropdown__arrow filter-dropdown__arrow--${arrow}" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" focusable="false">
+                        <path d="${arrow === "up" ? "m4 10 4-4 4 4" : "m4 6 4 4 4-4"}"></path>
+                    </svg>
+                </span>
+            </summary>
+            <div class="filter-dropdown__menu">
+                ${options.map((option) => `
+                    <button
+                        class="filter-dropdown__option${selectedId === option.id ? " is-active" : ""}"
+                        type="button"
+                        data-filter-key="${key}"
+                        data-filter-value="${option.id}"
+                    >
+                        ${escapeHtml(optionLabel(option))}
+                    </button>
+                `).join("")}
+            </div>
+        </details>
+    `;
+
+    const buildPriceDropdown = (state) => {
+        const start = ((state.priceMin - defaultPriceMin) / (defaultPriceMax - defaultPriceMin)) * 100;
+        const end = ((state.priceMax - defaultPriceMin) / (defaultPriceMax - defaultPriceMin)) * 100;
+        const isActive = state.priceMin !== defaultPriceMin || state.priceMax !== defaultPriceMax;
+
+        return `
+            <details class="filter-dropdown filter-dropdown--price${isActive ? " is-active" : ""}">
+                <summary class="filter-dropdown__summary">
+                    <span>Price</span>
+                    <span class="filter-dropdown__arrow" aria-hidden="true">
+                        <svg viewBox="0 0 16 16" focusable="false">
+                            <path d="m4 6 4 4 4-4"></path>
+                        </svg>
+                    </span>
+                </summary>
+                <div class="filter-dropdown__menu filter-dropdown__menu--price">
+                    <div class="filter-price" data-price-filter style="--range-start:${start}%; --range-end:${end}%;">
+                        <div class="filter-price__values">
+                            <span class="filter-price__value" data-price-label="min">${formatEuro(state.priceMin)}</span>
+                            <span class="filter-price__value" data-price-label="max">${formatEuro(state.priceMax)}</span>
+                        </div>
+                        <div class="filter-price__slider">
+                            <div class="filter-price__track"></div>
+                            <div class="filter-price__progress"></div>
+                            <input
+                                class="filter-price__input filter-price__input--min"
+                                type="range"
+                                min="${defaultPriceMin}"
+                                max="${defaultPriceMax}"
+                                step="${priceStep}"
+                                value="${state.priceMin}"
+                                data-price-input="min"
+                            >
+                            <input
+                                class="filter-price__input filter-price__input--max"
+                                type="range"
+                                min="${defaultPriceMin}"
+                                max="${defaultPriceMax}"
+                                step="${priceStep}"
+                                value="${state.priceMax}"
+                                data-price-input="max"
+                            >
+                        </div>
+                        <div class="filter-price__limits">
+                            <span>${formatEuro(defaultPriceMin)}</span>
+                            <span>${formatEuro(defaultPriceMax)}</span>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        `;
+    };
+
+    const syncPriceFilterUi = (state) => {
+        const priceFilterNode = document.querySelector("[data-price-filter]");
+
+        if (!priceFilterNode) {
+            return;
+        }
+
+        const start = ((state.priceMin - defaultPriceMin) / (defaultPriceMax - defaultPriceMin)) * 100;
+        const end = ((state.priceMax - defaultPriceMin) / (defaultPriceMax - defaultPriceMin)) * 100;
+        const minInput = priceFilterNode.querySelector("[data-price-input='min']");
+        const maxInput = priceFilterNode.querySelector("[data-price-input='max']");
+        const minLabel = priceFilterNode.querySelector("[data-price-label='min']");
+        const maxLabel = priceFilterNode.querySelector("[data-price-label='max']");
+        const dropdown = priceFilterNode.closest(".filter-dropdown");
+        const isActive = state.priceMin !== defaultPriceMin || state.priceMax !== defaultPriceMax;
+
+        priceFilterNode.style.setProperty("--range-start", `${start}%`);
+        priceFilterNode.style.setProperty("--range-end", `${end}%`);
+
+        if (minInput) {
+            minInput.value = String(state.priceMin);
+        }
+
+        if (maxInput) {
+            maxInput.value = String(state.priceMax);
+        }
+
+        if (minLabel) {
+            minLabel.textContent = formatEuro(state.priceMin);
+        }
+
+        if (maxLabel) {
+            maxLabel.textContent = formatEuro(state.priceMax);
+        }
+
+        if (dropdown) {
+            dropdown.classList.toggle("is-active", isActive);
+        }
+    };
+
+    const renderFilterWaypoint = (state) => {
+        const waypoint = document.querySelector("#filterWaypoint");
+
+        if (!waypoint) {
+            return;
+        }
+
+        waypoint.innerHTML = `
+            <div class="container filter-waypoint__inner">
+                ${buildFilterDropdown({
+                    label: "Sort By",
+                    key: "sort",
+                    selectedId: state.sortId,
+                    options: shared.sortTabs || [],
+                    optionLabel: (option) => option.label
+                })}
+                ${buildFilterDropdown({
+                    label: "Size",
+                    key: "size",
+                    selectedId: state.sizeId,
+                    options: shared.sizes || [],
+                    optionLabel: (option) => option.shortLabel || option.label
+                })}
+                ${buildFilterDropdown({
+                    label: "Orientation",
+                    key: "orientation",
+                    selectedId: state.orientationId,
+                    options: shared.orientations || [],
+                    optionLabel: (option) => option.label
+                })}
+                ${buildPriceDropdown(state)}
+                ${buildFilterDropdown({
+                    label: "Colour",
+                    key: "colour",
+                    selectedId: state.colourId,
+                    options: shared.colours || [],
+                    optionLabel: (option) => option.label
+                })}
+                ${publicArtist ? "" : buildFilterDropdown({
+                    label: "Artist",
+                    key: "artist",
+                    selectedId: state.artistId,
+                    options: [{ id: "all", label: "All Artists" }, ...getArtists()],
+                    optionLabel: (option) => option.label
+                })}
+                ${buildFilterDropdown({
+                    label: "Category",
+                    key: "category",
+                    selectedId: state.categoryId,
+                    options: shared.categories || [],
+                    optionLabel: (option) => option.label
+                })}
+                ${buildFilterDropdown({
+                    label: "Collection",
+                    key: "collection",
+                    selectedId: state.collectionId,
+                    options: shared.collections || [],
+                    optionLabel: (option) => option.label
+                })}
+            </div>
+        `;
+    };
+
+    const renderCatalogPage = () => {
+        const grid = document.querySelector("#printsGrid");
+        const state = getInitialCatalogState();
+        let lastScrollY = window.scrollY;
+
+        const renderProducts = () => {
+            const products = getCatalogProducts(state);
+
+            if (grid) {
+                grid.innerHTML = products.length
+                    ? products.map((product) => buildCardMarkup(product, state.sizeId)).join("")
+                    : `<p class="catalog-empty">No works match these filters. Try removing a filter or widening the price range.</p>`;
+            }
+
+            syncCatalogUrl(state);
+            renderGlobalUi();
+        };
+
+        const render = () => {
+            renderFilterWaypoint(state);
+            renderProducts();
+            syncPriceFilterUi(state);
+        };
+
+        const syncWaypointVisibility = () => {
+            const waypoint = document.querySelector("#filterWaypoint");
+
+            if (!waypoint) {
+                return;
+            }
+
+            const currentScrollY = window.scrollY;
+            const scrolledDown = currentScrollY > lastScrollY + 6;
+            const scrolledUp = currentScrollY < lastScrollY - 6;
+
+            if (currentScrollY < 120 || scrolledUp) {
+                waypoint.classList.remove("is-hidden");
+            } else if (scrolledDown) {
+                waypoint.classList.add("is-hidden");
+                document.querySelectorAll(".filter-dropdown[open]").forEach((dropdown) => {
+                    dropdown.open = false;
+                });
+            }
+
+            lastScrollY = currentScrollY;
+        };
+
+        window.addEventListener("scroll", syncWaypointVisibility, { passive: true });
+
+        document.addEventListener("click", (event) => {
+            const filterButton = event.target.closest("[data-filter-key]");
+
+            if (filterButton) {
+                const key = filterButton.dataset.filterKey;
+                const value = filterButton.dataset.filterValue;
+
+                if (key === "sort") {
+                    state.sortId = value;
+                }
+
+                if (key === "size") {
+                    state.sizeId = value;
+                }
+
+                if (key === "artist") {
+                    state.artistId = value;
+                }
+
+                if (key === "category") {
+                    state.categoryId = value;
+                }
+
+                if (key === "orientation") {
+                    state.orientationId = value;
+                }
+
+                if (key === "colour") {
+                    state.colourId = value;
+                }
+
+                if (key === "collection") {
+                    state.collectionId = value;
+                }
+
+                const parentDropdown = filterButton.closest(".filter-dropdown");
+
+                if (parentDropdown) {
+                    parentDropdown.open = false;
+                }
+
+                render();
+            }
+        });
+
+        document.addEventListener("input", (event) => {
+            const priceInput = event.target.closest("[data-price-input]");
+
+            if (!priceInput) {
+                return;
+            }
+
+            const nextRange = normalizePriceRange(
+                priceInput.dataset.priceInput === "min" ? priceInput.value : state.priceMin,
+                priceInput.dataset.priceInput === "max" ? priceInput.value : state.priceMax,
+                priceInput.dataset.priceInput
+            );
+
+            state.priceMin = nextRange.min;
+            state.priceMax = nextRange.max;
+
+            syncPriceFilterUi(state);
+            renderProducts();
+        });
+
+        render();
+        syncWaypointVisibility();
+    };
+
+    const renderProductOptions = (sizes, initialSizeId) => `
+        <div class="option-group">
+            <div class="option-group__label-row">
+                <label class="option-group__label" for="product-size">Size</label>
+                <span class="option-group__hint" data-role="size-hint"></span>
+            </div>
+            <select class="select-field" id="product-size" data-role="size-select">
+                ${sizes.map((size) => `<option value="${size.id}"${size.id === initialSizeId ? " selected" : ""}>${size.label}</option>`).join("")}
+            </select>
+        </div>
+        <div class="option-group">
+            <div class="option-group__label-row">
+                <label class="option-group__label" for="product-frame">Frame</label>
+                <span class="option-group__hint" data-role="frame-hint"></span>
+            </div>
+            <select class="select-field" id="product-frame" data-role="frame-select">
+                ${(shared.frames || []).map((frame) => `<option value="${frame.id}"${frame.id === defaultFrameId ? " selected" : ""}>${frame.label}</option>`).join("")}
+            </select>
+        </div>`;
+
+    const applyFramePreview = (preview, frame) => {
+        if (preview && frame) preview.style.setProperty("--preview-frame-color", frame.swatch);
+    };
+
+    const renderOfferDetails = (offer) => `
+        <div class="product-panel__price-row"><span>${offerLabels[offer.type]}</span><strong>${formatPrice(offer.price)}</strong></div>`;
+
+    const renderArtistProduct = (product, gallery, summary, featuredGrid, requestedSizeId) => {
+        document.title = `${product.title} — Mukashov Gallery`;
+        gallery.innerHTML = `
+            <div class="product-gallery artwork-product-gallery" aria-label="Artwork images">
+                <div class="product-gallery__thumbs">
+                    <button type="button" class="product-gallery__thumb is-active" aria-label="Artwork" aria-pressed="true">${renderArtworkImage(product)}</button>
+                    <button type="button" class="product-gallery__thumb" aria-label="Artwork in a room" aria-pressed="false">${renderArtworkImage(product, true)}</button>
+                </div>
+                <div class="artwork-product-preview" role="img" aria-label="${escapeHtml(product.title)}">${renderArtworkImage(product)}</div>
+            </div>`;
+        const offers = product.offers || [];
+        const initialOffer = offers.find((offer) => offer.available) || offers[0];
+        const initialSizeId = findSize(requestedSizeId)?.id || defaultSizeId;
+        summary.innerHTML = `
+            <div class="product-panel">
+                <div class="product-panel__head">
+                    <div>
+                        <p class="eyebrow">${escapeHtml(categoryLabel(product))}</p>
+                        <h1>${escapeHtml(product.title)}</h1>
+                        <p class="product-panel__artist">${escapeHtml(product.artist)}</p>
+                    </div>
+                    ${buildFavouriteButton(product.slug)}
+                </div>
+                ${product.summary ? `<p class="product-panel__summary artwork-description">${escapeHtml(product.summary)}</p>` : ""}
+                ${offers.length > 1 ? `
+                    <label class="option-group">Artwork option
+                        <select class="select-field" data-artwork-offer>
+                            ${offers.map((offer) => `<option value="${offer.type}"${offer === initialOffer ? " selected" : ""}>${offerLabels[offer.type]}</option>`).join("")}
+                        </select>
+                    </label>` : ""}
+                ${initialOffer ? `<div class="artwork-offer-details" data-artwork-offer-details aria-live="polite">${renderOfferDetails(initialOffer)}</div>` : ""}
+                ${renderProductOptions(shared.sizes || [], initialSizeId)}
+                <div class="summary-actions">
+                    <a class="button button--line" data-author-profile href="./?artist=${encodeURIComponent(artistFilterId(product))}">More from this artist</a>
+                    <a class="button button--ghost" href="./">Catalogue</a>
+                </div>
+            </div>`;
+        const offerSelector = summary.querySelector("[data-artwork-offer]");
+        offerSelector?.addEventListener("change", () => {
+            const offer = offers.find((entry) => entry.type === offerSelector.value);
+            summary.querySelector("[data-artwork-offer-details]").innerHTML = renderOfferDetails(offer);
+        });
+        const preview = gallery.querySelector(".artwork-product-preview");
+        const thumbs = Array.from(gallery.querySelectorAll(".product-gallery__thumb"));
+        let isInterior = false;
+        const showArtwork = (interior) => {
+            isInterior = interior;
+            preview.innerHTML = renderArtworkImage(product, interior);
+            preview.setAttribute("aria-label", interior ? `${product.title} in a room` : product.title);
+            thumbs.forEach((thumb, index) => {
+                const active = index === Number(interior);
+                thumb.classList.toggle("is-active", active);
+                thumb.setAttribute("aria-pressed", String(active));
+            });
+        };
+        thumbs.forEach((button, index) => button.addEventListener("click", () => showArtwork(index === 1)));
+
+        const sizeSelect = summary.querySelector("[data-role='size-select']");
+        const frameSelect = summary.querySelector("[data-role='frame-select']");
+        const sizeHint = summary.querySelector("[data-role='size-hint']");
+        const frameHint = summary.querySelector("[data-role='frame-hint']");
+        const updateSize = (sizeId) => {
+            sizeHint.textContent = findSize(sizeId)?.note || "";
+        };
+        const updateFrame = (frameId) => {
+            const frame = findFrame(frameId);
+            if (!frame) return;
+            applyFramePreview(preview, frame);
+            frameHint.textContent = frame.description;
+        };
+        sizeSelect.addEventListener("change", () => updateSize(sizeSelect.value));
+        frameSelect.addEventListener("change", () => {
+            if (isInterior && product.hoverImage) showArtwork(false);
+            updateFrame(frameSelect.value);
+        });
+        updateSize(initialSizeId);
+        updateFrame(defaultFrameId);
+        const profileLink = summary.querySelector("[data-author-profile]");
+        import("../../build/js/artist-data.js").then(async ({ loadPublicArtistProfile }) => {
+            const profile = await loadPublicArtistProfile({ work_id: product.slug.slice("artist-".length) });
+            if (!profile?.slug) return;
+            profileLink.href = `./?author=${encodeURIComponent(profile.slug)}`;
+            profileLink.textContent = "Artist profile";
+        }).catch(() => {});
+        if (featuredGrid) {
+            featuredGrid.innerHTML = getFeaturedProducts(product.slug)
+                .map((work) => buildCardMarkup(work, defaultSizeId)).join("");
+        }
+        renderGlobalUi();
+    };
+
+    const renderProductPage = () => {
+        const params = new URLSearchParams(window.location.search);
+        const slug = params.get("slug");
+        const requestedSizeId = params.get("size");
+        const product = getProductBySlug(slug);
+        const gallery = document.querySelector("#productGallery");
+        const summary = document.querySelector("#productSummary");
+        const featuredGrid = document.querySelector("#featuredGrid");
+        const footerMenu = document.querySelector("#productFooterMenu");
+
+        if (slug?.startsWith("artist-")) {
+            if (product.slug === slug) {
+                renderArtistProduct(product, gallery, summary, featuredGrid, requestedSizeId);
+            } else {
+                document.title = "Artwork unavailable — Mukashov Gallery";
+                summary.innerHTML = '<div class="product-panel"><h1>Artwork unavailable</h1><a class="button button--line" href="./">Catalogue</a></div>';
+            }
+            return;
+        }
+
+        const availableSizeIds = Object.keys(product.priceBySize);
+        const initialSizeId = availableSizeIds.includes(requestedSizeId)
+            ? requestedSizeId
+            : availableSizeIds.includes(defaultSizeId)
+                ? defaultSizeId
+                : availableSizeIds[0];
+        const images = getGalleryImages(product);
+        const state = {
+            sizeId: initialSizeId,
+            frameId: defaultFrameId,
+            activeImageIndex: 0
+        };
+        const thumbCount = Math.max(images.length, 1);
+
+        document.title = `${product.title} — Mukashov Gallery`;
+        const renderFeatured = () => {
+            if (featuredGrid) {
+                featuredGrid.innerHTML = getFeaturedProducts(product.slug)
+                    .map((item) => buildCardMarkup(item, state.sizeId))
+                    .join("");
+            }
+        };
+
+        if (gallery) {
+            gallery.style.setProperty("--gallery-thumb-count", String(thumbCount));
+            gallery.innerHTML = `
+                <div class="product-gallery">
+                    <div class="product-gallery__thumbs">
+                        ${images.map((image, index) => `
+                            <button class="product-gallery__thumb${index === state.activeImageIndex ? " is-active" : ""}" type="button" data-gallery-thumb="${index}">
+                                <img src="${image}" alt="" loading="lazy" aria-hidden="true">
+                            </button>
+                        `).join("")}
+                    </div>
+                    <div class="product-preview" id="productPreview">
+                        <div class="product-preview__frame">
+                            <img src="${images[state.activeImageIndex]}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" data-role="product-image">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (summary) {
+            summary.innerHTML = `
+                <div class="product-panel">
+                    <div class="product-panel__head">
+                        <div>
+                            <p class="eyebrow">${product.series || "Canvas Print"}</p>
+                            <h1>${escapeHtml(product.title)}</h1>
+                            <p class="product-panel__artist">${product.artist}</p>
+                        </div>
+                        ${buildFavouriteButton(product.slug)}
+                    </div>
+
+                    <div class="product-panel__price-row">
+                        <span>From</span>
+                        <strong data-role="total-price"></strong>
+                    </div>
+
+                    ${product.summary ? `<p class="product-panel__summary artwork-description">${escapeHtml(product.summary)}</p>` : ""}
+
+                    ${renderProductOptions((shared.sizes || []).filter((size) => availableSizeIds.includes(size.id)), initialSizeId)}
+
+                    <div class="selection-summary">
+                        <div class="selection-summary__row">
+                            <span>Selected</span>
+                            <strong data-role="selection-value"></strong>
+                        </div>
+                        <div class="selection-summary__row">
+                            <span>Production</span>
+                            <strong>${product.leadTime}</strong>
+                        </div>
+                    </div>
+
+                    <div class="summary-actions">
+                        <button class="button button--solid" type="button" data-role="add-to-cart">Add to Bag</button>
+                        <a class="button button--line" data-role="order-link" href="${product.referenceUrl}" target="_blank" rel="noopener">Order via Telegram</a>
+                        ${product.artistProfileSlug ? `<a class="button button--ghost" href="./?author=${encodeURIComponent(product.artistProfileSlug)}">Artist profile</a>` : ""}
+                        <a class="button button--ghost" href="./">Catalog</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (footerMenu) {
+            footerMenu.innerHTML = buildInfoMenu(product.slug, null, getInfoSections(product));
+        }
+
+        renderFeatured();
+        renderGlobalUi();
+        bindProductViewportEvents();
+
+        const preview = gallery?.querySelector("#productPreview");
+        const previewImage = document.querySelector("[data-role='product-image']");
+        const selectionValue = document.querySelector("[data-role='selection-value']");
+        const totalPrice = document.querySelector("[data-role='total-price']");
+        const orderLink = document.querySelector("[data-role='order-link']");
+        const sizeHint = document.querySelector("[data-role='size-hint']");
+        const frameHint = document.querySelector("[data-role='frame-hint']");
+        const sizeSelect = document.querySelector("[data-role='size-select']");
+        const frameSelect = document.querySelector("[data-role='frame-select']");
+        const addToCartButton = document.querySelector("[data-role='add-to-cart']");
+        const galleryThumbs = Array.from(document.querySelectorAll("[data-gallery-thumb]"));
+        const updateFrameHint = (frameId) => {
+            const frame = findFrame(frameId) || shared.frames?.[0];
+
+            if (frameHint && frame) {
+                frameHint.textContent = `${frame.label} / ${frame.description}`;
+            }
+        };
+
+        const syncState = () => {
+            const size = findSize(state.sizeId) || shared.sizes?.[0];
+            const frame = findFrame(state.frameId) || shared.frames?.[0];
+            const total = getBasePrice(product, state.sizeId) + (frame?.surcharge || 0);
+
+            galleryThumbs.forEach((button) => {
+                const isActive = Number(button.dataset.galleryThumb) === state.activeImageIndex;
+                button.classList.toggle("is-active", isActive);
+            });
+
+            if (sizeSelect) {
+                sizeSelect.value = state.sizeId;
+            }
+
+            if (frameSelect) {
+                frameSelect.value = state.frameId;
+            }
+
+            applyFramePreview(preview, frame);
+            preview?.classList.toggle("is-framed", state.activeImageIndex === 0);
+            if (previewImage) {
+                previewImage.src = images[state.activeImageIndex];
+            }
+
+            if (selectionValue) {
+                selectionValue.textContent = `${size.label} / ${frame.label}`;
+            }
+
+            if (totalPrice) {
+                totalPrice.textContent = formatPrice(total);
+            }
+
+            if (sizeHint) {
+                sizeHint.textContent = size.note;
+            }
+
+            updateFrameHint(state.frameId);
+
+            if (orderLink) {
+                orderLink.href = buildTelegramLink(product, size, frame, total);
+            }
+
+            renderFeatured();
+            renderGlobalUi();
+        };
+
+        if (sizeSelect) {
+            sizeSelect.addEventListener("change", () => {
+                state.sizeId = sizeSelect.value;
+                syncState();
+            });
+        }
+
+        if (frameSelect) {
+            frameSelect.addEventListener("change", () => {
+                state.frameId = frameSelect.value;
+                state.activeImageIndex = 0;
+                syncState();
+            });
+        }
+
+        galleryThumbs.forEach((button) => {
+            button.addEventListener("click", () => {
+                state.activeImageIndex = Number(button.dataset.galleryThumb) || 0;
+                syncState();
+            });
+        });
+
+        if (addToCartButton) {
+            addToCartButton.addEventListener("click", () => {
+                addToCart({
+                    slug: product.slug,
+                    sizeId: state.sizeId,
+                    frameId: state.frameId,
+                    quantity: 1
+                });
+            });
+        }
+
+        syncState();
+        queueProductViewportHeightSync();
+        window.setTimeout(queueProductViewportHeightSync, 120);
+    };
+
+    const renderInfoPage = () => {
+        const params = new URLSearchParams(window.location.search);
+        const slug = params.get("slug");
+        if (slug?.startsWith("artist-")) {
+            window.location.replace(buildProductUrl(slug));
+            return;
+        }
+        const sectionParam = params.get("section") || "about";
+        const product = getProductBySlug(slug);
+        const sections = getInfoSections(product);
+        const availableSections = Object.keys(sections);
+        const section = sections[sectionParam] ? sectionParam : availableSections[0];
+        const current = sections[section];
+
+        const media = document.querySelector("#infoPageMedia");
+        const content = document.querySelector("#infoPageContent");
+        const footerMenu = document.querySelector("#infoPageMenu");
+        const backLink = document.querySelector("#infoBackLink");
+
+        document.title = `${current.title} — ${product.title}`;
+        if (backLink) {
+            backLink.href = `./product.html?slug=${product.slug}`;
+            backLink.textContent = product.title;
+        }
+
+        if (media) {
+            media.innerHTML = `
+                <div class="info-page-media">
+                    <img src="${product.hoverImage || product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}">
+                </div>
+            `;
+        }
+
+        if (content) {
+            const body = current.type === "list"
+                ? `<ul class="editorial-list">${current.content.map((item) => `<li>${item}</li>`).join("")}</ul>`
+                : current.content.map((paragraph) => `<p>${paragraph}</p>`).join("");
+
+            content.innerHTML = `
+                <article class="info-page-card">
+                    <p class="eyebrow">${current.eyebrow}</p>
+                    <h1>${current.title}</h1>
+                    <p class="info-page-card__meta">${escapeHtml(product.title)} / ${escapeHtml(product.artist)}</p>
+                    <div class="info-page-card__body">
+                        ${body}
+                    </div>
+                    <div class="summary-actions">
+                        <a class="button button--solid" href="./product.html?slug=${product.slug}">Back to Print</a>
+                    </div>
+                </article>
+            `;
+        }
+
+        if (footerMenu) {
+            footerMenu.innerHTML = buildInfoMenu(product.slug, section, sections);
+        }
+
+        renderGlobalUi();
+    };
+
+    document.addEventListener("click", (event) => {
+        if (!event.target.closest(".filter-dropdown")) {
+            document.querySelectorAll(".filter-dropdown[open]").forEach((dropdown) => {
+                dropdown.open = false;
+            });
+        }
+
+        const favouriteButton = event.target.closest("[data-favourite-toggle]");
+        const favouritesOpenButton = event.target.closest("[data-favourites-open]");
+        const cartOpenButton = event.target.closest("[data-cart-open]");
+        const drawerCloseButton = event.target.closest("[data-drawer-close]");
+        const removeFavouriteButton = event.target.closest("[data-remove-favourite]");
+        const removeCartButton = event.target.closest("[data-remove-cart]");
+        const cartAdjustButton = event.target.closest("[data-cart-adjust]");
+
+        if (favouriteButton) {
+            event.preventDefault();
+            toggleFavourite(favouriteButton.dataset.slug);
+        }
+
+        if (favouritesOpenButton) {
+            event.preventDefault();
+            openDrawer("favourites");
+        }
+
+        if (cartOpenButton) {
+            event.preventDefault();
+            openDrawer("cart");
+        }
+
+        if (drawerCloseButton || event.target === overlay) {
+            closeDrawers();
+        }
+
+        if (removeFavouriteButton) {
+            favourites = favourites.filter((slug) => slug !== removeFavouriteButton.dataset.slug);
+            saveFavourites();
+            renderGlobalUi();
+        }
+
+        if (removeCartButton) {
+            removeCartItem(removeCartButton.dataset.cartKey);
+        }
+
+        if (cartAdjustButton) {
+            adjustCartItem(
+                cartAdjustButton.dataset.cartKey,
+                cartAdjustButton.dataset.cartAdjust === "increase" ? 1 : -1
+            );
+        }
+    });
+
+    try {
+        const { applyCatalogueAssignment, loadArtistProducts, loadPublicArtistProfile, loadCatalogArtistAssignments } = await import("../../build/js/artist-data.js");
+        const timeout = AbortSignal.timeout(8000);
+        const [artworks, profile, assignments] = await Promise.race([
+            Promise.all([
+                loadArtistProducts(),
+                profileHandle ? loadPublicArtistProfile({ profile_handle: profileHandle }) : null,
+                loadCatalogArtistAssignments().catch(() => [])
+            ]),
+            new Promise((_, reject) => timeout.addEventListener("abort", () => reject(timeout.reason), { once: true }))
+        ]);
+        const owners = new Map(assignments.map((assignment) => [assignment.product_slug, assignment]));
+        catalog = [...artworks, ...catalog.map((work) => applyCatalogueAssignment(work, owners.get(work.slug)))];
+        publicArtist = profile;
+        if (profileHandle && !publicArtist) {
+            const status = document.querySelector("#catalog-status");
+            status.hidden = false;
+            status.textContent = "Artist profile not found.";
+            renderGlobalUi();
+            return;
+        }
+        if (publicArtist) {
+            document.title = `${publicArtist.name} — Mukashov Gallery`;
+            document.querySelector("#public-artist-name").textContent = publicArtist.name;
+            document.querySelector("#public-artist-city").textContent = publicArtist.city;
+            document.querySelector("#public-artist-heading").hidden = false;
+        }
+    } catch (error) {
+        const status = document.querySelector("#catalog-status");
+        if (status) {
+            status.hidden = false;
+            status.textContent = profileHandle
+                ? "Could not open the artist profile. Try refreshing the page."
+                : "Artist artworks are temporarily unavailable. Try refreshing the page.";
+        }
+        console.warn("Prints: gallery unavailable", error.code || error.name);
+    }
+
+    renderGlobalUi();
+
+    if (page === "catalog" && (!profileHandle || publicArtist)) {
+        renderCatalogPage();
+    }
+
+    if (page === "product") {
+        renderProductPage();
+    }
+
+    if (page === "info") {
+        renderInfoPage();
+    }
+});

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="build/css/styles.css">
     <link rel="stylesheet" href="build/css/artists.css">
     <script type="module" src="build/js/profile-menu.js"></script>
+    <script defer src="build/js/language-link.js"></script>
 </head>
 <body data-prints-page="catalog">
     <div class="prints-page">
@@ -26,9 +27,9 @@
         <header class="prints-header">
             <div class="container prints-header__inner">
                 <nav class="prints-nav prints-nav--left" aria-label="Основная навигация">
-                    <a href="./?category=abstract">Abstract</a>
-                    <a href="./?category=figurative">Figurative</a>
-                    <a href="./?category=landscape">Landscape</a>
+                    <a href="./?category=abstract">Абстракция</a>
+                    <a href="./?category=figurative">Фигуративное искусство</a>
+                    <a href="./?category=landscape">Пейзаж</a>
                 </nav>
                 <a class="prints-brand" href="./">MUKASHOV GALLERY</a>
                 <div class="prints-nav prints-nav--right">
@@ -59,7 +60,7 @@
                                 <path d="M12 21.35 10.55 20C5.4 15.36 2 12.27 2 8.5 2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09A6.01 6.01 0 0 1 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.54L12 21.35Z"></path>
                             </svg>
                         </span>
-                        <span class="nav-action__label">Favourites</span>
+                        <span class="nav-action__label">Избранное</span>
                         <span class="nav-action__count" data-favourites-count>0</span>
                     </button>
                     <button class="nav-action" type="button" data-cart-open aria-label="Открыть корзину">
@@ -69,7 +70,7 @@
                                 <path d="M5 7.5h14l-1.2 13H6.2L5 7.5Z"></path>
                             </svg>
                         </span>
-                        <span class="nav-action__label">Cart</span>
+                        <span class="nav-action__label">Корзина</span>
                         <span class="nav-action__count" data-cart-count>0</span>
                     </button>
                 </div>
@@ -99,6 +100,8 @@
                     <a href="./offer.html">Публичная оферта</a>
                     <span aria-hidden="true">·</span>
                     <a href="./privacy.html">Политика обработки персональных данных</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="./en/" hreflang="en" lang="en" data-gallery-language>English</a>
                 </nav>
             </div>
         </footer>

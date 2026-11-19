@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Personal data policy — Mukashov Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../build/css/styles.css">
+    <script type="module" src="../build/js/profile-menu.js"></script>
+    <script defer src="../build/js/language-link.js"></script>
+</head>
+<body>
+    <header class="container gallery-document__header">
+        <a class="prints-brand" href="./">MUKASHOV GALLERY</a>
+        <details class="profile-menu" data-profile-menu>
+            <summary aria-label="Profile" title="Profile">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="3.25"></circle>
+                    <path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"></path>
+                </svg>
+            </summary>
+            <div class="profile-menu__panel">
+                <div data-profile-guest>
+                    <a href="../artists.html?mode=login">Log in</a>
+                    <a href="../artists.html?mode=register">Register</a>
+                </div>
+                <div data-profile-account hidden>
+                    <a href="../artists.html#works">My artworks</a>
+                    <a href="../artists.html#new-work">Add artwork</a>
+                    <a href="../artists.html#profile">Profile settings</a>
+                    <button type="button" data-profile-signout>Log out</button>
+                </div>
+                <p class="profile-menu__notice" role="status" hidden></p>
+            </div>
+        </details>
+    </header>
+    <main class="container gallery-document">
+        <h1>Personal data policy</h1>
+        <p class="gallery-document__note">Initial version. The data controller’s details, contact information and retention periods are to be confirmed.</p>
+        <h2>Data we collect</h2>
+        <p>We use your email address to send a one-time sign-in link. Artist profiles store a name or pseudonym, city and WhatsApp number. The catalogue shows the artist’s name or pseudonym and city, along with photos and a description of published artwork. If an artist chooses a short profile address, it becomes public. Artist email addresses and WhatsApp numbers are hidden in the catalogue.</p>
+        <h2>How we use your data</h2>
+        <p>Profile data is used to manage accounts and publish artwork. Supabase handles sign-in and stores profiles and images. Your browser stores your session, cart and favourites on your device.</p>
+        <h2>Updating your data</h2>
+        <p>Update your name, city and WhatsApp number in profile settings. You can hide published artwork in My artworks.</p>
+    </main>
+    <footer class="prints-footer">
+        <div class="container prints-footer__inner">
+            <p>© 2026 Mukashov Gallery</p>
+            <nav class="prints-footer__links" aria-label="Gallery documents">
+                <a href="./offer.html">Public offer</a>
+                <span aria-hidden="true">·</span>
+                <a href="./privacy.html">Personal data policy</a>
+                <span aria-hidden="true">·</span>
+                <a href="../privacy.html" hreflang="ru" lang="ru" data-gallery-language>Русский</a>
+            </nav>
+        </div>
+    </footer>
+</body>
+</html>
