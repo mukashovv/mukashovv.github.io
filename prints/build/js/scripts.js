@@ -550,15 +550,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderGlobalUi();
     };
 
-    const renderRelatedWorks = (product, sizeId, grid) => {
-        if (!grid) return;
+    const renderProductRecommendations = (product, sizeId) => {
         const others = catalog.filter((work) => work.slug !== product.slug);
-        const authorWorks = others.filter((work) => artistFilterId(work) === artistFilterId(product)
-            || (work.artist && work.artist === product.artist));
-        const heading = document.querySelector("#featuredHeading");
-        if (heading) heading.textContent = authorWorks.length ? "Работы того же автора" : "Другие работы галереи";
-        grid.innerHTML = (authorWorks.length ? authorWorks : others).slice(0, 4)
-            .map((work) => buildCardMarkup(work, sizeId)).join("");
+        const sameAuthor = (work) => work.artistId && product.artistId
+            ? work.artistId === product.artistId
+            : artistFilterId(work) === artistFilterId(product) || Boolean(work.artist && work.artist === product.artist);
+        const affinity = (work) =>
+            4 * Number(Boolean(product.category && work.category === product.category))
+            + 2 * Number(Boolean(product.collection && work.collection === product.collection))
+            + Number(Boolean(product.orientation && work.orientation === product.orientation));
+
+        const authorWorks = others.filter(sameAuthor);
+        const relatedWorks = others.filter((work) => !sameAuthor(work))
+            .sort((first, second) => affinity(second) - affinity(first));
+
+        for (const [id, works] of [["authorWorks", authorWorks], ["relatedWorks", relatedWorks]]) {
+            const section = document.getElementById(id);
+            if (!section) continue;
+            section.hidden = !works.length;
+            section.querySelector(".prints-grid").innerHTML = works.slice(0, 4)
+                .map((work) => buildCardMarkup(work, sizeId)).join("");
+        }
     };
 
     const renderArtworkImage = (product, interior = false) => {
@@ -1094,7 +1106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const renderOfferDetails = (offer) => `
         <div class="product-panel__price-row"><span>${offerLabels[offer.type]}</span><strong>${formatPrice(offer.price)}</strong></div>`;
 
-    const renderArtistProduct = (product, gallery, summary, featuredGrid, requestedSizeId) => {
+    const renderArtistProduct = (product, gallery, summary, requestedSizeId) => {
         document.title = `${product.title} — Mukashov Gallery`;
         gallery.innerHTML = `
             <div class="product-gallery artwork-product-gallery" aria-label="Фотографии работы">
@@ -1179,7 +1191,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             profileLink.href = `/${encodeURIComponent(profile.slug)}`;
             profileLink.textContent = "Профиль автора";
         }).catch(() => {});
-        renderRelatedWorks(product, defaultSizeId, featuredGrid);
+        renderProductRecommendations(product, initialSizeId);
         renderGlobalUi();
     };
 
@@ -1190,12 +1202,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         const product = getProductBySlug(slug);
         const gallery = document.querySelector("#productGallery");
         const summary = document.querySelector("#productSummary");
-        const featuredGrid = document.querySelector("#featuredGrid");
         const footerMenu = document.querySelector("#productFooterMenu");
 
         if (slug?.startsWith("artist-")) {
             if (product.slug === slug) {
-                renderArtistProduct(product, gallery, summary, featuredGrid, requestedSizeId);
+                renderArtistProduct(product, gallery, summary, requestedSizeId);
             } else {
                 document.title = "Работа недоступна — Mukashov Gallery";
                 summary.innerHTML = '<div class="product-panel"><h1>Работа недоступна</h1><a class="button button--line" href="./">Каталог</a></div>';
@@ -1218,7 +1229,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const thumbCount = Math.max(images.length, 1);
 
         document.title = `${product.title} — Mukashov Gallery`;
-        const renderFeatured = () => renderRelatedWorks(product, state.sizeId, featuredGrid);
+        const renderFeatured = () => renderProductRecommendations(product, state.sizeId);
 
         if (gallery) {
             gallery.style.setProperty("--gallery-thumb-count", String(thumbCount));
