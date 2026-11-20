@@ -851,6 +851,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
+        const scrollLeft = waypoint.querySelector(".filter-waypoint__inner")?.scrollLeft || 0;
         waypoint.innerHTML = `
             <div class="container filter-waypoint__inner">
                 ${buildFilterDropdown({
@@ -905,10 +906,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 })}
             </div>
         `;
+        if (scrollLeft) waypoint.querySelector(".filter-waypoint__inner").scrollLeft = scrollLeft;
     };
 
     const renderCatalogPage = () => {
         const grid = document.querySelector("#printsGrid");
+        const results = document.querySelector("#catalogResults");
         const state = getInitialCatalogState();
         let lastScrollY = window.scrollY;
         const searchForm = document.querySelector(".gallery-search");
@@ -923,6 +926,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const renderProducts = () => {
             const products = getCatalogProducts(state);
+            if (results) results.textContent = `Results: ${products.length}`;
 
             if (grid) {
                 grid.innerHTML = products.length
@@ -953,7 +957,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const approachingGrid = grid && grid.getBoundingClientRect().top > 0;
 
-            if (approachingGrid || currentScrollY < 120 || scrolledUp) {
+            if (window.innerWidth <= 760 || approachingGrid || currentScrollY < 120 || scrolledUp) {
                 waypoint.classList.remove("is-hidden");
             } else if (scrolledDown) {
                 waypoint.classList.add("is-hidden");
@@ -968,6 +972,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.addEventListener("scroll", syncWaypointVisibility, { passive: true });
 
         document.addEventListener("click", (event) => {
+            const filterSummary = event.target.closest(".filter-dropdown__summary");
+            if (filterSummary) {
+                document.querySelectorAll(".filter-dropdown[open]").forEach((dropdown) => {
+                    if (dropdown !== filterSummary.parentElement) dropdown.open = false;
+                });
+            }
+
             const filterButton = event.target.closest("[data-filter-key]");
 
             if (filterButton) {
