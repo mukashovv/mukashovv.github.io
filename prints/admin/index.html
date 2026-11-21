@@ -27,6 +27,14 @@
                     <div id="leaders"></div>
                 </section>
             </div>
+            <h2>Авторы и их работы</h2>
+            <p>В публикации входят загруженные работы и закреплённые за авторами работы каталога.</p>
+            <div class="scroll" role="region" aria-label="Статистика по авторам" tabindex="0">
+                <table>
+                    <thead><tr><th>Автор</th><th>Город</th><th>Всего</th><th>Опубликовано</th><th>Черновики</th><th>Загрузки за 30 дней</th><th>Последняя загрузка</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
             <section class="feature-editor">
                 <h2>Первый экран галереи</h2>
                 <p id="feature-status" role="status"></p>
@@ -36,18 +44,12 @@
                     <label>Заголовок <input name="title" maxlength="100" required></label>
                     <label>Описание <textarea name="description" maxlength="280" required></textarea></label>
                     <label>Надпись на кнопке <input name="cta" maxlength="55" required></label>
+                    <label>Первое фото <input type="file" data-photo="0" accept="image/jpeg,image/png,image/webp"></label>
+                    <label>Второе фото <input type="file" data-photo="1" accept="image/jpeg,image/png,image/webp"></label>
                     <iframe title="Предпросмотр первого экрана" tabindex="-1" inert></iframe>
-                    <button>Опубликовать выбранный вариант</button>
+                    <button>Сохранить и опубликовать</button>
                 </form>
             </section>
-            <h2>Авторы и их работы</h2>
-            <p>В публикации входят загруженные работы и закреплённые за авторами работы каталога.</p>
-            <div class="scroll" role="region" aria-label="Статистика по авторам" tabindex="0">
-                <table>
-                    <thead><tr><th>Автор</th><th>Город</th><th>Всего</th><th>Опубликовано</th><th>Черновики</th><th>Загрузки за 30 дней</th><th>Последняя загрузка</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
         </section>
     </main>
 </body>

@@ -32,3 +32,4 @@ button { padding: 8px 16px; cursor: pointer; }
 .feature-editor :is(input, textarea, select) { width: 100%; padding: 9px; font: inherit; }
 .feature-editor iframe { width: 100%; height: clamp(460px, 55vw, 630px); grid-column: 1 / -1; border: 0; background: #fff; }
 .feature-editor button { justify-self: start; }
+.feature-editor label[hidden] { display: none; }
