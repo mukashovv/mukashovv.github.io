@@ -32,8 +32,25 @@ function textField(name,label,value="",required=false){return field(label,'<inpu
 function amount(form,name){return Math.round(Number(form.get(name)||0)*100);}
 function notice(message){const node=$("#notice");node.textContent=message;node.classList.add("show");clearTimeout(flashTimer);flashTimer=setTimeout(()=>node.classList.remove("show"),4500);}
 function hint(message){const node=dialog.open?body.querySelector(".error"):main.querySelector(".error");if(node)node.textContent=message;else notice(message);}
-function modal(title,html){$("#dialog-title").textContent=title;body.innerHTML=html;if(!dialog.open)dialog.showModal();}
-function formWrap(name,content,label="Сохранить",extra=""){return '<form data-form="'+name+'">'+content+'<p class="error" role="alert"></p><div class="form-actions">'+extra+'<button class="primary" type="submit">'+label+'</button></div></form>';}
+function fitEditorToViewport(){
+ const viewport=window.visualViewport;
+ if(!dialog.open || !viewport)return;
+ dialog.style.setProperty("--editor-top",viewport.offsetTop+"px");
+ dialog.style.setProperty("--editor-height",viewport.height+"px");
+}
+window.visualViewport?.addEventListener("resize",fitEditorToViewport);
+window.visualViewport?.addEventListener("scroll",fitEditorToViewport);
+function modal(title,html){
+ $("#dialog-title").textContent=title;
+ body.innerHTML=html;
+ if(!dialog.open)dialog.showModal();
+ fitEditorToViewport();
+}
+function formWrap(name,content,label="Сохранить",extra=""){
+ const fields=content+'<p class="error" role="alert"></p>';
+ return '<form data-form="'+name+'">'+(name==="auth"?fields:'<div class="editor-fields">'+fields+'</div>')+
+   '<div class="form-actions">'+extra+'<button class="primary" type="submit">'+label+'</button></div></form>';
+}
 function renderGate(step){
  gate=step;const box=$("#gate");
  main.querySelector(".welcome").classList.toggle("auth-open",step!=="start");
