@@ -27,6 +27,19 @@
                     <div id="leaders"></div>
                 </section>
             </div>
+            <section class="feature-editor">
+                <h2>Первый экран галереи</h2>
+                <p id="feature-status" role="status"></p>
+                <form id="feature-form" hidden>
+                    <label>Вариант <select name="layout"></select></label>
+                    <label>Язык текста <select name="lang"><option value="ru">Русский</option><option value="en">English</option></select></label>
+                    <label>Заголовок <input name="title" maxlength="100" required></label>
+                    <label>Описание <textarea name="description" maxlength="280" required></textarea></label>
+                    <label>Надпись на кнопке <input name="cta" maxlength="55" required></label>
+                    <iframe title="Предпросмотр первого экрана" tabindex="-1" inert></iframe>
+                    <button>Опубликовать выбранный вариант</button>
+                </form>
+            </section>
             <h2>Авторы и их работы</h2>
             <p>В публикации входят загруженные работы и закреплённые за авторами работы каталога.</p>
             <div class="scroll" role="region" aria-label="Статистика по авторам" tabindex="0">

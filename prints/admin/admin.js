@@ -1,3 +1,4 @@
+import { loadEditor, resetEditor } from "./feature-editor.js";
 import { createPrintsClient } from "/prints/build/js/artist-data.js";
 
 const report = document.querySelector("#report");
@@ -80,7 +81,11 @@ retry.addEventListener("click", () => location.reload());
 
 try {
     const client = await createPrintsClient({ account: true });
+    let sessionOwner;
     client.auth.onAuthStateChange((_event, session) => {
+        if (session && session.user.id === sessionOwner && !report.hidden) return;
+        sessionOwner = session?.user.id;
+        resetEditor();
         const current = ++generation;
         report.hidden = true;
         retry.hidden = true;
@@ -102,6 +107,7 @@ try {
                 }
                 if (error) throw error;
                 render(data);
+                loadEditor(client);
             } catch {
                 if (current !== generation) return;
                 status.textContent = "Не удалось загрузить статистику.";

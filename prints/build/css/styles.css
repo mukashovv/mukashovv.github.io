@@ -1915,3 +1915,25 @@ select {
         border-radius: 50%;
     }
 }
+
+.gallery-feature[data-layout="panorama"] { position: relative; isolation: isolate; grid-template-columns: 1fr; align-items: end; }
+.gallery-feature[data-layout="panorama"] .gallery-feature__works { position: absolute; inset: 0; height: auto; display: block; z-index: -1; }
+.gallery-feature[data-layout="panorama"] .gallery-feature__work:first-child { height: 100%; }
+.gallery-feature[data-layout="panorama"] .gallery-feature__work:last-child,
+.gallery-feature[data-layout="panorama"] .gallery-feature__work span { display: none; }
+.gallery-feature[data-layout="panorama"] .gallery-feature__copy { align-self: end; width: 100%; padding-top: 100px; background: linear-gradient(transparent, #19241dda 80%); pointer-events: none; }
+.gallery-feature[data-layout="panorama"] .gallery-feature__work img { object-position: center 46%; }
+.gallery-feature[data-layout="panorama"] .gallery-feature__actions a { pointer-events: auto; }
+.gallery-feature[data-layout="edition"] { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); background: #f1ede5; color: #332e28; }
+.gallery-feature[data-layout="edition"] .gallery-feature__works { grid-area: 1 / 1; background: transparent; padding: clamp(16px, 3vw, 52px); gap: 16px; align-items: center; }
+.gallery-feature[data-layout="edition"] .gallery-feature__work { aspect-ratio: 3 / 4; }
+.gallery-feature[data-layout="edition"] .gallery-feature__work:last-child { transform: translateY(9%); }
+.gallery-feature[data-layout="edition"] .gallery-feature__copy { grid-area: 1 / 2; }
+.gallery-feature[data-layout="edition"] .button { --button: #343c32; --button-text: white; }
+@media (max-width: 760px) {
+    body[data-prints-page="catalog"] .gallery-feature:is([data-layout="panorama"], [data-layout="edition"]):not([hidden]) { display: grid; }
+    .gallery-feature[data-layout="panorama"] { min-height: 340px; }
+    .gallery-feature[data-layout="edition"] { grid-template-columns: 1fr; }
+    .gallery-feature[data-layout="edition"] .gallery-feature__works { height: auto; }
+    .gallery-feature[data-layout="edition"] .gallery-feature__copy { grid-area: 2 / 1; }
+}

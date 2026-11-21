@@ -26,3 +26,9 @@ button { padding: 8px 16px; cursor: pointer; }
 .bar-row span { overflow-wrap: anywhere; }
 .bar-track { grid-column: 1 / -1; height: 8px; background: #e3e5dc; border-radius: 4px; overflow: hidden; }
 .bar-track div { height: 100%; background: #556b55; }
+.feature-editor { margin-block: 40px; }
+.feature-editor form:not([hidden]) { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.feature-editor label { display: grid; align-content: start; gap: 5px; }
+.feature-editor :is(input, textarea, select) { width: 100%; padding: 9px; font: inherit; }
+.feature-editor iframe { width: 100%; height: clamp(460px, 55vw, 630px); grid-column: 1 / -1; border: 0; background: #fff; }
+.feature-editor button { justify-self: start; }
