@@ -1,5 +1,5 @@
 import { applyCatalogueAssignment, createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, unwrap } from "./artist-data.js";
-import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js?v=3";
+import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js?v=4";
 
 const slugCooldownMs = 14 * 24 * 60 * 60 * 1000;
 const authForm = document.querySelector("#artist-auth");
@@ -156,7 +156,7 @@ function initDashboard(client, storage) {
     }
 
     async function uploadPhoto(work, { blob, width, height }, interior = false) {
-        unwrap(await storage.upload(photoPath(work, interior), blob, { contentType: blob.type }));
+        unwrap(await storage.upload(photoPath(work, interior), blob, { contentType: blob.type, upsert: interior }));
         return `${width} × ${height} пикс., ${Math.ceil(blob.size / 1024)} КБ`;
     }
 
@@ -265,14 +265,14 @@ function initDashboard(client, storage) {
             input.type = "file";
             input.accept = photoTypes.join(",");
             input.required = true;
-            const button = element("button", "Загрузить фото", "button button--solid");
+            const button = element("button", interior && work.interiorUrl ? "Заменить фото в интерьере" : "Загрузить фото", "button button--solid");
             label.append(input);
             form.append(label, button);
             form.addEventListener("submit", (event) => {
                 event.preventDefault();
                 run(button, async () => {
                     setStatus("Подготавливаем изображение…");
-                    const photo = await preparePhoto(input.files[0]);
+                    const photo = await preparePhoto(input.files[0], { interior });
                     if (work.artist_id !== userId) return;
                     try {
                         if (!interior) {
@@ -291,7 +291,7 @@ function initDashboard(client, storage) {
         }
 
         if (!work.imageUrl) editor.append(photoForm(false));
-        if (work.imageUrl && !work.interiorUrl) editor.append(photoForm(true));
+        if (work.imageUrl || work.interiorUrl) editor.append(photoForm(true));
 
         const editForm = artworkDetailsForm(work);
 
@@ -473,7 +473,7 @@ function initDashboard(client, storage) {
             }
             setStatus("Подготавливаем изображения…");
             const preparedPhoto = await preparePhoto(photo);
-            const preparedInterior = interior?.size ? await preparePhoto(interior) : null;
+            const preparedInterior = interior?.size ? await preparePhoto(interior, { interior: true }) : null;
             details.orientation = preparedPhoto.orientation;
             if (owner !== userId) return;
             setStatus("Загружаем изображения…");

@@ -1,6 +1,5 @@
 export const photoTypes = ["image/jpeg", "image/png", "image/webp"];
 
-const maxEdge = 700;
 const quality = 0.82;
 
 export class PhotoPreparationError extends Error {}
@@ -9,7 +8,7 @@ function encode(canvas, format, quality) {
     return new Promise((resolve) => canvas.toBlob(resolve, format, quality));
 }
 
-async function compressPhoto(image, sourceType) {
+async function compressPhoto(image, sourceType, maxEdge) {
     const longestEdge = Math.max(image.naturalWidth, image.naturalHeight);
     const scale = Math.min(1, maxEdge / longestEdge);
     const canvas = document.createElement("canvas");
@@ -37,7 +36,7 @@ async function compressPhoto(image, sourceType) {
     }
 }
 
-async function measureOutput(blob) {
+async function measureOutput(blob, maxEdge) {
     const url = URL.createObjectURL(blob);
     try {
         const image = new Image();
@@ -54,7 +53,8 @@ async function measureOutput(blob) {
     }
 }
 
-export async function preparePhoto(photo) {
+export async function preparePhoto(photo, { interior = false } = {}) {
+    const maxEdge = interior ? 1120 : 700;
     if (!photo?.size || !photoTypes.includes(photo.type)) {
         throw new PhotoPreparationError("Выберите изображение JPEG, PNG или WebP.");
     }
@@ -68,8 +68,8 @@ export async function preparePhoto(photo) {
         if (!width || !height) throw new Error("Image has no dimensions");
 
         const orientation = width === height ? "square" : width > height ? "landscape" : "portrait";
-        const blob = await compressPhoto(image, photo.type);
-        const { width: outputWidth, height: outputHeight } = await measureOutput(blob);
+        const blob = await compressPhoto(image, photo.type, maxEdge);
+        const { width: outputWidth, height: outputHeight } = await measureOutput(blob, maxEdge);
         return { blob, orientation, width: outputWidth, height: outputHeight };
     } catch (error) {
         if (error instanceof PhotoPreparationError) throw error;
