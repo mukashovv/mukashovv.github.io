@@ -84,12 +84,26 @@ function render(){
 const weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 const shortSum = new Intl.NumberFormat("ru", {notation:"compact", maximumFractionDigits:1});
 
-function sheetDay(day, entries, weekday, today) {
+function monthReminders(){
+ const days = new Map();
+ for(const [key,{data}] of Object.entries(book.debts)){
+   for(const item of F.installments(data)){
+     if(item.reminder.slice(0,7)!==month) continue;
+     const day=Number(item.reminder.slice(-2));
+     if(!days.has(day)) days.set(day,[]);
+     days.get(day).push({...item,key,name:data.name});
+   }
+ }
+ return days;
+}
+const displayDate = date => date.split("-").reverse().join(".");
+function sheetDay(day, entries, weekday, today, reminders) {
  const {income, expense, net} = F.totals({entries});
  const completed = entries.filter(entry => entry.done).length;
  const first = entries[0];
  const count = entries.length;
- const label = [day, monthName(month), weekdays[weekday], today ? "Сегодня" : "",
+ const names = reminders.map(item=>item.name).join(", ");
+ const label = [day, monthName(month), weekdays[weekday], today ? "Сегодня" : "", names && "Платежи через 4 дня: "+names,
    count ? "Записей: "+count+". Итог: "+money(net) : "Добавить запись"].filter(Boolean).join(" · ");
  const value = cents => cents ? currency.format(cents / 100) : "";
  const status = count ? completed+" / "+count : "";
@@ -99,7 +113,7 @@ function sheetDay(day, entries, weekday, today) {
    '<span class="sheet-text">'+esc(first?.source || "")+(count>1?' <em>+'+(count-1)+'</em>':"")+'</span>'+
    '<span class="sheet-text">'+esc(first?.purpose || "")+'</span><span class="sheet-number">'+value(income)+'</span>'+
    '<span class="sheet-number">'+value(expense)+'</span><span class="sheet-number">'+(count?currency.format(net/100):"")+'</span>'+
-   '<span class="sheet-status">'+status+'</span><span class="calendar-net">'+summary+'</span>',
+   '<span class="sheet-status">'+status+'</span><span class="sheet-reminder" title="'+esc(names)+'">'+esc(names)+'</span><span class="calendar-net">'+summary+'</span>',
    classes,'data-day="'+day+'" aria-label="'+esc(label)+'"'+(today?' aria-current="date"':""));
 }
 
@@ -109,7 +123,8 @@ function monthView(){
  const weeks=Math.ceil((start+days)/7);
  const grouped=Array.from({length:days+1},()=>[]);
  for(const entry of data.entries)grouped[entry.day].push(entry);
- const cells=grouped.slice(1).map((entries,i)=>sheetDay(i+1,entries,(start+i)%7,month===F.monthKey() && i+1===firstDay(month))).join("");
+ const reminders=monthReminders();
+ const cells=grouped.slice(1).map((entries,i)=>sheetDay(i+1,entries,(start+i)%7,month===F.monthKey() && i+1===firstDay(month),reminders.get(i+1)||[])).join("");
  const options=Object.keys(book.months).sort().reverse().map(k=>'<option '+(k===month?"selected":"")+' value="'+k+'">'+monthName(k)+'</option>').join("");
  const amounts=[["Доходы",sums.income],["Расходы",sums.expense],["Итог месяца",sums.net]].map(([label,n])=>
    '<div><dt>'+label+'</dt><dd>'+money(n)+'</dd></div>').join("");
@@ -117,14 +132,15 @@ function monthView(){
    button("new-month",icon("plus")+'<span>Вкладка</span>',"sheet-tool",'aria-label="Новая месячная вкладка" title="Новая месячная вкладка"')+
    button("goals",icon("settings")+'<span>Распределение</span>',"sheet-tool",'aria-label="Распределение дохода" title="Распределение дохода"')+
    button("entry",icon("plus")+"Запись","sheet-add")+'</div><dl class="sheet-totals">'+amounts+'</dl>'+
-   '<section class="month-sheet" aria-label="'+monthName(month)+'" style="--days:'+days+';--weeks:'+weeks+';--start:'+(start+1)+'">'+
-   '<div class="sheet-labels">'+["День","Откуда","На что","Доход","Расход","Итог дня","Готово"].map(s=>'<span>'+s+'</span>').join("")+'</div>'+
+   '<section class="month-sheet'+(reminders.size?" has-reminders":"")+'" aria-label="'+monthName(month)+'" style="--days:'+days+';--weeks:'+weeks+';--start:'+(start+1)+'">'+
+   '<div class="sheet-labels">'+["День","Откуда","На что","Доход","Расход","Итог дня","Готово",...(reminders.size?["Платежи через 4 дня"]:[])].map(s=>'<span>'+s+'</span>').join("")+'</div>'+
    '<div class="week-labels">'+weekdays.map(s=>'<span>'+s+'</span>').join("")+'</div><div class="sheet-body">'+cells+'</div></section>';
 }
 
 function dayDetail(day){
  const entries=book.months[month].data.entries.filter(entry=>entry.day===day);
- if(!entries.length){entryEditor(day);return;}
+ const reminders=monthReminders().get(day)||[];
+ if(!entries.length && !reminders.length){entryEditor(day);return;}
  const date=F.dateOf(month);date.setDate(day);
  const rows=entries.map(entry=>{
    const key='data-id="'+esc(entry.id)+'"';
@@ -134,6 +150,9 @@ function dayDetail(day){
       '<small>Доход '+money(entry.income)+' · Расход '+money(entry.expense)+'</small>',"day-entry",key)+'</li>';
  }).join("");
  modal(date.toLocaleDateString("ru",{day:"numeric",month:"long",year:"numeric"}),
+   (reminders.length?'<h3>Платежи через 4 дня</h3><ul class="day-entries">'+reminders.map(r=>
+     '<li>'+button("record-payment",'<strong>'+esc(r.name)+'</strong><small>К '+displayDate(r.dueDate)+' · '+money(r.amount)+'</small>',"day-entry",'data-key="'+esc(r.key)+'" data-period="'+r.period+'"')+
+     button("record-payment","Внести","secondary small",'data-key="'+esc(r.key)+'" data-period="'+r.period+'"')+'</li>').join("")+'</ul>':"")+
    '<ul class="day-entries">'+rows+'</ul><div class="form-actions">'+button("entry",icon("plus")+"Добавить запись","primary",'data-day="'+day+'"')+'</div>');
 }
 function entryEditor(day,entryId){
@@ -188,7 +207,11 @@ function debtView(){
    const cards=records.filter(([,r])=>Boolean(r.data.closed)===closed);
    return '<section class="lane" data-lane="'+(closed?"closed":"active")+'"><h2>'+ (closed?"Выполнено":"Активные долги")+' <small>'+cards.length+'</small></h2>'+cards.map(([key,rec])=>{
      const d=rec.data,b=F.balance(d),total=d.principal+d.interest;
-     return '<article class="debt-card '+(closed?"done-card":"")+'" draggable="true" data-debt="'+key+'"><h3>'+button("debt-detail",esc(d.name),"entry-link",'data-key="'+key+'"')+'</h3><span class="muted">Осталось</span><strong>'+money(b)+'</strong><div class="meter"><i style="width:'+Math.min(100,(1-b/total)*100)+'%"></i></div><div class="card-foot"><span>из '+money(total)+'</span>'+button("move-debt",closed?"Вернуть":"Завершить","text-btn",'data-key="'+key+'"')+'</div></article>';
+     const attrs='data-key="'+esc(key)+'"';
+     const next=F.installments(d)[0];
+     return '<article class="debt-card '+(closed?"done-card":"")+'" draggable="true" data-debt="'+esc(key)+'"><h3>'+button("debt-detail",esc(d.name),"entry-link",attrs)+'</h3><span class="muted">Осталось</span><strong>'+money(b)+'</strong><div class="meter"><i style="width:'+Math.min(100,(1-b/total)*100)+'%"></i></div><div class="card-foot"><span>Внесено '+money(total-b)+' из '+money(total)+'</span>'+button("move-debt",closed?"Вернуть":"Завершить","text-btn",attrs)+'</div>'+
+       (next?'<p class="debt-next">Платёж до '+displayDate(next.dueDate)+' · '+money(next.amount)+'</p>':"")+
+       '<div class="debt-actions">'+(!closed && b>0?button("record-payment","Внести платёж","secondary small",attrs):"")+button("edit-debt","Редактировать","text-btn",attrs)+'</div></article>';
    }).join("")+(cards.length?"":'<div class="lane-empty">'+(closed?"Сюда можно перенести погашенный долг.":"Добавьте долг, чтобы вести график платежей.")+'</div>')+'</section>';
  }
  return heading("Трекер долгов",button("new-debt",icon("plus")+"Добавить долг","primary"))+
@@ -200,7 +223,10 @@ function debtEditor(key){
  editKey=key||id();editRev=rec?.rev||0;
  modal(rec?"Изменить долг":"Новый долг",formWrap("debt",textField("name","Название или кредитор",d.name,true)+
  cashField("principal","Основная сумма, сом",d.principal,true)+cashField("interest","Переплата сверх основной суммы, сом",d.interest)+
- (!rec?cashField("already","Уже погашено, сом"):"")));
+ (!rec?cashField("already","Уже погашено, сом"):"")+
+ '<fieldset class="debt-schedule"><legend>Ежемесячный платёж</legend><p class="muted">Для напоминаний укажите первый платёж по графику и количество платежей начиная с этой даты.</p>'+
+ field("Дата первого платежа",'<input type="date" name="firstDate" min="1000-01-01" max="9999-12-31" value="'+esc(d.schedule?.firstDate)+'">')+
+ '<div class="pair">'+cashField("monthly","Платёж в месяц, сом",d.schedule?.amount)+field("Срок, мес.",'<input type="number" name="term" min="1" max="1200" step="1" value="'+esc(d.schedule?.months)+'">')+'</div></fieldset>'));
 }
 function detail(key){
  const rec=book.debts[key],d=rec.data; editKey=key;editRev=rec.rev;
@@ -208,13 +234,19 @@ function detail(key){
  modal(d.name,'<p class="muted">Остаток долга</p><p class="big-money">'+money(F.balance(d))+'</p><p class="muted">Основная сумма '+money(d.principal)+' · Переплата '+money(d.interest)+'</p>'+
  '<div class="panel-head"><h3>График платежей</h3>'+(!d.closed?button("payment","＋ Платёж","secondary small"):"")+'</div>'+
  (payments.length?'<ul class="payments">'+payments.map(p=>'<li class="'+(p.done?"paid":"")+'">'+button("toggle-payment",p.done?icon("check"):"","check",'data-id="'+esc(p.id)+'" aria-label="Платёж внесён" aria-pressed="'+Boolean(p.done)+'" '+(d.closed?"disabled":""))+'<span>'+esc(p.date.split("-").reverse().join("."))+'<small>'+esc(p.note||(p.done?"Внесён":"Запланирован"))+'</small></span><b>'+money(p.amount)+'</b>'+(!d.closed?button("payment","Изменить","text-btn",'data-id="'+esc(p.id)+'"'):"")+'</li>').join("")+'</ul>':'<p class="muted">Пока нет платежей.</p>')+
- '<p class="error" role="alert"></p><div class="form-actions">'+(!d.closed?button("edit-debt","Изменить долг","text-btn"):"")+button("move-debt",d.closed?"Вернуть в активные":"Перенести в выполнено","secondary",'data-key="'+key+'"')+'</div>');
+ '<p class="error" role="alert"></p><div class="form-actions">'+button("edit-debt","Изменить долг","text-btn")+button("move-debt",d.closed?"Вернуть в активные":"Перенести в выполнено","secondary",'data-key="'+key+'"')+'</div>');
 }
-function paymentEditor(paymentId){
+function paymentEditor(paymentId,period){
  const debt=book.debts[editKey].data, payment=debt.payments.find(p=>p.id===paymentId);
+ const items=F.installments(debt);
+ const selected=payment?(payment.period||""):(period||items[0]?.period||"");
+ const options=new Map(items.map(item=>[item.period,item.amount]));
+ if(selected && !options.has(selected))options.set(selected,0);
+ const periods=options.size?field("За какой платёж",'<select name="period"><option value="">Вне графика</option>'+
+   [...options].map(([key,amount])=>'<option value="'+esc(key)+'" data-amount="'+amount+'" '+(key===selected?"selected":"")+'>'+esc(monthName(key))+'</option>').join("")+'</select>'):"";
  editItem=payment?.id;editRev=book.debts[editKey].rev;
  modal(payment?"Изменить платёж":"Новый платёж",formWrap("payment",field("Дата платежа",'<input required type="date" name="date" value="'+esc(payment?.date||F.dateKey())+'">')+
- cashField("amount","Сумма, сом",payment?.amount,true)+textField("note","Примечание",payment?.note)+
+ periods+cashField("amount","Сумма, сом",payment?.amount??options.get(selected),true)+textField("note","Примечание",payment?.note)+
  '<label class="tick"><input name="done" type="checkbox" '+(!payment||payment.done?"checked":"")+'> Платёж внесён</label>',
  "Сохранить",payment?button("remove-payment","Удалить","text-btn danger"):""));
 }
@@ -312,7 +344,8 @@ async function handleAction(el){
  }
  if(action==="new-debt"){debtEditor();return;}
  if(action==="debt-detail"){detail(key);return;}
- if(action==="edit-debt"){debtEditor(editKey);return;}
+ if(action==="edit-debt"){debtEditor(key||editKey);return;}
+ if(action==="record-payment"){editKey=key;paymentEditor(undefined,el.dataset.period);return;}
  if(action==="payment"){paymentEditor(item);return;}
  if(action==="move-debt"){await moveDebt(key,!book.debts[key].data.closed);return;}
  if(action==="toggle-payment"){
@@ -355,9 +388,16 @@ async function submit(form){
  if(type==="debt"){
   d.name=f.get("name").trim();d.principal=amount(f,"principal");d.interest=amount(f,"interest");
   if(!d.name){hint("Введите название долга.");return;}
+  const firstDate=f.get("firstDate"),monthly=amount(f,"monthly"),term=Number(f.get("term"));
+  if(firstDate || monthly || term){
+    if(!firstDate || monthly<=0 || !Number.isInteger(term) || term<1 || term>1200){hint("Для графика заполните дату, сумму ежемесячного платежа и срок в месяцах.");return;}
+    d.schedule={firstDate,amount:monthly,months:term};
+  }else delete d.schedule;
+  if(d.closed && F.balance(d)>0){hint("Чтобы увеличить сумму завершённого долга, сначала верните его в активные.");return;}
   if(amount(f,"already"))d.payments.push({id:id(),date:F.dateKey(),note:"Погашено до начала учёта",amount:amount(f,"already"),done:true});
  }else if(type==="payment"){
   const p={id:editItem||id(),date:f.get("date"),note:f.get("note").trim(),amount:amount(f,"amount"),done:f.has("done")};
+  if(f.get("period"))p.period=f.get("period");
   const index=d.payments.findIndex(v=>v.id===p.id);if(index<0)d.payments.push(p);else d.payments[index]=p;
  }else if(type==="remove-payment"){d.payments=d.payments.filter(p=>p.id!==editItem);}
  else if(type==="settle"){d.payments.push({id:id(),date:F.dateKey(),note:"Окончательное погашение",amount:F.balance(d),done:true});d.closed=true;}
@@ -383,6 +423,11 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-action]")
 document.addEventListener("submit",e=>{if(e.target.dataset.form){e.preventDefault();run(()=>submit(e.target));}});
 document.addEventListener("change",e=>{
  if(!book||busy)return;
+ if(e.target.name==="period" && !editItem){
+   const suggested=Number(e.target.selectedOptions[0].dataset.amount);
+   if(suggested)e.target.form.elements.amount.value=numberInput(suggested);
+   return;
+ }
  if(e.target.id==="months")month=e.target.value;
  else if(e.target.id==="years")year=e.target.value;
  else if(e.target.id==="comparison")compare=e.target.value;

@@ -21,6 +21,30 @@ const Finance = (() => {
   function balance(debt) {
     return debt.principal + debt.interest - debt.payments.reduce((sum,p) => sum + (p.done ? p.amount : 0),0);
   }
+  function installments(debt) {
+    const plan = debt.schedule;
+    let remaining = balance(debt);
+    if (!plan || debt.closed || remaining <= 0) return [];
+    const paid = new Map();
+    for (const payment of debt.payments) {
+      if (payment.done && payment.period) paid.set(payment.period, (paid.get(payment.period) || 0) + payment.amount);
+    }
+    const start = dateOf(plan.firstDate);
+    const day = Number(plan.firstDate.slice(-2));
+    const items = [];
+    for (let i = 0; i < plan.months && remaining > 0; i++) {
+      const due = new Date(start.getFullYear(), start.getMonth() + i + 1, 0, 12);
+      due.setDate(Math.min(day, due.getDate()));
+      const period = monthKey(due);
+      const amount = Math.min(remaining, plan.amount - (paid.get(period) || 0));
+      if (amount <= 0) continue;
+      const dueDate = dateKey(due);
+      due.setDate(due.getDate() - 4);
+      items.push({period, dueDate, reminder:dateKey(due), amount});
+      remaining -= amount;
+    }
+    return items;
+  }
   function readLocal() { const raw=localStorage.getItem(localKey); return raw ? JSON.parse(raw) : null; }
   function startLocal() {
     local = true; account = null;
@@ -87,6 +111,6 @@ const Finance = (() => {
   async function members(offset){return rpc("st_members",{p_offset:offset});}
   async function grantMember(member,years){return rpc("st_grant_member",{p_member:member,p_years:years});}
   return {configured, members, grantMember, startLocal, load, openSession, observeSession, authenticate, leave, save,
-    monthKey,dateKey,dateOf,nextMonth,emptyMonth,totals,allocated,balance,
+    monthKey,dateKey,dateOf,nextMonth,emptyMonth,totals,allocated,balance,installments,
     get local(){return local;},get email(){return account?.email || "";}};
 })();

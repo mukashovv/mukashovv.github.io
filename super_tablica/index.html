@@ -7,11 +7,15 @@
 <meta name="description" content="Супер Таблица — личный учёт доходов, расходов и долгов с итогами по месяцам и годам.">
 <title>Супер Таблица</title>
 <link rel="icon" href="./brand.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="./app.css">
+<script defer src="./install.js"></script>
 <script defer src="./config.js"></script><script defer src="./data.js"></script><script defer src="./app.js"></script>
 </head>
 <body>
-<header class="mast"><div class="brand"><img src="./brand.png" alt="" width="35" height="35"><span>Супер Таблица</span></div><div id="account"></div></header>
+<header class="mast"><div class="brand"><img src="./brand.png" alt="" width="35" height="35"><span>Супер Таблица</span></div>
+<div class="mast-actions"><button id="install-app" type="button" hidden aria-label="Установить Супер Таблицу"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg>Установить</button><div id="account"></div></div></header>
 <main id="main">
 <section class="welcome"><div class="welcome-inner">
 <img class="doodle" src="./doodle.svg" width="620" height="330" alt="Нарисованная от руки финансовая тетрадь с карандашом и монетами">
@@ -19,6 +23,7 @@
 </div></section>
 </main>
 <dialog id="editor"><div class="modal-head"><h2 id="dialog-title"></h2><button type="button" class="close" aria-label="Закрыть" data-action="close">×</button></div><div id="dialog-body"></div></dialog>
+<dialog id="install-help" aria-labelledby="install-title"><div class="modal-head"><h2 id="install-title">Установка Супер Таблицы</h2><form method="dialog"><button class="close" aria-label="Закрыть">×</button></form></div><p id="install-steps"></p></dialog>
 <div id="notice" role="status" aria-live="polite"></div>
 <noscript>Для работы таблицы включите JavaScript в браузере.</noscript>
 </body></html>
