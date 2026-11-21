@@ -129,22 +129,15 @@
     background-size: 100% 100%;
 }
 
-/* The wall area includes the entire frame and mat. Coordinates follow the room photo. */
 .artwork-scene--interior .artwork-scene__mount {
-    --frame-inset: clamp(1px, 1.2cqmin, 9px);
-    position: absolute;
-    left: var(--wall-center, 50%);
-    top: calc(var(--wall-top, 17cqh) + var(--wall-height, 47cqh) / 2);
-    transform: translate(-50%, -50%);
-    max-width: none;
-    max-height: none;
-    padding: var(--frame-inset);
-    border-width: var(--frame-inset);
+    margin-top: 17cqh;
+    max-width: 55%;
+    padding: clamp(1px, 1.2cqmin, 9px);
 }
 
 .artwork-scene--interior .artwork-scene__mount img {
-    max-width: calc(var(--wall-width, 52cqw) - 4 * var(--frame-inset));
-    max-height: calc(var(--wall-height, 47cqh) - 4 * var(--frame-inset));
+    max-width: 47cqw;
+    max-height: 43cqh;
 }
 
 .artwork-scene--photo > img {
@@ -179,28 +172,15 @@
 
 .artwork-scene--1 { background-image: url('../img/interiors/room-1.jpg'); }
 .artwork-scene--2 { background-image: url('../img/interiors/room-2.jpg'); }
-.artwork-scene--3 { --wall-top: 14cqh; --wall-height: 45cqh; --wall-center: 54%; --wall-width: 49cqw; background-image: url('../img/interiors/room-3.jpg'); }
+.artwork-scene--3 { background-image: url('../img/interiors/room-3.jpg'); }
 .artwork-scene--4 { background-image: url('../img/interiors/room-4.jpg'); }
-.artwork-scene--5 { --wall-top: 14cqh; --wall-height: 45cqh; --wall-center: 50%; --wall-width: 52cqw; background-image: url('../img/interiors/home-5.webp'); }
-.artwork-scene--6 { --wall-top: 13cqh; --wall-height: 47cqh; --wall-center: 51%; --wall-width: 50cqw; background-image: url('../img/interiors/home-6.webp'); }
-.artwork-scene--7 { --wall-top: 10cqh; --wall-height: 39cqh; --wall-center: 50%; --wall-width: 50cqw; background-image: url('../img/interiors/home-7.webp'); }
-.artwork-scene--8 { --wall-top: 11cqh; --wall-height: 43cqh; --wall-center: 50%; --wall-width: 52cqw; background-image: url('../img/interiors/home-8.webp'); }
-.artwork-scene--9 { --wall-top: 12cqh; --wall-height: 47cqh; --wall-center: 51%; --wall-width: 50cqw; background-image: url('../img/interiors/home-9.webp'); }
-.artwork-scene--10 { --wall-top: 13cqh; --wall-height: 46cqh; --wall-center: 50%; --wall-width: 50cqw; background-image: url('../img/interiors/home-10.webp'); }
-.artwork-scene--11 { --wall-top: 13cqh; --wall-height: 41cqh; --wall-center: 50%; --wall-width: 47cqw; background-image: url('../img/interiors/home-11.webp'); }
-.artwork-scene--12 { --wall-top: 13cqh; --wall-height: 44cqh; --wall-center: 50%; --wall-width: 52cqw; background-image: url('../img/interiors/home-12.webp'); }
-.artwork-scene--13 { --wall-top: 10cqh; --wall-height: 45cqh; --wall-center: 51%; --wall-width: 48cqw; background-image: url('../img/interiors/home-13.webp'); }
-.artwork-scene--14 { --wall-top: 10cqh; --wall-height: 46cqh; --wall-center: 51%; --wall-width: 50cqw; background-image: url('../img/interiors/home-14.webp'); }
-.artwork-scene--15 { --wall-top: 12cqh; --wall-height: 36cqh; --wall-center: 51%; --wall-width: 48cqw; background-image: url('../img/interiors/home-15.webp'); }
-.artwork-scene--16 { --wall-top: 12cqh; --wall-height: 46cqh; --wall-center: 51%; --wall-width: 50cqw; background-image: url('../img/interiors/home-16.webp'); }
-.artwork-scene--17 { --wall-top: 10cqh; --wall-height: 46cqh; --wall-center: 50%; --wall-width: 52cqw; background-image: url('../img/interiors/home-17.webp'); }
-.artwork-scene--18 { --wall-top: 10cqh; --wall-height: 42cqh; --wall-center: 50%; --wall-width: 49cqw; background-image: url('../img/interiors/home-18.webp'); }
-.artwork-scene--19 { --wall-top: 11cqh; --wall-height: 46cqh; --wall-center: 50%; --wall-width: 52cqw; background-image: url('../img/interiors/home-19.webp'); }
-.artwork-scene--20 { --wall-top: 12cqh; --wall-height: 44cqh; --wall-center: 50%; --wall-width: 48cqw; background-image: url('../img/interiors/home-20.webp'); }
-.artwork-scene--21 { --wall-top: 10cqh; --wall-height: 46cqh; --wall-center: 50%; --wall-width: 52cqw; background-image: url('../img/interiors/home-21.webp'); }
-.artwork-scene--22 { --wall-top: 13cqh; --wall-height: 47cqh; --wall-center: 50%; --wall-width: 52cqw; background-image: url('../img/interiors/home-22.webp'); }
-.artwork-scene--23 { --wall-top: 11cqh; --wall-height: 43cqh; --wall-center: 51%; --wall-width: 48cqw; background-image: url('../img/interiors/home-23.webp'); }
-.artwork-scene--24 { --wall-top: 11cqh; --wall-height: 46cqh; --wall-center: 50%; --wall-width: 52cqw; background-image: url('../img/interiors/home-24.webp'); }
+.artwork-scene--5 { background-image: url('../img/interiors/studio-5.webp'); }
+.artwork-scene--6 { background-image: url('../img/interiors/studio-6.webp'); }
+.artwork-scene--7 { background-image: url('../img/interiors/studio-7.webp'); }
+.artwork-scene--8 { background-image: url('../img/interiors/studio-8.webp'); }
+.artwork-scene--9 { background-image: url('../img/interiors/studio-9.webp'); }
+.artwork-scene--10 { background-image: url('../img/interiors/studio-10.webp'); }
+.artwork-scene--11 { background-image: url('../img/interiors/studio-11.webp'); }
 
 [data-offer-fields] {
     display: grid;

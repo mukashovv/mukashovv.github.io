@@ -102,7 +102,7 @@ export async function loadArtistProducts() {
         createdAt: work.created_at,
         isArtistWork: true,
         offers: publicOffers(work),
-        interior: (parseInt(work.id.slice(0, 8), 16) % 24) + 1
+        interior: (parseInt(work.id.slice(0, 8), 16) % 11) + 1
     }));
 }
 
