@@ -1,4 +1,18 @@
 (() => {
+    // Image load events do not bubble. Capture them for newly rendered cards and previews.
+    document.addEventListener("load", async (event) => {
+        const image = event.target;
+        if (!(image instanceof HTMLImageElement)) return;
+        const layer = image.parentElement;
+        if (!layer?.matches(".artwork-scene__mount, .artwork-scene--photo")) return;
+        try {
+            await image.decode?.();
+        } catch {
+            if (!image.naturalWidth) return;
+        }
+        layer.classList.add("is-ready");
+    }, true);
+
     const revealed = new Set();
     let observer;
 

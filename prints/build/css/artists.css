@@ -104,6 +104,21 @@
     container-type: size;
 }
 
+.artwork-scene__mount, .artwork-scene--photo {
+    opacity: 0;
+    transition: opacity 220ms ease-out;
+}
+
+.artwork-scene__mount.is-ready, .artwork-scene--photo.is-ready {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .artwork-scene__mount, .artwork-scene--photo {
+        transition: none;
+    }
+}
+
 .artwork-scene__mount {
     display: flex;
     max-width: 74%;
