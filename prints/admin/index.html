@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Статистика галереи — Mukashov Gallery</title>
+    <link rel="stylesheet" href="./admin.css">
+    <script type="module" src="./admin.js"></script>
+</head>
+<body>
+    <header><a href="/prints/">Mukashov Gallery</a><span>Кабинет владельца</span></header>
+    <main>
+        <h1>Статистика галереи</h1>
+        <p id="status" role="status">Проверяем доступ…</p>
+        <a id="login" href="/prints/artists.html" hidden>Войти в кабинет автора</a>
+        <button id="retry" hidden>Повторить загрузку</button>
+        <section id="report" hidden>
+            <dl id="metrics"></dl>
+            <div class="charts">
+                <section><h2>Новые работы</h2>
+                    <p>Сколько работ из текущего списка авторы загрузили за два периода.</p>
+                    <div id="trend"></div>
+                </section>
+                <section><h2>Кто пополняет галерею</h2>
+                    <p>До пяти авторов с наибольшим числом загрузок за последние 30 дней.</p>
+                    <div id="leaders"></div>
+                </section>
+            </div>
+            <h2>Авторы и их работы</h2>
+            <p>В публикации входят загруженные работы и закреплённые за авторами работы каталога.</p>
+            <div class="scroll" role="region" aria-label="Статистика по авторам" tabindex="0">
+                <table>
+                    <thead><tr><th>Автор</th><th>Город</th><th>Всего</th><th>Опубликовано</th><th>Черновики</th><th>Загрузки за 30 дней</th><th>Последняя загрузка</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
