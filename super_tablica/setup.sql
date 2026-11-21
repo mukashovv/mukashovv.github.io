@@ -100,6 +100,19 @@ begin
 end $$;
 revoke all on function public.st_book(text), public.st_save(text,text,integer,jsonb) from public,anon;
 grant execute on function public.st_book(text), public.st_save(text,text,integer,jsonb) to authenticated;
+
+create or replace function public.st_delete_debt(p_key text, p_revision integer)
+returns void language plpgsql security definer set search_path = '' as $$
+declare
+  u uuid := auth.uid();
+begin
+  if u is null then raise exception 'AUTH_REQUIRED'; end if;
+  delete from st_private.records
+    where owner=u and kind='debts' and key=p_key and rev=p_revision;
+  if not found then raise exception 'STALE_VERSION'; end if;
+end $$;
+revoke all on function public.st_delete_debt(text,integer) from public,anon;
+grant execute on function public.st_delete_debt(text,integer) to authenticated;
 -- Both RPCs authorize the caller before reading any member information.
 create or replace function public.st_members(p_offset integer default 0)
 returns jsonb language plpgsql security definer set search_path = '' as $$
