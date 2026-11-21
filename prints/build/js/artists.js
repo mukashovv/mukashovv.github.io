@@ -38,8 +38,6 @@ function workCard(work) {
     const card = element("article", "", "artist-card");
     if (work.imageUrl) {
         const img = element("img");
-        img.dataset.galleryImage = "";
-        img.addEventListener("load", () => { img.dataset.galleryState = "ready"; }, { once: true });
         img.src = work.imageUrl;
         img.alt = work.title;
         card.append(img);

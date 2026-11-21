@@ -15,7 +15,6 @@
     <script defer src="../build/js/language-link.js"></script>
 </head>
 <body data-prints-page="catalog">
-    <script src="../build/js/image-loading.js"></script>
     <div class="prints-page">
         <div class="announcement-bar">
             <div class="container announcement-bar__inner">
@@ -86,12 +85,12 @@
                 </div>
                 <div class="gallery-feature__works">
                     <a class="gallery-feature__work" href="./product.html?slug=last-sunlight-in-ala-archa" aria-label="View Last Sunlight in Ala-Archa">
-                        <img data-gallery-image src="../build/img/last-sunlight-in-ala-archa-in-action.webp" alt=""
-                            width="800" height="1120" fetchpriority="high">
+                        <img src="../build/img/last-sunlight-in-ala-archa-in-action.webp" alt=""
+                            width="800" height="1120">
                         <span>Ala-Archa</span>
                     </a>
                     <a class="gallery-feature__work" href="./product.html?slug=hidden-heart-of-teskey-ala-too" aria-label="View Hidden Heart of Teskey Ala-Too">
-                        <img data-gallery-image src="../build/img/hidden-heart-of-teskey-ala-too-interior.webp" alt=""
+                        <img src="../build/img/hidden-heart-of-teskey-ala-too-interior.webp" alt=""
                             width="1684" height="2528">
                         <span>Teskey Ala-Too</span>
                     </a>
@@ -114,12 +113,7 @@
                     </div>
                     <p id="catalog-status" role="status" hidden></p>
                     <p class="catalog-results" id="catalogResults" role="status"></p>
-                    <div class="prints-grid" id="printsGrid" aria-label="Loading artwork…" aria-busy="true">
-                        <span class="gallery-placeholder" aria-hidden="true"></span>
-                        <span class="gallery-placeholder" aria-hidden="true"></span>
-                        <span class="gallery-placeholder" aria-hidden="true"></span>
-                        <span class="gallery-placeholder" aria-hidden="true"></span>
-                    </div>
+                    <div class="prints-grid" id="printsGrid"></div>
                 </div>
             </section>
         </main>
@@ -138,6 +132,7 @@
         </footer>
     </div>
 
+    <script src="../build/js/card-reveal.js" defer></script>
     <script src="js/data.js"></script>
     <script src="js/scripts.js"></script>
 </body>

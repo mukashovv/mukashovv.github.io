@@ -154,18 +154,9 @@
     --gallery-thumb-count: 2;
 }
 
-.artwork-product-gallery .product-gallery__thumbs {
-    height: auto;
-    grid-template-rows: auto;
-}
-
-.artwork-product-gallery .product-gallery__thumb,
 .artwork-product-preview {
     width: 100%;
     aspect-ratio: 3 / 4;
-}
-
-.artwork-product-preview {
     max-width: min(100%, 66svh);
     justify-self: center;
 }
@@ -179,48 +170,30 @@
     padding-bottom: 1rem;
 }
 
-@media (max-width: 760px) {
-    .artwork-product-gallery .product-gallery__thumbs {
-        max-width: 12rem;
-    }
-}
-
-.print-card__artwork {
-    object-fit: contain;
-}
-
-.artwork-scene > .artwork-scene__room {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.artwork-scene__mount {
-    position: relative;
-    opacity: 0;
-    transition: opacity 320ms ease;
-}
-
-.artwork-scene:not(:has(img:not([data-gallery-state="ready"]))) .artwork-scene__mount {
-    opacity: 1;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .print-card__body {
-        transition: opacity 320ms ease;
-    }
-
-    .print-card:has(.print-card__image--base:not([data-gallery-state])) .print-card__body {
-        opacity: 0;
-    }
-
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .artwork-scene__mount { transition: none; }
-}
+.artwork-scene--1 { background-image: url('../img/interiors/room-1.jpg'); }
+.artwork-scene--2 { background-image: url('../img/interiors/room-2.jpg'); }
+.artwork-scene--3 { background-image: url('../img/interiors/room-3.jpg'); }
+.artwork-scene--4 { background-image: url('../img/interiors/room-4.jpg'); }
+.artwork-scene--5 { background-image: url('../img/interiors/room-5.jpg'); }
+.artwork-scene--6 { background-image: url('../img/interiors/room-6.jpg'); }
+.artwork-scene--7 { background-image: url('../img/interiors/room-7.jpg'); }
+.artwork-scene--8 { background-image: url('../img/interiors/room-8.jpg'); }
+.artwork-scene--9 { background-image: url('../img/interiors/room-9.jpg'); }
+.artwork-scene--10 { background-image: url('../img/interiors/room-10.jpg'); }
+.artwork-scene--11 { background-image: url('../img/interiors/room-11.jpg'); }
+.artwork-scene--12 { background-image: url('../img/interiors/room-12.jpg'); }
+.artwork-scene--13 { background-image: url('../img/interiors/room-13.jpg'); }
+.artwork-scene--14 { background-image: url('../img/interiors/room-14.jpg'); }
+.artwork-scene--15 { background-image: url('../img/interiors/room-15.jpg'); }
+.artwork-scene--16 { background-image: url('../img/interiors/room-16.jpg'); }
+.artwork-scene--17 { background-image: url('../img/interiors/room-17.jpg'); }
+.artwork-scene--18 { background-image: url('../img/interiors/room-18.jpg'); }
+.artwork-scene--19 { background-image: url('../img/interiors/room-19.jpg'); }
+.artwork-scene--20 { background-image: url('../img/interiors/room-20.jpg'); }
+.artwork-scene--21 { background-image: url('../img/interiors/room-21.jpg'); }
+.artwork-scene--22 { background-image: url('../img/interiors/room-22.jpg'); }
+.artwork-scene--23 { background-image: url('../img/interiors/room-23.jpg'); }
+.artwork-scene--24 { background-image: url('../img/interiors/room-24.jpg'); }
 
 [data-offer-fields] {
     display: grid;

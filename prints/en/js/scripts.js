@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (feature) feature.hidden = Boolean(window.location.search);
 
     if (!catalog.length) {
-        window.galleryImagesReady?.();
         return;
     }
 
@@ -210,7 +209,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         return params.toString();
     };
 
-    const { checkout } = await import("../../build/js/checkout.js");
+    const checkout = async (button, items) => {
+        try {
+            const order = await import("../../build/js/checkout.js");
+            await order.checkout(button, items);
+        } catch {
+            window.alert("Could not open checkout. Refresh the page and try again.");
+        }
+    };
 
     const getInfoSections = (product) => {
         const sections = {};
@@ -428,7 +434,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ? favouriteProducts.map((product) => `
                     <article class="drawer-item">
                         <a class="drawer-item__media" href="${buildProductUrl(product.slug)}">
-                            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" ${galleryImageAttributes()}>
+                            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}">
                         </a>
                         <div class="drawer-item__body">
                             <p class="drawer-item__artist">${escapeHtml(product.artist)}</p>
@@ -454,7 +460,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ? cartDetails.map((item) => `
                     <article class="drawer-item">
                         <a class="drawer-item__media" href="${buildProductUrl(item.product.slug, { sizeId: item.sizeId })}">
-                            <img src="${item.product.image}" alt="${escapeHtml(item.product.title)} — ${escapeHtml(item.product.artist)}" ${galleryImageAttributes()}>
+                            <img src="${item.product.image}" alt="${escapeHtml(item.product.title)} — ${escapeHtml(item.product.artist)}">
                         </a>
                         <div class="drawer-item__body">
                             <p class="drawer-item__artist">${escapeHtml(item.product.artist)}</p>
@@ -575,21 +581,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     };
 
-    const galleryImageAttributes = (priority = false) => priority
-        ? 'data-gallery-image data-gallery-primary loading="eager" fetchpriority="high"'
-        : 'data-gallery-image loading="lazy" decoding="async"';
-
-    const renderArtworkImage = (product, interior = false, priority = false) => {
+    const renderArtworkImage = (product, interior = false, lazy = false) => {
+        const loading = lazy ? ' loading="lazy"' : "";
         if (interior && product.hoverImage) {
-            return `<span class="artwork-scene artwork-scene--photo"><img src="${escapeHtml(product.hoverImage)}" alt="" ${galleryImageAttributes(priority)}></span>`;
+            return `<span class="artwork-scene artwork-scene--photo"><img${loading} src="${escapeHtml(product.hoverImage)}" alt=""></span>`;
         }
-        const room = interior ? `<img class="artwork-scene__room" src="../build/img/interiors/room-${product.interior}.jpg" alt="" ${galleryImageAttributes(priority)}>` : "";
-        return `<span class="artwork-scene${interior ? " artwork-scene--interior" : ""}">${room}<span class="artwork-scene__mount">
-            <img src="${escapeHtml(product.image)}" alt="" ${galleryImageAttributes(priority)}>
+        const scene = interior ? ` artwork-scene--interior artwork-scene--${product.interior}` : "";
+        return `<span class="artwork-scene${scene}"><span class="artwork-scene__mount">
+            <img${loading} src="${escapeHtml(product.image)}" alt="">
         </span></span>`;
     };
 
-    const buildCardMarkup = (product, sizeId, priority = false) => {
+    const buildCardMarkup = (product, sizeId) => {
         const cardUrl = buildProductUrl(product.slug, { sizeId });
         const hoverImage = product.hoverImage || product.image;
         const size = findSize(sizeId) || findSize(defaultSizeId) || shared.sizes?.[0];
@@ -600,10 +603,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ${buildFavouriteButton(product.slug)}
                     <a class="print-card__media" href="${cardUrl}" aria-label="Open ${escapeHtml(product.title)}">
                         ${product.isArtistWork ? `
-                            <img class="print-card__image print-card__image--base print-card__artwork" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}" ${galleryImageAttributes(priority)}>
-                            <span class="print-card__image print-card__image--hover" aria-hidden="true">${renderArtworkImage(product, true)}</span>`
-                            : `<img class="print-card__image print-card__image--base" src="${product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" ${galleryImageAttributes(priority)}>
-                            <img class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" ${galleryImageAttributes()} aria-hidden="true">`}
+                            <span class="print-card__image print-card__image--base">${renderArtworkImage(product, false, true)}</span>
+                            <span class="print-card__image print-card__image--hover" aria-hidden="true">${renderArtworkImage(product, true, true)}</span>`
+                            : `<img loading="lazy" class="print-card__image print-card__image--base" src="${product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}">
+                            <img loading="lazy" class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" aria-hidden="true">`}
                     </a>
                 </div>
                 <div class="print-card__body">
@@ -918,9 +921,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (scrollLeft) waypoint.querySelector(".filter-waypoint__inner").scrollLeft = scrollLeft;
     };
 
-    const renderCatalogPage = () => {
+    const renderCatalogGrid = (state) => {
         const grid = document.querySelector("#printsGrid");
         const results = document.querySelector("#catalogResults");
+
+        const products = getCatalogProducts(state);
+        if (results) results.textContent = `Results: ${products.length}`;
+
+        if (grid) {
+            grid.innerHTML = products.length
+                ? products.map((product) => buildCardMarkup(product, state.sizeId)).join("")
+                : `<p class="catalog-empty">No works match these filters. Try removing a filter or widening the price range.</p>`;
+            window.prepareGalleryCards?.(grid);
+        }
+    };
+
+    const renderCatalogPage = () => {
+        const grid = document.querySelector("#printsGrid");
         const state = getInitialCatalogState();
         let lastScrollY = window.scrollY;
         const searchForm = document.querySelector(".gallery-search");
@@ -934,15 +951,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         const renderProducts = () => {
-            const products = getCatalogProducts(state);
-            if (results) results.textContent = `Results: ${products.length}`;
-
-            if (grid) {
-                grid.innerHTML = products.length
-                    ? products.map((product, index) => buildCardMarkup(product, state.sizeId, index === 0)).join("")
-                    : `<p class="catalog-empty">No works match these filters. Try removing a filter or widening the price range.</p>`;
-            }
-
+            renderCatalogGrid(state);
             syncCatalogUrl(state);
             renderGlobalUi();
         };
@@ -1128,10 +1137,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         gallery.innerHTML = `
             <div class="product-gallery artwork-product-gallery" aria-label="Artwork images">
                 <div class="product-gallery__thumbs">
-                    <button type="button" class="product-gallery__thumb is-active" aria-label="Artwork" aria-pressed="true">${renderArtworkImage(product)}</button>
+                    <button type="button" class="product-gallery__thumb is-active" aria-label="Artwork" aria-pressed="true"><img src="${escapeHtml(product.image)}" alt=""></button>
                     <button type="button" class="product-gallery__thumb" aria-label="Artwork in a room" aria-pressed="false">${renderArtworkImage(product, true)}</button>
                 </div>
-                <div class="artwork-product-preview" role="img" aria-label="${escapeHtml(product.title)}">${renderArtworkImage(product, false, true)}</div>
+                <div class="artwork-product-preview" role="img" aria-label="${escapeHtml(product.title)}">${renderArtworkImage(product)}</div>
             </div>`;
         const offers = product.offers || [];
         const initialOffer = offers.find((offer) => offer.available) || offers[0];
@@ -1172,7 +1181,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         let isInterior = false;
         const showArtwork = (interior) => {
             isInterior = interior;
-            preview.innerHTML = renderArtworkImage(product, interior, true);
+            preview.innerHTML = renderArtworkImage(product, interior);
             preview.setAttribute("aria-label", interior ? `${product.title} in a room` : product.title);
             thumbs.forEach((thumb, index) => {
                 const active = index === Number(interior);
@@ -1272,13 +1281,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="product-gallery__thumbs">
                         ${images.map((image, index) => `
                             <button class="product-gallery__thumb${index === state.activeImageIndex ? " is-active" : ""}" type="button" data-gallery-thumb="${index}" aria-label="Photo ${index + 1}" aria-pressed="${index === state.activeImageIndex}">
-                                <img src="${image}" alt="" ${galleryImageAttributes()} aria-hidden="true">
+                                <img src="${image}" alt="" aria-hidden="true">
                             </button>
                         `).join("")}
                     </div>
                     <div class="product-preview" id="productPreview">
                         <div class="product-preview__frame">
-                            <img src="${images[state.activeImageIndex]}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" data-role="product-image" ${galleryImageAttributes(true)}>
+                            <img src="${images[state.activeImageIndex]}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" data-role="product-image">
                         </div>
                     </div>
                 </div>
@@ -1377,7 +1386,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             preview?.classList.toggle("is-framed", state.activeImageIndex === 0);
             const nextImage = images[state.activeImageIndex];
             if (previewImage && previewImage.getAttribute("src") !== nextImage) {
-                delete previewImage.dataset.galleryState;
                 previewImage.src = nextImage;
             }
 
@@ -1470,7 +1478,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (media) {
             media.innerHTML = `
                 <div class="info-page-media">
-                    <img src="${product.hoverImage || product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" ${galleryImageAttributes(true)}>
+                    <img src="${product.hoverImage || product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}">
                 </div>
             `;
         }
@@ -1554,6 +1562,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
+    if (page === "catalog" && !window.location.search) {
+        renderCatalogGrid(getInitialCatalogState());
+    }
+
     try {
         const { applyCatalogueAssignment, loadArtistProducts, loadPublicArtistProfile, loadCatalogArtistAssignments } = await import("../../build/js/artist-data.js");
         const timeout = AbortSignal.timeout(8000);
@@ -1573,7 +1585,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             status.hidden = false;
             status.textContent = "Artist profile not found.";
             renderGlobalUi();
-            window.galleryImagesReady?.();
             return;
         }
         if (publicArtist) {
@@ -1606,5 +1617,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (page === "info") {
         renderInfoPage();
     }
-    window.galleryImagesReady?.();
 });
