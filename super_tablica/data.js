@@ -84,7 +84,9 @@ const Finance = (() => {
     };
     return navigator.locks ? navigator.locks.request(localKey,write) : write();
   }
-  return {configured, startLocal, load, openSession, observeSession, authenticate, leave, save,
+  async function members(offset){return rpc("st_members",{p_offset:offset});}
+  async function grantMember(member,years){return rpc("st_grant_member",{p_member:member,p_years:years});}
+  return {configured, members, grantMember, startLocal, load, openSession, observeSession, authenticate, leave, save,
     monthKey,dateKey,dateOf,nextMonth,emptyMonth,totals,allocated,balance,
     get local(){return local;},get email(){return account?.email || "";}};
 })();

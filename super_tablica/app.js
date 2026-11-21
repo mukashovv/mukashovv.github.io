@@ -15,6 +15,7 @@ const id=()=>crypto.randomUUID();
 let book,month,view="month",year,compare,gate="start",busy=false,workspaceOpening=null,lastDate=F.dateKey();
 let editKey,editItem,editRev,flashTimer;
 const icons={
+ members:'<circle cx="9" cy="8" r="3"/><path d="M2 20v-2a7 7 0 0 1 14 0v2m0-15a3 3 0 0 1 0 6m3 3a6 6 0 0 1 3 6"/>',
  month:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M7 2v4m10-4v4M3 10h18m-13 5h3"/>',
  debts:'<path d="M4 6h14a2 2 0 0 1 2 2v12H5a2 2 0 0 1-2-2V7a3 3 0 0 1 3-3l11-2v4"/><path d="M15 11h6v5h-6a2.5 2.5 0 0 1 0-5Z"/>',
  year:'<path d="M4 3v17h17M8 16v-4m5 4V7m5 9v-7"/>',
@@ -49,14 +50,14 @@ function renderGate(step){
  }
  box.querySelector("input,button")?.focus({preventScroll:true});
 }
-function home(){book=null;view="month";main.innerHTML=welcome;accountBox.innerHTML="";gate="start";if(dialog.open)dialog.close();}
+function home(){document.body.classList.remove("month-open","workbook-open");memberPage=[];memberOffset=0;book=null;view="month";main.innerHTML=welcome;accountBox.innerHTML="";gate="start";if(dialog.open)dialog.close();}
 async function workspace(local=false){
  if(workspaceOpening)return workspaceOpening;
  workspaceOpening=(async()=>{
    book=local?F.startLocal():await F.load();
    month=book.paid?F.monthKey():book.trial;
    if(!book.months[month])await createMonth(month);
-   view="month";year=month.slice(0,4);compare=month;render(true);
+   view="month";year=month.slice(0,4);compare=month;render();
  })();
  try{await workspaceOpening;}finally{workspaceOpening=null;}
 }
@@ -69,39 +70,71 @@ async function createMonth(key){
 }
 function heading(title,actions=""){return '<div class="section-top"><h1>'+esc(title)+'</h1><div class="actions">'+actions+'</div></div>';}
 function stats(items){return '<div class="stats">'+items.map(([name,value])=>'<div><span>'+esc(name)+'</span><strong>'+esc(value)+'</strong></div>').join("")+'</div>';}
-function render(focusDay=false){
+function render(){
+ document.body.classList.toggle("month-open",view==="month");
+ document.body.classList.add("workbook-open");
  accountBox.innerHTML='<span class="account-label">'+(F.local?"На этом устройстве":esc(F.email))+'</span>'+button("leave",icon("logout"),"icon-btn",'aria-label="Выйти" title="Выйти"');
- const nav=[["month","Учёт по месяцам"],["debts","Долги"],["year","Сводка по годам"]].map(([key,name])=>button("view",icon(key)+name,"nav-item "+(view===key?"active":""),'data-key="'+key+'" '+(view===key?'aria-current="page"':""))).join("");
- const plan=book.paid?'<span class="plan-label">Полный доступ</span>':button("upgrade","Бесплатный месяц","plan-label");
- main.innerHTML='<div class="desk"><nav class="tabs" aria-label="Разделы таблицы">'+nav+plan+'</nav><section class="content">'+(view==="month"?monthView():view==="debts"?debtView():yearView())+'</section></div>';
- if(focusDay && view==="month" && month===F.monthKey()){
-   const list=$(".ledger-scroll"), today=$(".day.today"); if(list && today)list.scrollTop+=today.getBoundingClientRect().top-list.getBoundingClientRect().top-50;
- }
+ const tabs=[["month","Месяц"],["debts","Долги"],["year","Годы"]];
+ if(book.manager)tabs.push(["members","Участники"]);
+ const nav=tabs.map(([key,name])=>button("view",icon(key)+name,"nav-item "+(view===key?"active":""),'data-key="'+key+'" '+(view===key?'aria-current="page"':""))).join("");
+ const plan=book.paid?'<span class="plan-label" title="'+(book.paid_until?'До '+accessDate(book.paid_until):'Бессрочный доступ')+'">Полный доступ</span>':button("upgrade","Бесплатный месяц","plan-label");
+ const section={month:monthView,debts:debtView,year:yearView,members:membersView}[view];
+ main.innerHTML='<div class="desk"><nav class="tabs" aria-label="Разделы таблицы">'+nav+plan+'</nav><section class="content">'+section()+'</section></div>';
 }
+const weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+const shortSum = new Intl.NumberFormat("ru", {notation:"compact", maximumFractionDigits:1});
+
+function sheetDay(day, entries, weekday, today) {
+ const {income, expense, net} = F.totals({entries});
+ const completed = entries.filter(entry => entry.done).length;
+ const first = entries[0];
+ const count = entries.length;
+ const label = [day, monthName(month), weekdays[weekday], today ? "Сегодня" : "",
+   count ? "Записей: "+count+". Итог: "+money(net) : "Добавить запись"].filter(Boolean).join(" · ");
+ const value = cents => cents ? currency.format(cents / 100) : "";
+ const status = count ? completed+" / "+count : "";
+ const summary = count ? (Math.abs(net)<100000 ? currency.format(net/100) : shortSum.format(net/100)) : "";
+ const classes = ["sheet-day",today && "is-today",count && completed===count && "finished"].filter(Boolean).join(" ");
+ return button("day",'<span class="sheet-date"><b>'+day+'</b><small>'+weekdays[weekday]+'</small></span>'+
+   '<span class="sheet-text">'+esc(first?.source || "")+(count>1?' <em>+'+(count-1)+'</em>':"")+'</span>'+
+   '<span class="sheet-text">'+esc(first?.purpose || "")+'</span><span class="sheet-number">'+value(income)+'</span>'+
+   '<span class="sheet-number">'+value(expense)+'</span><span class="sheet-number">'+(count?currency.format(net/100):"")+'</span>'+
+   '<span class="sheet-status">'+status+'</span><span class="calendar-net">'+summary+'</span>',
+   classes,'data-day="'+day+'" aria-label="'+esc(label)+'"'+(today?' aria-current="date"':""));
+}
+
 function monthView(){
- const data=book.months[month].data, sums=F.totals(data);
+ const data=book.months[month].data, sums=F.totals(data), days=len(month);
+ const start=(F.dateOf(month).getDay()+6)%7;
+ const weeks=Math.ceil((start+days)/7);
+ const grouped=Array.from({length:days+1},()=>[]);
+ for(const entry of data.entries)grouped[entry.day].push(entry);
+ const cells=grouped.slice(1).map((entries,i)=>sheetDay(i+1,entries,(start+i)%7,month===F.monthKey() && i+1===firstDay(month))).join("");
  const options=Object.keys(book.months).sort().reverse().map(k=>'<option '+(k===month?"selected":"")+' value="'+k+'">'+monthName(k)+'</option>').join("");
- const controls='<select aria-label="Выбрать месячную вкладку" id="months">'+options+'</select>'+button("new-month",icon("plus")+"Новая вкладка","secondary");
- const goals=data.goals.map(g=>'<span>'+esc(g.name)+' <small>'+esc(g.rate)+'%</small> <b>'+money(F.allocated(sums.net,g.rate))+'</b></span>').join("");
- const grouped=Map.groupBy?Map.groupBy(data.entries,e=>e.day):data.entries.reduce((map,e)=>{if(!map.has(e.day))map.set(e.day,[]);map.get(e.day).push(e);return map;},new Map());
- let rows="";
- for(let day=1;day<=len(month);day++){
-   const entries=grouped.get(day)||[];
-   const today=month===F.monthKey() && day===firstDay(month);
-   const weekday=new Date(F.dateOf(month).getFullYear(),F.dateOf(month).getMonth(),day).toLocaleDateString("ru",{weekday:"short"});
-   rows+='<tr class="day '+(today?"today":"")+'"><th scope="row" rowspan="'+Math.max(1,entries.length)+'"><button class="day-button" data-action="entry" data-day="'+day+'" title="Добавить запись за '+day+' число"><b>'+day+'</b><span>'+(today?"Сегодня":weekday)+'</span></button></th>';
-   if(!entries.length)rows+='<td>'+button("entry","＋ Добавить запись","empty-day",'data-day="'+day+'"')+'</td><td class="detail-col"></td><td class="detail-col"></td><td class="detail-col"></td><td></td></tr>';
-   else entries.forEach((entry,i)=>{
-     if(i)rows+="<tr>";
-     const tag=entry.done?' class="finished"':"";
-     const figures='<div class="mobile-figures">'+(entry.income?'<span>Доход '+money(entry.income)+'</span>':"")+(entry.expense?'<span>Расход '+money(entry.expense)+'</span>':"")+'</div>';
-     rows+='<td'+tag+'>'+button("entry",esc(entry.source||entry.purpose||"Запись"),"entry-link",'data-id="'+esc(entry.id)+'"')+
-       (entry.source && entry.purpose?'<small class="mobile-purpose">'+esc(entry.purpose)+'</small>':"")+figures+'</td>'+
-       [esc(entry.purpose||"—"),money(entry.income),money(entry.expense)].map(value=>'<td class="detail-col '+(entry.done?"finished":"")+'">'+value+'</td>').join("")+'<td'+tag+'>'+button("toggle-entry",entry.done?icon("check"):"","check",'data-id="'+esc(entry.id)+'" aria-label="Выполнено" aria-pressed="'+Boolean(entry.done)+'"')+'</td></tr>';
-   });
- }
- return heading(monthName(month),controls)+stats([["Доходы",money(sums.income)],["Расходы",money(sums.expense)],["Итог месяца",money(sums.net)]])+
- '<div class="goal-strip">'+goals+button("goals",icon("settings")+"Распределение","text-btn")+'</div><div class="panel"><div class="panel-head"><h2>Дневник операций</h2>'+button("entry",icon("plus")+"Запись","primary small")+'</div><div class="ledger-scroll"><table class="ledger"><thead><tr><th>День</th><th><span class="wide-label">Откуда</span><span class="phone-label">Операция</span></th><th class="detail-col">На что</th><th class="detail-col">Доход</th><th class="detail-col">Расход</th><th>Готово</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+ const amounts=[["Доходы",sums.income],["Расходы",sums.expense],["Итог месяца",sums.net]].map(([label,n])=>
+   '<div><dt>'+label+'</dt><dd>'+money(n)+'</dd></div>').join("");
+ return '<div class="sheet-tools"><select id="months" aria-label="Месячная вкладка">'+options+'</select>'+
+   button("new-month",icon("plus")+'<span>Вкладка</span>',"sheet-tool",'aria-label="Новая месячная вкладка" title="Новая месячная вкладка"')+
+   button("goals",icon("settings")+'<span>Распределение</span>',"sheet-tool",'aria-label="Распределение дохода" title="Распределение дохода"')+
+   button("entry",icon("plus")+"Запись","sheet-add")+'</div><dl class="sheet-totals">'+amounts+'</dl>'+
+   '<section class="month-sheet" aria-label="'+monthName(month)+'" style="--days:'+days+';--weeks:'+weeks+';--start:'+(start+1)+'">'+
+   '<div class="sheet-labels">'+["День","Откуда","На что","Доход","Расход","Итог дня","Готово"].map(s=>'<span>'+s+'</span>').join("")+'</div>'+
+   '<div class="week-labels">'+weekdays.map(s=>'<span>'+s+'</span>').join("")+'</div><div class="sheet-body">'+cells+'</div></section>';
+}
+
+function dayDetail(day){
+ const entries=book.months[month].data.entries.filter(entry=>entry.day===day);
+ if(!entries.length){entryEditor(day);return;}
+ const date=F.dateOf(month);date.setDate(day);
+ const rows=entries.map(entry=>{
+   const key='data-id="'+esc(entry.id)+'"';
+   return '<li class="'+(entry.done?'finished':'')+'">'+button("toggle-entry",entry.done?icon("check"):"","check",key+' aria-label="Выполнено" aria-pressed="'+Boolean(entry.done)+'"')+
+     button("entry",'<strong>'+esc(entry.source || entry.purpose || "Запись")+'</strong>'+
+      (entry.source && entry.purpose?'<span>'+esc(entry.purpose)+'</span>':"")+
+      '<small>Доход '+money(entry.income)+' · Расход '+money(entry.expense)+'</small>',"day-entry",key)+'</li>';
+ }).join("");
+ modal(date.toLocaleDateString("ru",{day:"numeric",month:"long",year:"numeric"}),
+   '<ul class="day-entries">'+rows+'</ul><div class="form-actions">'+button("entry",icon("plus")+"Добавить запись","primary",'data-day="'+day+'"')+'</div>');
 }
 function entryEditor(day,entryId){
  const rec=book.months[month];const entry=rec.data.entries.find(e=>e.id===entryId)||{day:day||firstDay(month)};
@@ -128,7 +161,9 @@ function dailyGoals(){
 }
 document.addEventListener("input",e=>{if(e.target.closest('[data-form="entry"]'))dailyGoals();});
 function goalRow(g={name:"",rate:""}){return '<div class="goal-row">'+textField("goalName","Цель",g.name,true)+field("Доля, %",'<input type="number" name="rate" min="0" max="100" step="0.01" required value="'+esc(g.rate)+'">')+button("drop-goal","×","icon-btn",'aria-label="Убрать цель"')+'</div>';}
-function goalsEditor(){editKey=month;editRev=book.months[month].rev;modal("Распределение дохода",formWrap("goals",'<p class="muted">Доли считаются от итога месяца и сохраняются для этой вкладки.</p><div id="goal-rows">'+book.months[month].data.goals.map(goalRow).join("")+'</div>'+button("add-goal","＋ Ещё цель","text-btn")));}
+function goalsEditor(){const data=book.months[month].data,net=F.totals(data).net;
+ const allocations=data.goals.map(g=>esc(g.name)+" · "+money(F.allocated(net,g.rate))).join("<br>");
+ editKey=month;editRev=book.months[month].rev;modal("Распределение дохода",formWrap("goals",'<p class="muted">Доли считаются от итога месяца и сохраняются для этой вкладки.</p><p class="allocation-preview">'+allocations+'</p><div id="goal-rows">'+book.months[month].data.goals.map(goalRow).join("")+'</div>'+button("add-goal","＋ Ещё цель","text-btn")));}
 function yearView(){
  const keys=Object.keys(book.months).sort(), years=[...new Set(keys.map(k=>k.slice(0,4)))].reverse();
  const inYear=keys.filter(k=>k.startsWith(year+"-"));
@@ -186,8 +221,7 @@ function paymentEditor(paymentId){
 async function persist(kind,key,rev,data,after){
  if(kind==="debts" && F.balance(data)<0){hint("Внесённые платежи превышают сумму долга с переплатой.");return false;}
  book[kind][key]=await F.save(kind,key,rev,data);
- const scroll=$(".ledger-scroll")?.scrollTop;
- render();if(scroll!==undefined && $(".ledger-scroll"))$(".ledger-scroll").scrollTop=scroll;
+ render();
  if(after)after();else if(dialog.open)dialog.close();
  return true;
 }
@@ -206,6 +240,43 @@ async function moveDebt(key,closing){
  }
  d.closed=closing;await persist("debts",key,rec.rev,d);
 }
+const memberPageSize=25;
+let memberPage=[],memberOffset=0;
+
+function accessDate(value){
+ return new Date(value).toLocaleDateString("ru",{day:"2-digit",month:"2-digit",year:"numeric",timeZone:"Asia/Bishkek"});
+}
+function memberStatus(member){
+ if(member.active)return member.paid_until?"До "+accessDate(member.paid_until):"Бессрочный";
+ return member.paid_until?"Истёк "+accessDate(member.paid_until):"Бесплатный";
+}
+async function loadMembers(offset){
+ const ownerBook=book;
+ if(!ownerBook?.manager || F.local)return;
+ const page=await F.members(offset);
+ if(book!==ownerBook)return;
+ memberOffset=offset;memberPage=page;view="members";render();
+}
+function membersView(){
+ const rows=memberPage.slice(0,memberPageSize).map(m=>{
+   const grant=m.self || (m.active && !m.paid_until) ? "—" :
+     button("grant-dialog","Выдать доступ","secondary small",'data-key="'+esc(m.id)+'"');
+   return '<tr><th scope="row">'+esc(m.email)+'</th><td>'+accessDate(m.joined)+'</td><td>'+esc(memberStatus(m))+'</td><td>'+grant+'</td></tr>';
+ }).join("");
+ const prev=button("members-prev","Назад","secondary small",memberOffset?"":"disabled");
+ const next=button("members-next","Далее","secondary small",memberPage.length>memberPageSize?"":"disabled");
+ return heading("Участники")+ '<div class="panel member-panel"><div class="table-wrap"><table><thead><tr><th>Почта</th><th>Регистрация</th><th>Полный доступ</th><th>Действие</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   (memberPage.length?"":'<p class="muted">Нет зарегистрированных пользователей.</p>')+
+   (memberOffset || memberPage.length>memberPageSize?'<div class="member-pages">'+prev+'<span>Страница '+(memberOffset/memberPageSize+1)+'</span>'+next+'</div>':"")+'</div>';
+}
+function grantDialog(member){
+ editKey=member.id;
+ modal("Выдать полный доступ",formWrap("grant-member",
+   '<p class="intro"><b>'+esc(member.email)+'</b><br>Сейчас: '+esc(memberStatus(member))+'</p>'+
+   field("Срок от сегодняшнего дня",'<select name="years"><option value="1">1 год</option><option value="3">3 года</option></select>')+
+   '<p class="muted">Выбранный срок заменит текущую дату окончания доступа.</p>',"Выдать доступ",button("close","Отмена","text-btn")));
+}
+
 async function handleAction(el){
  const action=el.dataset.action,key=el.dataset.key,item=el.dataset.id;
  if(action==="close"){dialog.close();return;}
@@ -214,18 +285,23 @@ async function handleAction(el){
  if(action==="local"){await workspace(true);sessionStorage.setItem("st-preview-open","1");return;}
  if(action==="leave"){await F.leave();sessionStorage.removeItem("st-preview-open");home();return;}
  if(action==="retry-cloud"){await init();return;}
- if(action==="view"){view=key;if(view==="year"){year=month.slice(0,4);compare=month;}render(view==="month");return;}
- if(action==="jump-month"){month=key;view="month";render(true);return;}
+ if(action==="view" && key==="members"){await loadMembers(0);return;}
+ if(action==="members-next"){await loadMembers(memberOffset+memberPageSize);return;}
+ if(action==="members-prev"){await loadMembers(Math.max(0,memberOffset-memberPageSize));return;}
+ if(action==="grant-dialog" && book.manager){const m=memberPage.find(member=>member.id===key);if(m)grantDialog(m);return;}
+ if(action==="view"){view=key;if(view==="year"){year=month.slice(0,4);compare=month;}render();return;}
+ if(action==="jump-month"){month=key;view="month";render();return;}
  if(action==="new-month"){
   if(!book.paid){upgrade();return;}
   modal("Новая месячная вкладка",formWrap("month",field("Месяц",'<input required type="month" min="1000-01" max="9999-12" name="month" value="'+F.nextMonth(month,1)+'">'),"Создать вкладку"));return;
  }
  if(action==="upgrade"){upgrade();return;}
  if(action==="refresh-plan"){book=await F.load();render();if(book.paid){dialog.close();notice("Полный доступ активирован");}else hint("Оплата пока ожидает подтверждения");return;}
+ if(action==="day"){dayDetail(Number(el.dataset.day));return;}
  if(action==="entry"){entryEditor(Number(el.dataset.day),item);return;}
  if(action==="toggle-entry"){
   const rec=book.months[month],data=structuredClone(rec.data),entry=data.entries.find(e=>e.id===item);
-  entry.done=!entry.done;await persist("months",month,rec.rev,data);return;
+  entry.done=!entry.done;await persist("months",month,rec.rev,data,()=>dayDetail(entry.day));return;
  }
  if(action==="goals"){goalsEditor();return;}
  if(action==="add-goal"){$("#goal-rows").insertAdjacentHTML("beforeend",goalRow());return;}
@@ -246,12 +322,22 @@ async function handleAction(el){
 }
 async function submit(form){
  const f=new FormData(form),type=form.dataset.form;
+ if(type==="grant-member"){
+   const ownerBook=book;
+   if(!ownerBook?.manager)return;
+   const member=memberPage.find(m=>m.id===editKey);
+   if(!member)return;
+   const expiry=await F.grantMember(member.id,Number(f.get("years")));
+   if(book!==ownerBook)return;
+   member.paid_until=expiry;member.active=true;dialog.close();render();
+   notice("Полный доступ до "+accessDate(expiry));return;
+ }
  if(type==="auth"){
   if(!F.configured){hint("Пока доступен локальный режим. Кнопка находится под формой.");return;}
   const started=await F.authenticate(gate,f.get("email").trim(),f.get("password"));
   if(started){await workspace();}else{renderGate("login");hint("Проверьте почту и подтвердите регистрацию по ссылке.");}return;
  }
- if(type==="month"){const key=f.get("month");if(!book.months[key])await createMonth(key);month=key;dialog.close();render(true);return;}
+ if(type==="month"){const key=f.get("month");if(!book.months[key])await createMonth(key);month=key;dialog.close();render();return;}
  if(["entry","goals","remove-entry"].includes(type)){
   const d=structuredClone(book.months[editKey].data);
   if(type==="goals"){
@@ -283,7 +369,10 @@ async function run(task){
   const message=String(error.message||error);
   if(message.includes("STALE_VERSION")){
     try{book=await F.load();if(dialog.open)dialog.close();render();notice("Данные изменились в другом окне. Загружена свежая версия. Повторите изменение.");}catch{hint("Не удалось обновить таблицу. Проверьте подключение.");}
-  }else if(message.includes("MONTH_LIMIT"))upgrade();
+  }else if(message.includes("MONTH_LIMIT")){
+    book.paid=false;month=book.trial;render();upgrade();
+  }else if(message.includes("FORBIDDEN"))hint("У этого аккаунта нет прав на управление участниками.");
+  else if(message.includes("ACCOUNT_UNAVAILABLE"))hint("Доступ к аккаунту изменился. Откройте вкладку «Участники» заново.");
   else if(/invalid login/i.test(message))hint("Проверьте адрес почты и пароль.");
   else if(/email not confirmed/i.test(message))hint("Подтвердите почту по ссылке из письма.");
   else if(/rate limit/i.test(message))hint("Слишком много попыток. Попробуйте ещё раз позже.");
@@ -298,7 +387,7 @@ document.addEventListener("change",e=>{
  else if(e.target.id==="years")year=e.target.value;
  else if(e.target.id==="comparison")compare=e.target.value;
  else return;
- render(e.target.id==="months");
+ render();
 });
 let dragged=null;
 document.addEventListener("dragstart",e=>{const card=e.target.closest("[data-debt]");if(card){dragged=card.dataset.debt;e.dataTransfer.setData("text/plain",dragged);e.dataTransfer.effectAllowed="move";}});
@@ -311,7 +400,7 @@ function rollover(){
  const previous=lastDate;
  run(async()=>{if(book.paid && F.monthKey()!==previous.slice(0,7) && month===previous.slice(0,7)){
   if(!book.months[F.monthKey()])await createMonth(F.monthKey());month=F.monthKey();
- }lastDate=today;render(true);});
+ }lastDate=today;render();});
 }
 setInterval(rollover,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)rollover();});
 async function init(){

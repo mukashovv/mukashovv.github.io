@@ -5,3 +5,149 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 .mobile-figures,.mobile-purpose,.phone-label{display:none}.daily-goals{background:var(--wash);padding:10px 12px;border-radius:8px;color:var(--soft);font-size:.86rem;margin-bottom:15px}
 @media(max-width:600px){.ledger{min-width:0;table-layout:fixed}.ledger th:first-child{width:72px}.ledger th:last-child{width:63px}.ledger td{overflow-wrap:anywhere}.ledger td:nth-last-child(2),.ledger td:nth-last-child(3){white-space:normal}.ledger .detail-col,.wide-label{display:none}.phone-label,.mobile-purpose{display:inline}.mobile-purpose{color:var(--soft);font-size:.8rem;margin-left:4px}.mobile-figures{display:flex;flex-wrap:wrap;gap:3px 10px;color:var(--soft);font-size:.82rem}.day-button{flex-wrap:wrap;gap:4px}.empty-day{min-height:36px}.desk .table-wrap table{min-width:0;font-size:.83rem}.table-wrap td,.table-wrap th{padding:9px 6px}.net-figure{min-width:0}}
+
+/* The month owns the space between the workbook toolbar and the sheet tabs. */
+body.month-open {
+  --grid-line:#dce1db;
+  --sheet-columns: 6rem minmax(0,1.5fr) minmax(0,1.35fr) repeat(3,minmax(0,.8fr)) 4.8rem;
+  height:100vh;
+  height:100dvh;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  background:#fff;
+}
+.month-open .mast {
+  width:100%;max-width:none;min-height:0;margin:0;padding:5px 16px;
+  background:#f5f7f3;border-bottom:1px solid var(--grid-line);
+}
+.month-open .brand img {width:27px;height:27px;border-radius:6px}
+.month-open .brand {font-size:1rem}
+.month-open .mast .icon-btn {width:30px;height:30px}
+.month-open main,.month-open .desk,.month-open .content,.month-sheet,.sheet-body {min-width:0;min-height:0}
+.month-open .desk {
+  height:100%;max-width:none;margin:0;padding:0;
+  display:grid;grid-template-rows:minmax(0,1fr) auto;
+}
+.month-open .content {
+  grid-row:1;grid-column:1;padding:0;
+  display:grid;grid-template-rows:auto auto minmax(0,1fr);
+}
+.month-open .tabs {
+  grid-row:2;grid-column:1;display:flex;justify-content:flex-start;gap:0;
+  border-top:1px solid var(--grid-line);border-bottom:0;background:#f5f7f3;
+  padding:0 10px max(0px,env(safe-area-inset-bottom));
+}
+.month-open .nav-item {
+  min-height:34px;padding:0 11px;font-size:.83rem;border:0;border-top:2px solid transparent;
+}
+.month-open .nav-item.active {background:white;color:#2d5940;border-top-color:#4b7257}
+.month-open .tabs .plan-label {margin:0 0 0 auto;padding:5px 9px;align-self:center;font-size:.76rem}
+.sheet-tools {display:flex;align-items:center;gap:5px;padding:4px 14px;border-bottom:1px solid var(--grid-line)}
+.sheet-tools select,.sheet-tool,.sheet-add {
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  min-height:30px;padding:4px 8px;border-radius:5px;font-size:.86rem;
+}
+.sheet-tool:hover {background:var(--wash)}
+.sheet-tools select {font-weight:650;border:0;width:auto;max-width:48%;padding-left:2px}
+.sheet-add {margin-left:auto;background:#e6eee5;font-weight:600;color:#294b36}
+.sheet-totals {
+  margin:0;display:flex;align-items:baseline;gap:6px 22px;flex-wrap:wrap;
+  padding:5px 16px;border-bottom:1px solid var(--grid-line);font-variant-numeric:tabular-nums;
+}
+.sheet-totals div {display:flex;align-items:baseline;gap:5px;min-width:0}
+.sheet-totals dt {font-size:.76rem;color:var(--soft)}
+.sheet-totals dd {margin:0;font-weight:650;font-size:.85rem}
+.month-sheet {display:grid;grid-template-rows:auto minmax(0,1fr);font-variant-numeric:tabular-nums}
+.sheet-labels,.sheet-day {display:grid;grid-template-columns:var(--sheet-columns)}
+.sheet-labels,.week-labels {background:#eff3ee;color:#425043;font-weight:600;font-size:.78rem}
+.sheet-labels span,.week-labels span {padding:3px 8px;border-right:1px solid var(--grid-line);border-bottom:1px solid var(--grid-line)}
+.sheet-labels span:nth-child(n+4) {text-align:right}
+.sheet-labels span:last-child,.sheet-status {text-align:center}
+.sheet-body {display:grid;grid-template-rows:repeat(var(--days),minmax(0,1fr))}
+.sheet-day {
+  min-width:0;min-height:0;padding:0;text-align:left;color:var(--ink);background:white;
+  border:0;border-bottom:1px solid var(--grid-line);border-radius:0;
+  font-size:clamp(.76rem,1.54dvh,.94rem);line-height:1.06;
+}
+.sheet-day > span {
+  min-width:0;align-content:center;padding:0 8px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;border-right:1px solid var(--grid-line);
+}
+.sheet-date {background:#f7f9f6}
+.sheet-date b {font-weight:630}
+.sheet-date small,.sheet-text em {margin-left:7px;color:var(--soft);font-size:.78em;font-style:normal}
+.sheet-number {text-align:right}
+.sheet-status {color:var(--soft);font-size:.85em}
+.sheet-day.finished,.sheet-day.finished .sheet-date {background:var(--done)}
+.sheet-day.is-today .sheet-date {box-shadow:inset 3px 0 #416d49;color:#244f2f;background:#e8f1e7}
+.sheet-day:hover {box-shadow:inset 0 0 0 1px #97aa96}
+.sheet-day:focus-visible {outline-offset:-2px;z-index:1}
+.week-labels,.sheet-day .calendar-net {display:none}
+.day-entries {list-style:none;margin:0;padding:0}
+.day-entries li {display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid var(--rule)}
+.day-entries .check {flex:none}
+.day-entry {flex:1;min-width:0;padding:5px 2px;text-align:left;overflow-wrap:anywhere}
+.day-entry > * {display:block}
+.day-entry small,.day-entry span {color:var(--soft);margin-top:3px}
+.allocation-preview:not(:empty) {margin:10px 0 16px;font-size:.9rem}
+
+/* A week grid keeps each date readable on narrow or short screens. */
+@media(max-width:740px),(max-height:660px) {
+  .sheet-labels,.sheet-day .sheet-text,.sheet-day .sheet-number,.sheet-day .sheet-status,.sheet-date small {display:none}
+  .week-labels {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center}
+  .sheet-body {
+    grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(var(--weeks),minmax(0,1fr));
+    background:var(--wash);
+  }
+  .sheet-day {
+    display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;
+    gap:3px;border-right:1px solid var(--grid-line);padding:clamp(2px,1vh,9px) 4px 1px;
+    font-size:clamp(.8rem,2.2dvh,1rem);
+  }
+  .sheet-day:first-child {grid-column-start:var(--start)}
+  .sheet-day > span {border:0;padding:0 2px}
+  .sheet-date,.sheet-day.finished .sheet-date {background:transparent}
+  .sheet-day.is-today {box-shadow:inset 0 0 0 2px #416d49}
+  .sheet-day.is-today .sheet-date {background:transparent;box-shadow:none}
+  .sheet-day .calendar-net {display:block;font-size:.74em;color:#445345;line-height:1.2}
+}
+@media(max-width:600px) {
+  .month-open .mast {padding:4px 8px}
+  .month-open .tabs {padding-left:1px;padding-right:1px}
+  .month-open .tabs .nav-item {padding:0 5px;font-size:.72rem;gap:3px}
+  .month-open .tabs .nav-item svg {display:none}
+  .month-open .tabs .plan-label {padding:4px;font-size:.66rem}
+  .sheet-tools {padding:3px 6px}
+  .sheet-tool span {display:none}
+  .sheet-tool {min-width:32px}
+  .sheet-totals {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px 8px}
+  .sheet-totals div {display:block}
+  .sheet-totals dt,.sheet-totals dd {font-size:.72rem;line-height:1.2}
+  .sheet-totals dd {overflow-wrap:anywhere}
+}
+@media(max-height:420px) {
+  .month-open .mast {padding-block:1px}
+  .month-open .tabs .nav-item {min-height:27px}
+  .sheet-tools {padding-block:1px}
+  .sheet-totals {padding-block:2px}
+  .sheet-day {gap:0;padding-top:1px}
+}
+.workbook-open:not(.month-open) .desk {padding-bottom:78px}
+.workbook-open:not(.month-open) .tabs {
+  position:fixed;bottom:0;inset-inline:0;z-index:3;
+  display:flex;align-items:center;justify-content:flex-start;gap:8px;
+  padding:0 12px max(0px,env(safe-area-inset-bottom));
+  background:#f5f7f3;border-top:1px solid #dce1db;
+}
+.workbook-open:not(.month-open) .nav-item {min-height:40px;font-size:.85rem}
+.workbook-open:not(.month-open) .tabs .plan-label {margin:0 0 0 auto}
+.member-panel {margin-bottom:16px}
+.member-panel td,.member-panel th {overflow-wrap:anywhere}
+.member-pages {display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:10px}
+.member-pages button:disabled {opacity:.45}
+@media(max-width:600px) {
+  .workbook-open:not(.month-open) .tabs {padding-inline:3px;gap:7px}
+  .workbook-open:not(.month-open) .nav-item svg {display:none}
+  .workbook-open:not(.month-open) .nav-item,.workbook-open:not(.month-open) .tabs .plan-label {font-size:.74rem}
+  .member-panel td:nth-child(2),.member-panel th:nth-child(2) {display:none}
+}
