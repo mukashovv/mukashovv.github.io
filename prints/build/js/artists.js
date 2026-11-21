@@ -1,5 +1,5 @@
 import { applyCatalogueAssignment, createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, unwrap } from "./artist-data.js";
-import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js";
+import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js?v=2";
 
 const slugCooldownMs = 14 * 24 * 60 * 60 * 1000;
 const authForm = document.querySelector("#artist-auth");
