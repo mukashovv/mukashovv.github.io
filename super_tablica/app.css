@@ -264,29 +264,11 @@ body.month-open {
   .project-breakdown li {font-size:.86rem}
 }
 
-@media (max-width:760px), (pointer:coarse) {
-  #editor[open]:has(.editor-fields) {
-    --form-top-gap:max(8px,env(safe-area-inset-top,0px));
-    --form-bottom-gap:max(8px,env(safe-area-inset-bottom,0px));
-    position:fixed;
-    top:calc(var(--editor-top,0px) + var(--form-top-gap));
-    bottom:calc(100% - var(--editor-top,0px) - var(--editor-height,100dvh) + var(--form-bottom-gap));
-    max-height:calc(var(--editor-height,100dvh) - var(--form-top-gap) - var(--form-bottom-gap));
-    margin:auto;
-    display:flex;flex-direction:column;
-    padding:0;overflow:hidden;
-  }
-  #editor:has(.editor-fields) .modal-head {flex:none;margin:0;padding:12px 16px}
-  #editor:has(.editor-fields) #dialog-body,
-  #editor form:has(> .editor-fields) {display:flex;flex-direction:column;min-height:0;min-width:0}
-  #editor .editor-fields {
-    min-height:0;overflow:auto;overscroll-behavior:contain;
-    padding:4px 16px 12px;scroll-padding-block:8px;
-  }
-  #editor .editor-fields + .form-actions {
-    flex:none;margin:0;padding:10px 16px 12px;
-    border-top:1px solid var(--rule);background:var(--paper);
-  }
-  #editor .editor-fields + .form-actions button {max-width:100%;min-width:0}
-  #editor .editor-fields + .form-actions .primary {flex:1 1 auto;min-height:44px}
+
+@media (max-width:760px) {
+  #editor .modal-head {margin-bottom:14px}
+  #editor .field, #editor .project-picker {margin-bottom:11px}
+  #editor .project-picker .field, #editor .debt-schedule .pair .field {margin-bottom:0}
+  #editor .field > span {margin-bottom:5px}
+  #editor form .form-actions {margin-top:10px}
 }
