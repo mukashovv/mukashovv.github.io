@@ -38,6 +38,8 @@ function workCard(work) {
     const card = element("article", "", "artist-card");
     if (work.imageUrl) {
         const img = element("img");
+        img.dataset.galleryImage = "";
+        img.addEventListener("load", () => { img.dataset.galleryState = "ready"; }, { once: true });
         img.src = work.imageUrl;
         img.alt = work.title;
         card.append(img);
@@ -347,6 +349,25 @@ function initDashboard(client, storage) {
             }, "Не удалось изменить статус работы. Попробуйте ещё раз."));
             actions.append(button);
         }
+        const remove = element("button", "Удалить работу", "button button--line");
+        remove.type = "button";
+        remove.addEventListener("click", () => {
+            if (!window.confirm(`Удалить «${work.title}» и её фотографии навсегда?`)) return;
+            run(remove, async () => {
+                const owner = userId;
+                try {
+                    unwrap(await client.from("prints_artworks").update({ is_published: false })
+                        .eq("id", work.id).eq("artist_id", owner).select("id").single());
+                    unwrap(await storage.remove([photoPath(work), photoPath(work, true)]));
+                    unwrap(await client.from("prints_artworks").delete().eq("id", work.id)
+                        .eq("artist_id", owner).select("id").single());
+                    setStatus("Работа удалена.");
+                } finally {
+                    await refreshWorks(owner);
+                }
+            }, "Не удалось завершить удаление. Попробуйте ещё раз.");
+        });
+        actions.append(remove);
         card.append(actions, editor);
         return card;
     }

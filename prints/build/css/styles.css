@@ -485,14 +485,10 @@ select {
     opacity: 0;
 }
 
-.print-card__media:hover .print-card__image--hover,
-.print-card__media:focus-visible .print-card__image--hover {
+.print-card__media:is(:hover, :focus-visible) .print-card__image--hover:is(
+    [data-gallery-state="ready"], :has(img):not(:has(img:not([data-gallery-state="ready"])))
+) {
     opacity: 1;
-}
-
-.print-card__media:hover .print-card__image--base,
-.print-card__media:focus-visible .print-card__image--base {
-    opacity: 0;
 }
 
 .print-card__media:hover .print-card__image,
@@ -616,7 +612,11 @@ select {
 }
 
 .product-preview.is-framed .product-preview__frame {
-    border: clamp(3px, .75vw, 10px) solid var(--preview-frame-color, #272622);
+    border: clamp(3px, .75vw, 10px) solid transparent;
+}
+
+.product-preview.is-framed .product-preview__frame:has(> img[data-gallery-state="ready"]) {
+    border-color: var(--preview-frame-color, #272622);
 }
 
 .product-preview__frame img {
@@ -1411,6 +1411,100 @@ select {
     }
 }
 
+.gallery-placeholder {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(105deg, var(--surface-soft) 32%, var(--surface) 50%, var(--surface-soft) 68%);
+    background-size: 220% 100%;
+    animation: gallery-image-placeholder 1.7s ease-in-out 180ms infinite;
+}
+
+:is(#productGallery, #infoPageMedia) > .gallery-placeholder {
+    max-height: min(68vh, 680px);
+}
+
+@media (max-width: 760px) {
+    #productGallery > .gallery-placeholder {
+        height: calc(min(47svh, 395px) + 80px);
+    }
+}
+
+[data-gallery-image]:not([data-gallery-state="ready"]) {
+    opacity: 0;
+}
+
+img[data-gallery-image]:not(.print-card__image) {
+    transition: opacity 250ms ease;
+}
+
+.product-gallery__thumb,
+.drawer-item__media,
+.info-page-media {
+    position: relative;
+}
+
+:is(.product-preview__frame, .product-gallery__thumb, .info-page-media, .artwork-scene, .drawer-item__media, .gallery-feature__work):has(img[data-gallery-image]:not([data-gallery-state])),
+.print-card__media:has(> img.print-card__image--base:not([data-gallery-state])) {
+    background-color: var(--surface-soft);
+}
+
+:is(.product-preview__frame, .product-gallery__thumb, .info-page-media, .artwork-scene, .drawer-item__media, .gallery-feature__work):has(img[data-gallery-image]:not([data-gallery-state]))::after,
+.print-card__media:has(> img.print-card__image--base:not([data-gallery-state]))::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, var(--surface-soft) 32%, var(--surface) 50%, var(--surface-soft) 68%);
+    background-size: 220% 100%;
+    animation: gallery-image-placeholder 1.7s ease-in-out infinite;
+}
+
+.product-gallery__thumb:has(> .artwork-scene) {
+    /* The scene supplies the placeholder when the thumbnail is composed of multiple layers. */
+    isolation: isolate;
+}
+
+.product-gallery__thumb:has(> .artwork-scene)::after {
+    content: none;
+}
+
+:is(.artwork-product-preview .artwork-scene, .product-preview__frame, .info-page-media):has(img[data-gallery-state="error"])::after {
+    content: "Изображение недоступно";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--surface-soft);
+    color: var(--muted);
+    font-size: .9rem;
+}
+
+.artwork-scene__mount:has(img[data-gallery-image]:not([data-gallery-state="ready"])) {
+    visibility: hidden;
+}
+
+@keyframes gallery-image-placeholder {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gallery-placeholder,
+    :is(.product-preview__frame, .product-gallery__thumb, .info-page-media, .artwork-scene, .drawer-item__media, .gallery-feature__work)::after,
+    .print-card__media::after {
+        animation: none;
+    }
+
+    img[data-gallery-image]:not(.print-card__image) {
+        transition: none;
+    }
+}
+
+html[lang="en"] :is(.artwork-product-preview .artwork-scene, .product-preview__frame, .info-page-media):has(img[data-gallery-state="error"])::after {
+    content: "Image unavailable";
+}
+
 .gallery-feature {
     display: grid;
     grid-template-columns: minmax(290px, 0.86fr) minmax(0, 2fr);
@@ -1483,7 +1577,7 @@ select {
     height: 100%;
     object-fit: cover;
     object-position: center 43%;
-    transition: transform 300ms ease;
+    transition: transform 300ms ease, opacity 250ms ease;
 }
 
 .gallery-feature__work:is(:hover, :focus-visible) img {
@@ -1491,6 +1585,7 @@ select {
 }
 
 .gallery-feature__work span {
+    z-index: 1;
     position: relative;
     padding: 32px 16px 12px;
     background: linear-gradient(transparent, #211b16d9);
@@ -1695,7 +1790,7 @@ select {
         background: #fff;
     }
 
-    body[data-prints-page="catalog"] :is(.announcement-bar, .prints-nav--left, .gallery-feature, .gallery-intro) {
+    body[data-prints-page="catalog"] :is(.announcement-bar, .prints-nav--left, .gallery-feature) {
         display: none;
     }
 

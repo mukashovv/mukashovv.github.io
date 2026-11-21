@@ -15,6 +15,7 @@
     <script defer src="build/js/language-link.js"></script>
 </head>
 <body data-prints-page="catalog">
+    <script src="build/js/image-loading.js"></script>
     <div class="prints-page">
         <div class="announcement-bar">
             <div class="container announcement-bar__inner">
@@ -85,12 +86,12 @@
                 </div>
                 <div class="gallery-feature__works">
                     <a class="gallery-feature__work" href="./product.html?slug=last-sunlight-in-ala-archa" aria-label="Открыть «Последние лучи солнца в Ала-Арче»">
-                        <img src="build/img/last-sunlight-in-ala-archa-in-action.webp" alt=""
+                        <img data-gallery-image src="build/img/last-sunlight-in-ala-archa-in-action.webp" alt=""
                             width="800" height="1120" fetchpriority="high">
                         <span>Ала-Арча</span>
                     </a>
                     <a class="gallery-feature__work" href="./product.html?slug=hidden-heart-of-teskey-ala-too" aria-label="Открыть «Потаённое сердце Терскей-Ала-Тоо»">
-                        <img src="build/img/hidden-heart-of-teskey-ala-too-interior.webp" alt=""
+                        <img data-gallery-image src="build/img/hidden-heart-of-teskey-ala-too-interior.webp" alt=""
                             width="1684" height="2528">
                         <span>Терскей-Ала-Тоо</span>
                     </a>
@@ -113,7 +114,12 @@
                     </div>
                     <p id="catalog-status" role="status" hidden></p>
                     <p class="catalog-results" id="catalogResults" role="status"></p>
-                    <div class="prints-grid" id="printsGrid"></div>
+                    <div class="prints-grid" id="printsGrid" aria-label="Загружаем работы…" aria-busy="true">
+                        <span class="gallery-placeholder" aria-hidden="true"></span>
+                        <span class="gallery-placeholder" aria-hidden="true"></span>
+                        <span class="gallery-placeholder" aria-hidden="true"></span>
+                        <span class="gallery-placeholder" aria-hidden="true"></span>
+                    </div>
                 </div>
             </section>
         </main>

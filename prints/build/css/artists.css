@@ -185,13 +185,42 @@
     }
 }
 
-.artwork-scene--1 { background-image: url('../img/interiors/room-1.jpg'); }
+.print-card__artwork {
+    object-fit: contain;
+}
 
-.artwork-scene--2 { background-image: url('../img/interiors/room-2.jpg'); }
+.artwork-scene > .artwork-scene__room {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-.artwork-scene--3 { background-image: url('../img/interiors/room-3.jpg'); }
+.artwork-scene__mount {
+    position: relative;
+    opacity: 0;
+    transition: opacity 320ms ease;
+}
 
-.artwork-scene--4 { background-image: url('../img/interiors/room-4.jpg'); }
+.artwork-scene:not(:has(img:not([data-gallery-state="ready"]))) .artwork-scene__mount {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .print-card__body {
+        transition: opacity 320ms ease;
+    }
+
+    .print-card:has(.print-card__image--base:not([data-gallery-state])) .print-card__body {
+        opacity: 0;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .artwork-scene__mount { transition: none; }
+}
 
 [data-offer-fields] {
     display: grid;

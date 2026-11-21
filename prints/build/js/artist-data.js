@@ -102,7 +102,7 @@ export async function loadArtistProducts() {
         createdAt: work.created_at,
         isArtistWork: true,
         offers: publicOffers(work),
-        interior: (parseInt(work.id.slice(0, 8), 16) % 4) + 1
+        interior: (parseInt(work.id.slice(0, 8), 16) % 24) + 1
     }));
 }
 
@@ -136,4 +136,12 @@ export function applyCatalogueAssignment(work, assignment) {
         artistProfileSlug: assignment.profile_slug,
         canEditCatalogue: Object.hasOwn(assignment, "title")
     };
+}
+
+export async function orderPhone(product) {
+    const client = await createPrintsClient();
+    const phone = unwrap(await client.rpc("prints_order_phone", { work_slug: product.slug })
+        .abortSignal(AbortSignal.timeout(8000)));
+    if (!phone && (product.isArtistWork || product.artistId)) throw new Error("Missing artist phone");
+    return phone;
 }

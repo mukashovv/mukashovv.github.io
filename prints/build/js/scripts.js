@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (feature) feature.hidden = Boolean(window.location.search);
 
     if (!catalog.length) {
+        window.galleryImagesReady?.();
         return;
     }
 
@@ -140,9 +141,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     let productViewportSyncFrame = 0;
     let productViewportEventsBound = false;
 
-    const cartItemKey = (item) => `${item.slug}::${item.sizeId}::${item.frameId}`;
+    const cartItemKey = (item) => `${item.slug}::${item.sizeId}::${item.frameId}::${item.offerType || ""}`;
     const normalizeCartItem = (item) => ({
         slug: item.slug,
+        offerType: item.offerType || "",
         sizeId: item.sizeId || defaultSizeId,
         frameId: item.frameId || defaultFrameId,
         quantity: Math.max(1, Number(item.quantity) || 1)
@@ -211,21 +213,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return params.toString();
     };
 
-    const buildTelegramLink = (product, size, frame, total) => {
-        const productUrl = `https://mukashov.com/prints/product.html?slug=${product.slug}`;
-        const message = [
-            `Хочу заказать принт "${product.title}"`,
-            `Автор: ${product.artist}`,
-            `Размер: ${size.label}`,
-            `Багет: ${frame.label}`,
-            `Итого: ${formatPrice(total)}`
-        ].join("\n");
-        const params = new URLSearchParams({
-            url: productUrl,
-            text: message
-        });
-        return `${shared.contactLink}?${params.toString()}`;
-    };
+    const { checkout } = await import("./checkout.js");
 
     const getInfoSections = (product) => {
         const sections = {};
@@ -325,22 +313,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         productViewportEventsBound = true;
     };
 
-    const getCartDetails = () => cart.flatMap((item) => {
-        const product = catalog.find((work) => work.slug === item.slug && !work.isArtistWork);
-        if (!product) return [];
+    const orderDetails = (item) => {
+        const product = catalog.find((work) => work.slug === item.slug);
+        if (!product) return null;
         const size = findSize(item.sizeId) || findSize(defaultSizeId);
         const frame = findFrame(item.frameId) || findFrame(defaultFrameId);
-        const unitPrice = getBasePrice(product, item.sizeId) + (frame?.surcharge || 0);
+        const offer = product.offers?.find((entry) => entry.type === item.offerType);
+        const unitPrice = product.isArtistWork ? (offer?.price ?? 0)
+            : getBasePrice(product, item.sizeId) + (frame?.surcharge || 0);
 
-        return [{
+        return {
             ...item,
+            offerLabel: offerLabels[item.offerType],
+            available: !product.isArtistWork || Boolean(offer?.available),
+            limit: offer?.type === "original" ? 1 : offer?.stock,
             product,
             size,
             frame,
             unitPrice,
             totalPrice: unitPrice * item.quantity
-        }];
-    });
+        };
+    };
+    const getCartDetails = () => cart.map(orderDetails).filter(Boolean);
 
     const getCartCount = () => getCartDetails().reduce((sum, item) => sum + item.quantity, 0);
     const getCartTotal = () => getCartDetails().reduce((sum, item) => sum + item.totalPrice, 0);
@@ -437,7 +431,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ? favouriteProducts.map((product) => `
                     <article class="drawer-item">
                         <a class="drawer-item__media" href="${buildProductUrl(product.slug)}">
-                            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" loading="lazy">
+                            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" ${galleryImageAttributes()}>
                         </a>
                         <div class="drawer-item__body">
                             <p class="drawer-item__artist">${escapeHtml(product.artist)}</p>
@@ -463,12 +457,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ? cartDetails.map((item) => `
                     <article class="drawer-item">
                         <a class="drawer-item__media" href="${buildProductUrl(item.product.slug, { sizeId: item.sizeId })}">
-                            <img src="${item.product.image}" alt="${escapeHtml(item.product.title)} — ${item.product.artist}" loading="lazy">
+                            <img src="${item.product.image}" alt="${escapeHtml(item.product.title)} — ${escapeHtml(item.product.artist)}" ${galleryImageAttributes()}>
                         </a>
                         <div class="drawer-item__body">
-                            <p class="drawer-item__artist">${item.product.artist}</p>
+                            <p class="drawer-item__artist">${escapeHtml(item.product.artist)}</p>
                             <h3 class="drawer-item__name"><a href="${buildProductUrl(item.product.slug, { sizeId: item.sizeId })}">${escapeHtml(item.product.title)}</a></h3>
-                            <p class="drawer-item__meta">${item.size?.label || ""} / ${item.frame?.label || ""}</p>
+                            <p class="drawer-item__meta">${item.offerLabel ? item.offerLabel + " / " : ""}${item.size?.label || ""} / ${item.frame?.label || ""}</p>
                             <p class="drawer-item__meta">Количество: ${item.quantity} / ${formatPrice(item.totalPrice)}</p>
                             <div class="drawer-item__actions">
                                 <button class="drawer-item__button" type="button" data-cart-adjust="decrease" data-cart-key="${cartItemKey(item)}">- 1</button>
@@ -488,10 +482,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <span>Подытог</span>
                         <strong>${formatPrice(getCartTotal())}</strong>
                     </p>
-                    <p class="drawer-empty">Онлайн-оплату и доставку подключим следующим этапом. Пока корзина собирает конфигурации принтов.</p>
-                    <a class="button button--solid" href="./">Продолжить просмотр</a>
+                    <button type="button" class="button button--solid" data-checkout>Заказать в WhatsApp</button>
                 `
                 : `<a class="button button--line" href="./">Открыть каталог</a>`;
+            cartFooter.querySelector("[data-checkout]")?.addEventListener("click", (event) => {
+                const unavailable = cartDetails.some((item) => {
+                    const count = cartDetails.filter((entry) => entry.slug === item.slug && entry.offerType === item.offerType)
+                        .reduce((sum, entry) => sum + entry.quantity, 0);
+                    return !item.available || (item.limit != null && count > item.limit);
+                });
+                if (unavailable) {
+                    window.alert("Проверьте количество. Одной из работ уже нет в наличии или выбранное количество превышает остаток.");
+                    return;
+                }
+                checkout(event.currentTarget, cartDetails);
+            });
         }
     };
 
@@ -573,17 +578,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     };
 
-    const renderArtworkImage = (product, interior = false) => {
+    const galleryImageAttributes = (priority = false) => priority
+        ? 'data-gallery-image data-gallery-primary loading="eager" fetchpriority="high"'
+        : 'data-gallery-image loading="lazy" decoding="async"';
+
+    const renderArtworkImage = (product, interior = false, priority = false) => {
         if (interior && product.hoverImage) {
-            return `<span class="artwork-scene artwork-scene--photo"><img src="${escapeHtml(product.hoverImage)}" alt=""></span>`;
+            return `<span class="artwork-scene artwork-scene--photo"><img src="${escapeHtml(product.hoverImage)}" alt="" ${galleryImageAttributes(priority)}></span>`;
         }
-        const scene = interior ? ` artwork-scene--interior artwork-scene--${product.interior}` : "";
-        return `<span class="artwork-scene${scene}"><span class="artwork-scene__mount">
-            <img src="${escapeHtml(product.image)}" alt="" loading="lazy">
+        const room = interior ? `<img class="artwork-scene__room" src="build/img/interiors/room-${product.interior}.jpg" alt="" ${galleryImageAttributes(priority)}>` : "";
+        return `<span class="artwork-scene${interior ? " artwork-scene--interior" : ""}">${room}<span class="artwork-scene__mount">
+            <img src="${escapeHtml(product.image)}" alt="" ${galleryImageAttributes(priority)}>
         </span></span>`;
     };
 
-    const buildCardMarkup = (product, sizeId) => {
+    const buildCardMarkup = (product, sizeId, priority = false) => {
         const cardUrl = buildProductUrl(product.slug, { sizeId });
         const hoverImage = product.hoverImage || product.image;
         const size = findSize(sizeId) || findSize(defaultSizeId) || shared.sizes?.[0];
@@ -594,10 +603,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ${buildFavouriteButton(product.slug)}
                     <a class="print-card__media" href="${cardUrl}" aria-label="Открыть ${escapeHtml(product.title)}">
                         ${product.isArtistWork ? `
-                            <span class="print-card__image print-card__image--base">${renderArtworkImage(product)}</span>
+                            <img class="print-card__image print-card__image--base print-card__artwork" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}" ${galleryImageAttributes(priority)}>
                             <span class="print-card__image print-card__image--hover" aria-hidden="true">${renderArtworkImage(product, true)}</span>`
-                            : `<img class="print-card__image print-card__image--base" src="${product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" loading="lazy">
-                            <img class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" loading="lazy" aria-hidden="true">`}
+                            : `<img class="print-card__image print-card__image--base" src="${product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" ${galleryImageAttributes(priority)}>
+                            <img class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" ${galleryImageAttributes()} aria-hidden="true">`}
                     </a>
                 </div>
                 <div class="print-card__body">
@@ -933,7 +942,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (grid) {
                 grid.innerHTML = products.length
-                    ? products.map((product) => buildCardMarkup(product, state.sizeId)).join("")
+                    ? products.map((product, index) => buildCardMarkup(product, state.sizeId, index === 0)).join("")
                     : `<p class="catalog-empty">По выбранным фильтрам пока ничего не найдено. Попробуйте ослабить фильтры и расширить диапазон цены.</p>`;
             }
 
@@ -1125,7 +1134,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <button type="button" class="product-gallery__thumb is-active" aria-label="Работа" aria-pressed="true">${renderArtworkImage(product)}</button>
                     <button type="button" class="product-gallery__thumb" aria-label="Работа в интерьере" aria-pressed="false">${renderArtworkImage(product, true)}</button>
                 </div>
-                <div class="artwork-product-preview" role="img" aria-label="${escapeHtml(product.title)}">${renderArtworkImage(product)}</div>
+                <div class="artwork-product-preview" role="img" aria-label="${escapeHtml(product.title)}">${renderArtworkImage(product, false, true)}</div>
             </div>`;
         const offers = product.offers || [];
         const initialOffer = offers.find((offer) => offer.available) || offers[0];
@@ -1149,6 +1158,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ${initialOffer ? `<div class="artwork-offer-details" data-artwork-offer-details aria-live="polite">${renderOfferDetails(initialOffer)}</div>` : ""}
                 ${renderProductOptions(shared.sizes || [], initialSizeId)}
                 <div class="summary-actions">
+                    ${initialOffer ? `<button type="button" class="button button--solid" data-art-cart>В корзину</button>
+                    <button type="button" class="button button--line" data-art-order>Заказать в WhatsApp</button>` : ""}
                     <a class="button button--line" data-author-profile href="./?artist=${encodeURIComponent(artistFilterId(product))}">Другие работы автора</a>
                     <a class="button button--ghost" href="./">Каталог</a>
                 </div>
@@ -1164,7 +1175,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         let isInterior = false;
         const showArtwork = (interior) => {
             isInterior = interior;
-            preview.innerHTML = renderArtworkImage(product, interior);
+            preview.innerHTML = renderArtworkImage(product, interior, true);
             preview.setAttribute("aria-label", interior ? `${product.title} в интерьере` : product.title);
             thumbs.forEach((thumb, index) => {
                 const active = index === Number(interior);
@@ -1187,6 +1198,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             applyFramePreview(preview, frame);
             frameHint.textContent = frame.description;
         };
+        if (initialOffer) {
+            const cartButton = summary.querySelector("[data-art-cart]");
+            const orderButton = summary.querySelector("[data-art-order]");
+            const selection = () => ({ slug: product.slug, sizeId: sizeSelect.value, frameId: frameSelect.value,
+                offerType: offerSelector?.value || initialOffer.type, quantity: 1 });
+            const updateAvailability = () => {
+                const available = orderDetails(selection()).available;
+                cartButton.disabled = !available;
+                orderButton.disabled = !available;
+            };
+            offerSelector?.addEventListener("change", updateAvailability);
+            updateAvailability();
+            cartButton.addEventListener("click", () => addToCart(selection()));
+            orderButton.addEventListener("click", () => checkout(orderButton, [orderDetails(selection())]));
+        }
         sizeSelect.addEventListener("change", () => updateSize(sizeSelect.value));
         frameSelect.addEventListener("change", () => {
             if (isInterior && product.hoverImage) showArtwork(false);
@@ -1249,13 +1275,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="product-gallery__thumbs">
                         ${images.map((image, index) => `
                             <button class="product-gallery__thumb${index === state.activeImageIndex ? " is-active" : ""}" type="button" data-gallery-thumb="${index}" aria-label="Фото ${index + 1}" aria-pressed="${index === state.activeImageIndex}">
-                                <img src="${image}" alt="" loading="lazy" aria-hidden="true">
+                                <img src="${image}" alt="" ${galleryImageAttributes()} aria-hidden="true">
                             </button>
                         `).join("")}
                     </div>
                     <div class="product-preview" id="productPreview">
                         <div class="product-preview__frame">
-                            <img src="${images[state.activeImageIndex]}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" data-role="product-image">
+                            <img src="${images[state.activeImageIndex]}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" data-role="product-image" ${galleryImageAttributes(true)}>
                         </div>
                     </div>
                 </div>
@@ -1284,7 +1310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     <div class="summary-actions">
                         <button class="button button--solid" type="button" data-role="add-to-cart">В корзину</button>
-                        <a class="button button--line" data-role="order-link" href="${product.referenceUrl}" target="_blank" rel="noopener">Заказать через Telegram</a>
+                        <button type="button" class="button button--line" data-role="order-link">Заказать в WhatsApp</button>
                         ${product.artistProfileSlug ? `<a class="button button--ghost" href="/${encodeURIComponent(product.artistProfileSlug)}">Профиль автора</a>` : ""}
                         <a class="button button--ghost" href="./">Каталог</a>
                     </div>
@@ -1352,8 +1378,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             applyFramePreview(preview, frame);
             preview?.classList.toggle("is-framed", state.activeImageIndex === 0);
-            if (previewImage) {
-                previewImage.src = images[state.activeImageIndex];
+            const nextImage = images[state.activeImageIndex];
+            if (previewImage && previewImage.getAttribute("src") !== nextImage) {
+                delete previewImage.dataset.galleryState;
+                previewImage.src = nextImage;
             }
 
             if (selectionValue) {
@@ -1371,7 +1399,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             updateFrameHint(state.frameId);
 
             if (orderLink) {
-                orderLink.href = buildTelegramLink(product, size, frame, total);
+                orderLink.onclick = () => checkout(orderLink, [orderDetails({ slug: product.slug, sizeId: size.id, frameId: frame.id, quantity: 1 })]);
             }
 
             renderFeatured();
@@ -1445,7 +1473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (media) {
             media.innerHTML = `
                 <div class="info-page-media">
-                    <img src="${product.hoverImage || product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}">
+                    <img src="${product.hoverImage || product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}" ${galleryImageAttributes(true)}>
                 </div>
             `;
         }
@@ -1548,6 +1576,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             status.hidden = false;
             status.textContent = "Профиль автора не найден.";
             renderGlobalUi();
+            window.galleryImagesReady?.();
             return;
         }
         if (publicArtist) {
@@ -1580,4 +1609,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (page === "info") {
         renderInfoPage();
     }
+    window.galleryImagesReady?.();
 });
