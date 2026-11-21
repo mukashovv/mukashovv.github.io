@@ -3,17 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>
+if (navigator.maxTouchPoints > 0 && (navigator.standalone === true ||
+    (matchMedia("(display-mode: standalone)").matches && CSS.supports("-webkit-touch-callout", "none")))) {
+  document.documentElement.classList.add("ios-home-screen");
+  document.querySelector('meta[name="viewport"]').content += ",viewport-fit=cover";
+}
+</script>
 <meta name="theme-color" content="#ffffff">
 <meta name="description" content="Супер Таблица — личный учёт доходов, расходов и долгов с итогами по месяцам и годам.">
 <title>Супер Таблица</title>
 <link rel="icon" href="./brand.png">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./app.css">
+<link rel="stylesheet" href="./app.css?v=mobile-date-2">
 <script defer src="./install.js"></script>
 <script defer src="./config.js"></script><script defer src="./data.js"></script><script defer src="./app.js"></script>
 </head>
 <body>
+<div class="status-bar-surface" aria-hidden="true"></div>
 <header class="mast"><div class="brand"><img src="./brand.png" alt="" width="35" height="35"><span>Супер Таблица</span></div>
 <div class="mast-actions"><button id="install-app" type="button" hidden aria-label="Установить Супер Таблицу"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg>Установить</button><div id="account"></div></div></header>
 <main id="main">

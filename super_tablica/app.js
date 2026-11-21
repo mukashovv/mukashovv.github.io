@@ -151,6 +151,7 @@ function dayDetail(day){
    return '<li class="'+(entry.done?'finished':'')+'">'+button("toggle-entry",entry.done?icon("check"):"","check",key+' aria-label="Выполнено" aria-pressed="'+Boolean(entry.done)+'"')+
      button("entry",'<strong>'+esc(entry.source || entry.purpose || "Запись")+'</strong>'+
       (entry.source && entry.purpose?'<span>'+esc(entry.purpose)+'</span>':"")+
+      (entry.project?'<small>Проект · '+esc(entry.project)+'</small>':"")+
       '<small>Доход '+money(entry.income)+' · Расход '+money(entry.expense)+'</small>',"day-entry",key)+'</li>';
  }).join("");
  modal(date.toLocaleDateString("ru",{day:"numeric",month:"long",year:"numeric"}),
@@ -158,6 +159,27 @@ function dayDetail(day){
      '<li>'+button("record-payment",'<strong>'+esc(r.name)+'</strong><small>К '+displayDate(r.dueDate)+' · '+money(r.amount)+'</small>',"day-entry",'data-key="'+esc(r.key)+'" data-period="'+r.period+'"')+
      button("record-payment","Внести","secondary small",'data-key="'+esc(r.key)+'" data-period="'+r.period+'"')+'</li>').join("")+'</ul>':"")+
    '<ul class="day-entries">'+rows+'</ul><div class="form-actions">'+button("entry",icon("plus")+"Добавить запись","primary",'data-day="'+day+'"')+'</div>');
+}
+function cleanProject(name){return (name||"").normalize("NFC").trim().replace(/\s+/g," ");}
+function projectCatalog(){
+ const names=new Map();
+ for(const {data} of Object.values(book.months)){
+   for(const name of data.projectNames||[]){
+     const key=name.toLowerCase();
+     if(!names.has(key))names.set(key,name);
+   }
+ }
+ return names;
+}
+function projectField(current){
+ const names=[...projectCatalog().values()];
+ if(current && !names.some(name=>name.toLowerCase()===current.toLowerCase()))names.push(current);
+ const input='<input name="project" aria-label="Название проекта" maxlength="180" placeholder="Название проекта"';
+ if(!names.length)return field("Проект",input+'>');
+ const options=names.sort((a,b)=>a.localeCompare(b,"ru")).map(name=>'<option value="p:'+esc(name)+'" '+
+   (name.toLowerCase()===current?.toLowerCase()?"selected":"")+'>'+esc(name)+'</option>');
+ return '<div class="project-picker">'+field("Проект",'<select name="projectChoice"><option value="">Без проекта</option>'+
+   options.join("")+'<option value="+">＋ Новый проект…</option></select>')+input+' hidden disabled></div>';
 }
 function entryEditor(day,entryId){
  const rec=book.months[month];const entry=rec.data.entries.find(e=>e.id===entryId)||{day:day||firstDay(month)};
@@ -167,7 +189,8 @@ function entryEditor(day,entryId){
  modal(entry.id?"Изменить запись":"Новая запись",formWrap("entry",
    field("Дата",'<input name="date" type="date" required min="'+month+'-01" max="'+month+'-'+len(month)+'" value="'+date+'">')+
    '<div class="pair">'+cashField("income","Доход, сом",entry.income)+cashField("expense","Расход, сом",entry.expense)+'</div>'+
-   textField("source","Откуда поступили деньги",entry.source)+textField("purpose","На что запланирован расход",entry.purpose)+allocation+
+   '<div class="pair entry-source">'+textField("source","Откуда поступили деньги",entry.source)+projectField(entry.project)+'</div>'+
+   textField("purpose","На что запланирован расход",entry.purpose)+allocation+
    '<label class="tick"><input type="checkbox" name="done" '+(entry.done?"checked":"")+'> Выполнено</label>'+
    '<p class="muted">Итог дня равен доходу за вычетом расхода. Отметка «Выполнено» выделяет запись зелёным.</p>',
    "Сохранить",entry.id?button("remove-entry","Удалить","text-btn danger"):""));
@@ -187,6 +210,39 @@ function goalRow(g={name:"",rate:""}){return '<div class="goal-row">'+textField(
 function goalsEditor(){const data=book.months[month].data,net=F.totals(data).net;
  const allocations=data.goals.map(g=>esc(g.name)+" · "+money(F.allocated(net,g.rate))).join("<br>");
  editKey=month;editRev=book.months[month].rev;modal("Распределение дохода",formWrap("goals",'<p class="muted">Доли считаются от итога месяца и сохраняются для этой вкладки.</p><p class="allocation-preview">'+allocations+'</p><div id="goal-rows">'+book.months[month].data.goals.map(goalRow).join("")+'</div>'+button("add-goal","＋ Ещё цель","text-btn")));}
+function projectChart(months,total){
+ const heading='<section class="panel"><div class="panel-head"><h2>Доходы по проектам</h2></div>';
+ if(!total)return heading+'<p class="project-empty muted">За этот год пока нет доходов.</p></section>';
+ const groups=new Map();
+ for(const key of months){
+   for(const entry of book.months[key].data.entries){
+     if(!entry.income)continue;
+     const name=cleanProject(entry.project),id=name.toLowerCase();
+     if(!groups.has(id))groups.set(id,{name,amount:0});
+     groups.get(id).amount+=entry.income;
+   }
+ }
+ const palette=["#396750","#c18346","#55759c","#92719b","#8b924d","#ad655e"];
+ const stops=[],rows=[];
+ let cumulative=0,assigned=0;
+ for(const {name,amount} of [...groups.values()].sort((a,b)=>b.amount-a.amount || a.name.localeCompare(b.name,"ru"))){
+   let color="#a5aba6";
+   if(name){
+     color=palette[assigned] || 'hsl('+Math.round(assigned*137.508%360)+' 43% 43%)';
+     assigned++;
+   }
+   const start=100*cumulative/total;
+   cumulative+=amount;
+   stops.push(color+' '+start+'% '+100*cumulative/total+'%');
+   const pct=100*amount/total;
+   const share=pct<0.1?'&lt;0,1':currency.format(Math.round(pct*10)/10);
+   rows.push('<li><i aria-hidden="true" style="background:'+color+'"></i><span>'+esc(name||"Без проекта")+
+     '</span><b>'+money(amount)+'</b><small>'+share+'%</small></li>');
+ }
+ const fill=stops.length===1?(assigned?palette[0]:"#a5aba6"):'conic-gradient('+stops.join(",")+')';
+ return heading+'<div class="project-breakdown"><div class="project-pie" aria-hidden="true" style="background:'+
+   fill+'"></div><ul>'+rows.join("")+'</ul></div></section>';
+}
 function yearView(){
  const keys=Object.keys(book.months).sort(), years=[...new Set(keys.map(k=>k.slice(0,4)))].reverse();
  const inYear=keys.filter(k=>k.startsWith(year+"-"));
@@ -198,6 +254,7 @@ function yearView(){
  const before=F.nextMonth(compare,-1),prev=book.months[before],curr=F.totals(book.months[compare].data);
  const max=Math.max(1,...sums.map(s=>Math.abs(s.net)));
  return heading("Сводка по годам",select)+stats([["Доходы за год",money(annual.income)],["Расходы за год",money(annual.expense)],["Итог за год",money(annual.net)]])+
+ projectChart(inYear,annual.income)+
  '<div class="panel"><div class="panel-head"><h2>Итоги по месяцам</h2></div><div class="table-wrap"><table><thead><tr><th>Месяц</th><th>Доход</th><th>Расход</th><th>Прибыль</th></tr></thead><tbody>'+monthly.map(k=>{
   const d=book.months[k],s=d?F.totals(d.data):null;
   return '<tr><th scope="row">'+(d?button("jump-month",monthName(k,false),"entry-link",'data-key="'+k+'"'):monthName(k,false))+'</th><td>'+(s?money(s.income):"—")+'</td><td>'+(s?money(s.expense):"—")+'</td><td>'+(s?'<div class="net-figure">'+money(s.net)+'<i style="width:'+Math.abs(s.net)/max*100+'%"></i></div>':"—")+'</td></tr>';}).join("")+
@@ -427,6 +484,14 @@ async function submit(form){
   else{
     const entry={id:editItem||id(),day:Number(f.get("date").slice(-2)),income:amount(f,"income"),expense:amount(f,"expense"),source:f.get("source").trim(),purpose:f.get("purpose").trim(),done:f.has("done")};
     if(!(entry.income||entry.expense||entry.source||entry.purpose)){hint("Введите сумму или описание записи.");return;}
+    const choice=f.get("projectChoice");
+    const name=cleanProject(choice?.startsWith("p:")?choice.slice(2):f.get("project"));
+    if(choice==="+" && !name){hint("Введите название проекта.");return;}
+    if(name){
+      entry.project=projectCatalog().get(name.toLowerCase())||name;
+      d.projectNames ||= [];
+      if(!d.projectNames.some(saved=>saved.toLowerCase()===entry.project.toLowerCase()))d.projectNames.push(entry.project);
+    }
     const index=d.entries.findIndex(e=>e.id===entry.id);if(index<0)d.entries.push(entry);else d.entries[index]=entry;
   }
   await persist("months",editKey,editRev,d);return;
@@ -476,6 +541,14 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-action]")
 document.addEventListener("submit",e=>{if(e.target.dataset.form){e.preventDefault();run(()=>submit(e.target));}});
 document.addEventListener("change",e=>{
  if(!book||busy)return;
+ if(e.target.name==="projectChoice"){
+   const input=e.target.form.elements.project;
+   const adding=e.target.value==="+";
+   input.hidden=input.disabled=!adding;
+   input.required=adding;
+   if(adding)input.focus();
+   return;
+ }
  if(e.target.name==="period" && !editItem){
    if(e.target.type==="select-one"){
      const suggested=Number(e.target.selectedOptions[0].dataset.amount);
