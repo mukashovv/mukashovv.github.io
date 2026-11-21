@@ -243,13 +243,28 @@ body.month-open {
   }
 }
 
-.entry-source {grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
-.entry-source > * {min-width:0}
-.project-picker {margin-bottom:15px}
-.project-picker .field {margin-bottom:0}
-.project-picker input:not([hidden]) {margin-top:6px}
-.project-picker input[hidden] {display:none}
-.project-picker select {width:100%;min-width:0}
+.entry-source > label {display:block;margin-bottom:7px;font-size:.87rem;font-weight:550;white-space:nowrap}
+.source-control {
+  display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);
+  border:1px solid #ced1c8;border-radius:8px;background:white;
+}
+.source-control input:not([type=checkbox]),.source-control select {
+  min-width:0;min-height:41px;border:0;background:transparent;
+}
+.source-control :focus-visible {outline-offset:-2px}
+.source-project {position:relative;min-width:0;border-inline-start:1px solid #ced1c8}
+.source-project select {appearance:none;-webkit-appearance:none;padding-inline:8px 24px;text-overflow:ellipsis}
+.source-project::after {
+  content:"";position:absolute;right:10px;top:50%;height:6px;width:6px;
+  border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-70%) rotate(45deg);pointer-events:none;
+}
+.source-project input[name=project]:not([hidden]) {
+  position:absolute;inset:0 24px 0 0;width:calc(100% - 24px);padding-inline:8px 1px;
+  border-radius:0;background:white;
+}
+.source-project input[hidden] {display:none}
+.source-project:has(input:not([hidden])) select {color:transparent}
+.source-project select option {color:var(--ink)}
 .project-breakdown {display:flex;align-items:center;flex-wrap:wrap;gap:18px 28px;padding:0 20px 20px}
 .project-pie {width:clamp(100px,15vw,146px);aspect-ratio:1;border-radius:50%;flex:none}
 .project-breakdown ul {min-width:0;flex:1 1 260px;margin:0;padding:0;list-style:none}
@@ -267,8 +282,8 @@ body.month-open {
 
 @media (max-width:760px) {
   #editor .modal-head {margin-bottom:14px}
-  #editor .field, #editor .project-picker {margin-bottom:11px}
-  #editor .project-picker .field, #editor .debt-schedule .pair .field {margin-bottom:0}
-  #editor .field > span {margin-bottom:5px}
+  #editor .field {margin-bottom:11px}
+  #editor .debt-schedule .pair .field {margin-bottom:0}
+  #editor .field > span, #editor .entry-source > label {margin-bottom:5px}
   #editor form .form-actions {margin-top:10px}
 }

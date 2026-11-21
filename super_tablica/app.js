@@ -171,15 +171,18 @@ function projectCatalog(){
  }
  return names;
 }
-function projectField(current){
+function sourceField(entry){
+ const current=entry.project;
  const names=[...projectCatalog().values()];
  if(current && !names.some(name=>name.toLowerCase()===current.toLowerCase()))names.push(current);
- const input='<input name="project" aria-label="Название проекта" maxlength="180" placeholder="Название проекта"';
- if(!names.length)return field("Проект",input+'>');
  const options=names.sort((a,b)=>a.localeCompare(b,"ru")).map(name=>'<option value="p:'+esc(name)+'" '+
    (name.toLowerCase()===current?.toLowerCase()?"selected":"")+'>'+esc(name)+'</option>');
- return '<div class="project-picker">'+field("Проект",'<select name="projectChoice"><option value="">Без проекта</option>'+
-   options.join("")+'<option value="+">＋ Новый проект…</option></select>')+input+' hidden disabled></div>';
+ return '<div class="field entry-source"><label for="entry-source-name">Откуда поступили деньги</label>'+
+   '<div class="source-control"><input id="entry-source-name" name="source" maxlength="180" value="'+esc(entry.source)+'">'+
+   '<div class="source-project"><select name="projectChoice" aria-label="Проект"><option value="">проект</option>'+
+   options.join("")+'<option value="+">＋ Новый проект…</option></select>'+
+   '<input name="project" aria-label="Название нового проекта" maxlength="180" placeholder="Название" hidden disabled>'+
+   '</div></div></div>';
 }
 function entryEditor(day,entryId){
  const rec=book.months[month];const entry=rec.data.entries.find(e=>e.id===entryId)||{day:day||firstDay(month)};
@@ -189,7 +192,7 @@ function entryEditor(day,entryId){
  modal(entry.id?"Изменить запись":"Новая запись",formWrap("entry",
    field("Дата",'<input name="date" type="date" required min="'+month+'-01" max="'+month+'-'+len(month)+'" value="'+date+'">')+
    '<div class="pair">'+cashField("income","Доход, сом",entry.income)+cashField("expense","Расход, сом",entry.expense)+'</div>'+
-   '<div class="pair entry-source">'+textField("source","Откуда поступили деньги",entry.source)+projectField(entry.project)+'</div>'+
+   sourceField(entry)+
    textField("purpose","На что запланирован расход",entry.purpose)+allocation+
    '<label class="tick"><input type="checkbox" name="done" '+(entry.done?"checked":"")+'> Выполнено</label>'+
    '<p class="muted">Итог дня равен доходу за вычетом расхода. Отметка «Выполнено» выделяет запись зелёным.</p>',
