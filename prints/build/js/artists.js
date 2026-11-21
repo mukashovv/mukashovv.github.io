@@ -1,5 +1,5 @@
 import { applyCatalogueAssignment, createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, unwrap } from "./artist-data.js";
-import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js?v=2";
+import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js?v=3";
 
 const slugCooldownMs = 14 * 24 * 60 * 60 * 1000;
 const authForm = document.querySelector("#artist-auth");
@@ -155,8 +155,9 @@ function initDashboard(client, storage) {
         if (saved?.profile_slug) profileLink.href = `/${encodeURIComponent(saved.profile_slug)}`;
     }
 
-    async function uploadPhoto(work, { blob }, interior = false) {
+    async function uploadPhoto(work, { blob, width, height }, interior = false) {
         unwrap(await storage.upload(photoPath(work, interior), blob, { contentType: blob.type }));
+        return `${width} × ${height} пикс., ${Math.ceil(blob.size / 1024)} КБ`;
     }
 
     async function refreshWorks(owner) {
@@ -279,8 +280,8 @@ function initDashboard(client, storage) {
                                 .update({ orientation: photo.orientation }).eq("id", work.id));
                         }
                         setStatus("Загружаем изображение…");
-                        await uploadPhoto(work, photo, interior);
-                        setStatus("Фото загружено.");
+                        const size = await uploadPhoto(work, photo, interior);
+                        setStatus(`Фото загружено · ${size}.`);
                     } finally {
                         await refreshWorks(work.artist_id);
                     }
@@ -431,9 +432,9 @@ function initDashboard(client, storage) {
             workForm.reset();
             syncNewOffer();
             try {
-                await uploadPhoto(work, preparedPhoto);
-                if (preparedInterior) await uploadPhoto(work, preparedInterior, true);
-                setStatus("Черновик сохранён. Теперь его можно опубликовать.");
+                const sizes = [`Работа · ${await uploadPhoto(work, preparedPhoto)}`];
+                if (preparedInterior) sizes.push(`Интерьер · ${await uploadPhoto(work, preparedInterior, true)}`);
+                setStatus(`Черновик сохранён. ${sizes.join(". ")}. Теперь его можно опубликовать.`);
             } finally {
                 if (owner === userId) {
                     window.history.replaceState(null, "", "#works");

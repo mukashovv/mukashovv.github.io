@@ -37,6 +37,23 @@ async function compressPhoto(image, sourceType) {
     }
 }
 
+async function measureOutput(blob) {
+    const url = URL.createObjectURL(blob);
+    try {
+        const image = new Image();
+        image.src = url;
+        await image.decode();
+        const width = image.naturalWidth;
+        const height = image.naturalHeight;
+        if (!width || !height || Math.max(width, height) > maxEdge) {
+            throw new PhotoPreparationError("Проверка размера не пройдена. Фото не отправлено.");
+        }
+        return { width, height };
+    } finally {
+        URL.revokeObjectURL(url);
+    }
+}
+
 export async function preparePhoto(photo) {
     if (!photo?.size || !photoTypes.includes(photo.type)) {
         throw new PhotoPreparationError("Выберите изображение JPEG, PNG или WebP.");
@@ -51,8 +68,11 @@ export async function preparePhoto(photo) {
         if (!width || !height) throw new Error("Image has no dimensions");
 
         const orientation = width === height ? "square" : width > height ? "landscape" : "portrait";
-        return { blob: await compressPhoto(image, photo.type), orientation };
-    } catch {
+        const blob = await compressPhoto(image, photo.type);
+        const { width: outputWidth, height: outputHeight } = await measureOutput(blob);
+        return { blob, orientation, width: outputWidth, height: outputHeight };
+    } catch (error) {
+        if (error instanceof PhotoPreparationError) throw error;
         throw new PhotoPreparationError("Не удалось подготовить изображение. Попробуйте выбрать другой файл.");
     } finally {
         URL.revokeObjectURL(source);
