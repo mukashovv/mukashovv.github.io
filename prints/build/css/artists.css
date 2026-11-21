@@ -174,26 +174,26 @@
 .artwork-scene--2 { background-image: url('../img/interiors/room-2.jpg'); }
 .artwork-scene--3 { background-image: url('../img/interiors/room-3.jpg'); }
 .artwork-scene--4 { background-image: url('../img/interiors/room-4.jpg'); }
-.artwork-scene--5 { background-image: url('../img/interiors/room-5.jpg'); }
-.artwork-scene--6 { background-image: url('../img/interiors/room-6.jpg'); }
-.artwork-scene--7 { background-image: url('../img/interiors/room-7.jpg'); }
-.artwork-scene--8 { background-image: url('../img/interiors/room-8.jpg'); }
-.artwork-scene--9 { background-image: url('../img/interiors/room-9.jpg'); }
-.artwork-scene--10 { background-image: url('../img/interiors/room-10.jpg'); }
-.artwork-scene--11 { background-image: url('../img/interiors/room-11.jpg'); }
-.artwork-scene--12 { background-image: url('../img/interiors/room-12.jpg'); }
-.artwork-scene--13 { background-image: url('../img/interiors/room-13.jpg'); }
-.artwork-scene--14 { background-image: url('../img/interiors/room-14.jpg'); }
-.artwork-scene--15 { background-image: url('../img/interiors/room-15.jpg'); }
-.artwork-scene--16 { background-image: url('../img/interiors/room-16.jpg'); }
-.artwork-scene--17 { background-image: url('../img/interiors/room-17.jpg'); }
-.artwork-scene--18 { background-image: url('../img/interiors/room-18.jpg'); }
-.artwork-scene--19 { background-image: url('../img/interiors/room-19.jpg'); }
-.artwork-scene--20 { background-image: url('../img/interiors/room-20.jpg'); }
-.artwork-scene--21 { background-image: url('../img/interiors/room-21.jpg'); }
-.artwork-scene--22 { background-image: url('../img/interiors/room-22.jpg'); }
-.artwork-scene--23 { background-image: url('../img/interiors/room-23.jpg'); }
-.artwork-scene--24 { background-image: url('../img/interiors/room-24.jpg'); }
+.artwork-scene--5 { background-image: url('../img/interiors/home-5.webp'); }
+.artwork-scene--6 { background-image: url('../img/interiors/home-6.webp'); }
+.artwork-scene--7 { background-image: url('../img/interiors/home-7.webp'); }
+.artwork-scene--8 { background-image: url('../img/interiors/home-8.webp'); }
+.artwork-scene--9 { background-image: url('../img/interiors/home-9.webp'); }
+.artwork-scene--10 { background-image: url('../img/interiors/home-10.webp'); }
+.artwork-scene--11 { background-image: url('../img/interiors/home-11.webp'); }
+.artwork-scene--12 { background-image: url('../img/interiors/home-12.webp'); }
+.artwork-scene--13 { background-image: url('../img/interiors/home-13.webp'); }
+.artwork-scene--14 { background-image: url('../img/interiors/home-14.webp'); }
+.artwork-scene--15 { background-image: url('../img/interiors/home-15.webp'); }
+.artwork-scene--16 { background-image: url('../img/interiors/home-16.webp'); }
+.artwork-scene--17 { background-image: url('../img/interiors/home-17.webp'); }
+.artwork-scene--18 { background-image: url('../img/interiors/home-18.webp'); }
+.artwork-scene--19 { background-image: url('../img/interiors/home-19.webp'); }
+.artwork-scene--20 { background-image: url('../img/interiors/home-20.webp'); }
+.artwork-scene--21 { background-image: url('../img/interiors/home-21.webp'); }
+.artwork-scene--22 { background-image: url('../img/interiors/home-22.webp'); }
+.artwork-scene--23 { background-image: url('../img/interiors/home-23.webp'); }
+.artwork-scene--24 { background-image: url('../img/interiors/home-24.webp'); }
 
 [data-offer-fields] {
     display: grid;

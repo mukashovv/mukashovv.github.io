@@ -592,7 +592,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </span></span>`;
     };
 
-    const buildCardMarkup = (product, sizeId) => {
+    const buildCardMarkup = (product, sizeId, eager = false) => {
         const cardUrl = buildProductUrl(product.slug, { sizeId });
         const hoverImage = product.hoverImage || product.image;
         const size = findSize(sizeId) || findSize(defaultSizeId) || shared.sizes?.[0];
@@ -603,9 +603,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ${buildFavouriteButton(product.slug)}
                     <a class="print-card__media" href="${cardUrl}" aria-label="Open ${escapeHtml(product.title)}">
                         ${product.isArtistWork ? `
-                            <span class="print-card__image print-card__image--base">${renderArtworkImage(product, false, true)}</span>
+                            <span class="print-card__image print-card__image--base">${renderArtworkImage(product, false, !eager)}</span>
                             <span class="print-card__image print-card__image--hover" aria-hidden="true">${renderArtworkImage(product, true, true)}</span>`
-                            : `<img loading="lazy" class="print-card__image print-card__image--base" src="${product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}">
+                            : `<img loading="${eager ? "eager" : "lazy"}" class="print-card__image print-card__image--base" src="${product.image}" alt="${escapeHtml(product.title)} — ${escapeHtml(product.artist)}">
                             <img loading="lazy" class="print-card__image print-card__image--hover" src="${hoverImage}" alt="" aria-hidden="true">`}
                     </a>
                 </div>
@@ -930,7 +930,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (grid) {
             grid.innerHTML = products.length
-                ? products.map((product) => buildCardMarkup(product, state.sizeId)).join("")
+                ? products.map((product, index) => buildCardMarkup(product, state.sizeId, index < 2)).join("")
                 : `<p class="catalog-empty">No works match these filters. Try removing a filter or widening the price range.</p>`;
             window.prepareGalleryCards?.(grid);
         }
@@ -1164,8 +1164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ${initialOffer ? `<div class="artwork-offer-details" data-artwork-offer-details aria-live="polite">${renderOfferDetails(initialOffer)}</div>` : ""}
                 ${renderProductOptions(shared.sizes || [], initialSizeId)}
                 <div class="summary-actions">
-                    ${initialOffer ? `<button type="button" class="button button--solid" data-art-cart>Add to cart</button>
-                    <button type="button" class="button button--line" data-art-order>Order via WhatsApp</button>` : ""}
+                    ${initialOffer ? `<button type="button" class="button button--solid" data-role="add-to-cart">Add to cart</button>` : ""}
                     <a class="button button--line" data-author-profile href="./?artist=${encodeURIComponent(artistFilterId(product))}">More from this artist</a>
                     <a class="button button--ghost" href="./">Catalogue</a>
                 </div>
@@ -1205,19 +1204,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             frameHint.textContent = frame.description;
         };
         if (initialOffer) {
-            const cartButton = summary.querySelector("[data-art-cart]");
-            const orderButton = summary.querySelector("[data-art-order]");
+            const cartButton = summary.querySelector("[data-role='add-to-cart']");
             const selection = () => ({ slug: product.slug, sizeId: sizeSelect.value, frameId: frameSelect.value,
                 offerType: offerSelector?.value || initialOffer.type, quantity: 1 });
             const updateAvailability = () => {
                 const available = orderDetails(selection()).available;
                 cartButton.disabled = !available;
-                orderButton.disabled = !available;
             };
             offerSelector?.addEventListener("change", updateAvailability);
             updateAvailability();
             cartButton.addEventListener("click", () => addToCart(selection()));
-            orderButton.addEventListener("click", () => checkout(orderButton, [orderDetails(selection())]));
         }
         sizeSelect.addEventListener("change", () => updateSize(sizeSelect.value));
         frameSelect.addEventListener("change", () => {
@@ -1316,7 +1312,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     <div class="summary-actions">
                         <button class="button button--solid" type="button" data-role="add-to-cart">Add to Bag</button>
-                        <button type="button" class="button button--line" data-role="order-link">Order via WhatsApp</button>
                         ${product.artistProfileSlug ? `<a class="button button--ghost" href="./?author=${encodeURIComponent(product.artistProfileSlug)}">Artist profile</a>` : ""}
                         <a class="button button--ghost" href="./">Catalog</a>
                     </div>
@@ -1348,7 +1343,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const previewImage = document.querySelector("[data-role='product-image']");
         const selectionValue = document.querySelector("[data-role='selection-value']");
         const totalPrice = document.querySelector("[data-role='total-price']");
-        const orderLink = document.querySelector("[data-role='order-link']");
         const sizeHint = document.querySelector("[data-role='size-hint']");
         const frameHint = document.querySelector("[data-role='frame-hint']");
         const sizeSelect = document.querySelector("[data-role='size-select']");
@@ -1402,10 +1396,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             updateFrameHint(state.frameId);
-
-            if (orderLink) {
-                orderLink.onclick = () => checkout(orderLink, [orderDetails({ slug: product.slug, sizeId: size.id, frameId: frame.id, quantity: 1 })]);
-            }
 
             renderFeatured();
             renderGlobalUi();

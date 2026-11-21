@@ -481,10 +481,11 @@ select {
     place-items: center;
     background: var(--surface-soft);
     color: var(--text);
-    font: 500 clamp(13px, 1.8vw, 22px) var(--font-display);
-    letter-spacing: .08em;
+    font: 400 clamp(10px, 1.2vw, 14px) var(--font-body);
+    text-transform: uppercase;
+    letter-spacing: .34em;
     pointer-events: none;
-    transition: opacity 450ms ease-in-out;
+    transition: opacity 150ms ease-out;
 }
 
 .print-card__media.is-revealed::after {

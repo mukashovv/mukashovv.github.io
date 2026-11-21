@@ -349,24 +349,55 @@ function initDashboard(client, storage) {
         }
         const remove = element("button", "Удалить работу", "button button--line");
         remove.type = "button";
+        const confirmation = element("div", "", "artist-card__actions");
+        confirmation.hidden = true;
+        const prompt = element("span", `Удалить «${work.title}» и её фотографии навсегда?`);
+        const cancel = element("button", "Отмена", "button button--line");
+        const confirm = element("button", "Да, удалить", "button button--line");
+        cancel.type = confirm.type = "button";
+        confirmation.append(prompt, cancel, confirm);
         remove.addEventListener("click", () => {
-            if (!window.confirm(`Удалить «${work.title}» и её фотографии навсегда?`)) return;
-            run(remove, async () => {
-                const owner = userId;
-                try {
-                    unwrap(await client.from("prints_artworks").update({ is_published: false })
-                        .eq("id", work.id).eq("artist_id", owner).select("id").single());
-                    unwrap(await storage.remove([photoPath(work), photoPath(work, true)]));
-                    unwrap(await client.from("prints_artworks").delete().eq("id", work.id)
-                        .eq("artist_id", owner).select("id").single());
-                    setStatus("Работа удалена.");
-                } finally {
-                    await refreshWorks(owner);
-                }
-            }, "Не удалось завершить удаление. Попробуйте ещё раз.");
+            confirmation.hidden = false;
+            remove.disabled = true;
+            cancel.focus();
         });
+        cancel.addEventListener("click", () => {
+            confirmation.hidden = true;
+            remove.disabled = false;
+            remove.focus();
+        });
+        confirm.addEventListener("click", () => run(confirm, async () => {
+            const owner = work.artist_id;
+            if (owner !== userId) return;
+            cancel.disabled = true;
+            try {
+                const result = await client.from("prints_artworks").delete()
+                    .eq("id", work.id).eq("artist_id", owner).select("id").maybeSingle();
+                if (result.error?.code === "42501" || (!result.error && !result.data)) {
+                    prompt.textContent = "Удаление недоступно. Проверьте права в Supabase или обновите список работ.";
+                    return;
+                }
+                unwrap(result);
+                card.remove();
+                try {
+                    const deleted = unwrap(await storage.remove([photoPath(work), photoPath(work, true)]));
+                    const names = new Set(deleted.map((file) => file.name));
+                    const missing = (work.imageUrl && !names.has(photoPath(work)))
+                        || (work.interiorUrl && !names.has(photoPath(work, true)));
+                    setStatus(missing ? "Работа удалена. Не удалось подтвердить удаление всех фотографий." : "Работа удалена.");
+                } catch {
+                    setStatus("Работа удалена. Не удалось подтвердить удаление фотографий из хранилища.");
+                }
+                await refreshWorks(owner);
+            } catch (error) {
+                prompt.textContent = "Не удалось подтвердить удаление. Обновите список работ и попробуйте снова.";
+                throw error;
+            } finally {
+                cancel.disabled = false;
+            }
+        }, "Не удалось подтвердить удаление работы."));
         actions.append(remove);
-        card.append(actions, editor);
+        card.append(actions, confirmation, editor);
         return card;
     }
 
