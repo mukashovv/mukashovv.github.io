@@ -174,7 +174,7 @@ const Finance = (() => {
     return navigator.locks ? navigator.locks.request(localKey, write) : write();
   }
   async function grantMember(member,years){return rpc("st_grant_member",{p_member:member,p_years:years});}
-  return {configured, fullAccess, members, grantMember, startLocal, load, openSession, observeSession, authenticate, leave, save, deleteDebt,
+  return {claimAccessNotice:()=>rpc("st_claim_access_notice",{}), configured, fullAccess, members, grantMember, startLocal, load, openSession, observeSession, authenticate, leave, save, deleteDebt,
     monthKey,dateKey,dateOf,nextMonth,emptyMonth,totals,allocated,balance,installments,calendarPayments,dueForPeriod,
     get local(){return local;},get email(){return account?.email || "";}};
 })();

@@ -58,7 +58,7 @@ async function workspace(local=false){
    book=local?F.startLocal():await F.load();
    month=book.paid?F.monthKey():book.trial;
    if(!book.months[month])await createMonth(month);
-   view="month";year=month.slice(0,4);compare=month;render();
+   view="month";year=month.slice(0,4);compare=month;render();showAccessWelcome();
  })();
  try{await workspaceOpening;}finally{workspaceOpening=null;}
 }
@@ -78,7 +78,7 @@ function render(){
  const tabs=[["month","Месяц"],["debts","Долги"],["year","Годы"]];
  if(book.manager)tabs.push(["members","Участники"]);
  const nav=tabs.map(([key,name])=>button("view",icon(key)+name,"nav-item "+(view===key?"active":""),'data-key="'+key+'" '+(view===key?'aria-current="page"':""))).join("");
- const plan=book.paid?'<span class="plan-label" title="'+(book.paid_until?'До '+accessDate(book.paid_until):'Бессрочный доступ')+'">Полный доступ</span>':button("upgrade","Бесплатный месяц","plan-label");
+ const plan=book.paid?button("subscription","Полный доступ","plan-label"):button("upgrade","Бесплатный месяц","plan-label");
  const section={month:monthView,debts:debtView,year:yearView,members:membersView}[view];
  main.innerHTML='<div class="desk"><nav class="tabs" aria-label="Разделы таблицы">'+nav+plan+'</nav><section class="content">'+section()+'</section></div>';
 }
@@ -400,6 +400,31 @@ async function persist(kind,key,rev,data,after){
  if(after)after();else if(dialog.open)dialog.close();
  return true;
 }
+async function showAccessWelcome(){
+ const current=book;
+ if(F.local || !F.fullAccess(current))return;
+ try{
+   if(await F.claimAccessNotice() && book===current){
+     const box=$("#access-welcome");
+     box.textContent="Поздравляем! Теперь вам открыт полный доступ.";
+     box.classList.add("visible");
+     setTimeout(()=>box.classList.remove("visible"),4500);
+   }
+ }catch(error){console.warn("Не удалось проверить уведомление о подписке",error);}
+}
+function subscription(offers=false){
+ if(!F.fullAccess(book)){upgrade();return;}
+ const terms=[[1,"1 год",20,0],[3,"3 года",48,20],[5,"5 лет",65,35]];
+ const cards=terms.map(([years,label,price,discount])=>{
+   const link=new URL(config.supportUrl);
+   link.searchParams.set("text","Хочу продлить подписку «Супер Таблица» на "+label+" за $"+price+". Аккаунт "+F.email);
+   return '<a class="renew-choice" target="_blank" rel="noopener" href="'+esc(link.href)+'"><span>'+label+
+     (discount?'<small>Скидка '+discount+'%</small>':'')+'</span><b>$'+price+'</b></a>';
+ }).join("");
+ modal("Полный доступ",'<section class="subscription-card"><div class="sub-laptop" aria-hidden="true"><div><img src="./brand.png" alt=""></div></div>'+
+   '<h3>Супер Таблица</h3><p>'+(book.paid_until?'Доступ до '+accessDate(book.paid_until):'Бессрочный доступ')+'</p>'+
+   (book.paid_until?(offers?'<p class="renew-note">Выберите срок, чтобы запросить продление в WhatsApp.</p>'+cards:button("renew","Продлить подписку","secondary")):'')+'</section>');
+}
 function upgrade(){
  const url=config.paymentUrl||config.supportUrl;
  modal("Полный доступ",'<p class="intro">В бесплатной версии доступна одна месячная вкладка — <b>'+esc(monthName(book.trial))+'</b>. Подписка открывает «Долги и платежи», напоминания, новые месяцы и сравнение результатов за разные годы.</p>'+
@@ -448,8 +473,8 @@ function grantDialog(member){
  editKey=member.id;
  modal("Выдать полный доступ",formWrap("grant-member",
    '<p class="intro"><b>'+esc(member.email)+'</b><br>Сейчас: '+esc(memberStatus(member))+'</p>'+
-   field("Срок от сегодняшнего дня",'<select name="years"><option value="1">1 год</option><option value="3">3 года</option></select>')+
-   '<p class="muted">Выбранный срок заменит текущую дату окончания доступа.</p>',"Выдать доступ",button("close","Отмена","text-btn")));
+   field("Срок доступа",'<select name="years"><option value="1">1 год</option><option value="3">3 года</option><option value="5">5 лет</option></select>')+
+   '<p class="muted">При действующей подписке срок добавится к дате её окончания.</p>',"Выдать доступ",button("close","Отмена","text-btn")));
 }
 
 async function handleAction(el){
@@ -470,8 +495,9 @@ async function handleAction(el){
   if(!book.paid){upgrade();return;}
   modal("Новая месячная вкладка",formWrap("month",field("Месяц",'<input required type="month" min="1000-01" max="9999-12" name="month" value="'+F.nextMonth(month,1)+'">'),"Создать вкладку"));return;
  }
+ if(action==="subscription" || action==="renew"){subscription(action==="renew");return;}
  if(action==="upgrade"){upgrade();return;}
- if(action==="refresh-plan"){book=await F.load();render();if(book.paid){dialog.close();notice("Полный доступ активирован");}else hint("Оплата пока ожидает подтверждения");return;}
+ if(action==="refresh-plan"){book=await F.load();render();if(book.paid){dialog.close();showAccessWelcome();}else hint("Оплата пока ожидает подтверждения");return;}
  if(action==="day"){dayDetail(Number(el.dataset.day));return;}
  if(action==="entry"){entryEditor(Number(el.dataset.day),item);return;}
  if(action==="toggle-entry"){

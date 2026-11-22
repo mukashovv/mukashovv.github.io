@@ -298,3 +298,19 @@ body.month-open {
 .day-payment-row .check {flex:none}
 .day-payment-row small {display:block;margin:3px 0;color:var(--soft)}
 .day-payment-row[aria-pressed=true] small {color:inherit}
+
+#access-welcome {position:fixed;z-index:10;left:50%;top:max(24px,env(safe-area-inset-top));transform:translate(-50%,-12px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s,transform .25s,visibility .25s;width:max-content;max-width:90vw;background:white;color:var(--ink);padding:16px 22px;border:1px solid var(--rule);border-radius:16px;box-shadow:0 6px 30px #2222;text-align:center}
+#access-welcome.visible {visibility:visible;opacity:1;transform:translate(-50%,0)}
+#editor:has(.subscription-card) {width:min(92vw,390px);background:rgba(255,255,255,.96);backdrop-filter:blur(15px)}
+#editor:has(.subscription-card)::backdrop {backdrop-filter:blur(4px)}
+.subscription-card {text-align:center}
+.sub-laptop {width:150px;margin:32px auto 25px}
+.sub-laptop div {display:grid;place-items:center;aspect-ratio:1.56;background:linear-gradient(145deg,#d6e0e6,#92aabe 60%,#697c91);border:5px solid #26292d;border-radius:7px 7px 3px 3px}
+.sub-laptop img {width:28px;height:28px;border-radius:6px}
+.sub-laptop::after {content:"";display:block;height:6px;margin:0 -15px;background:linear-gradient(#d7d8da,#85888b);border-radius:0 0 55% 55%}
+.subscription-card h3 {font-size:1.4rem}
+.subscription-card p {margin:7px 0 20px;color:var(--soft)}
+.subscription-card .renew-note {font-size:.88rem;margin:22px 0 8px}
+.renew-choice {display:flex;justify-content:space-between;align-items:center;min-height:44px;text-align:left;color:var(--ink);text-decoration:none;border-top:1px solid var(--rule);padding:9px 6px}
+.renew-choice small {display:block;color:#237236}
+.renew-choice:hover {background:var(--wash)}
