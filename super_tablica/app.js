@@ -104,7 +104,7 @@ function sheetDay(day, entries, weekday, today, reminders) {
  const first = entries[0];
  const count = entries.length;
  const names = reminders.map(item=>item.name+(item.done?" · внесено":"")).join(", ");
- const badges = reminders.map(r=>'<span class="payment-badge'+(r.done?' paid':'')+'">'+(r.done?'✓ ':'')+esc(r.name)+'</span>').join(" ");
+ const badges = reminders.map(r=>'<span class="payment-badge'+(r.done?' paid':'')+'">'+esc(r.name)+'</span>').join(" ");
  const label = [day, monthName(month), weekdays[weekday], today ? "Сегодня" : "", names && "Платежи: "+names,
    count ? "Записей: "+count+". Итог: "+money(net) : "Добавить запись"].filter(Boolean).join(" · ");
  const value = cents => cents ? currency.format(cents / 100) : "";
@@ -157,17 +157,40 @@ function dayDetail(day){
  }).join("");
  modal(date.toLocaleDateString("ru",{day:"numeric",month:"long",year:"numeric"}),
    (reminders.length?'<h3>Долги и платежи</h3><ul class="day-payments">'+reminders.map(r=>{
-     const attrs='data-key="'+esc(r.key)+'" data-day="'+day+'"';
-     const outstanding=r.amount>0;
+     const token=r.period||r.payments[0].id;
+     const unpaidAmount=r.amount || (!r.done?r.payments.reduce((sum,p)=>sum+(p.done?0:p.amount),0):0);
      const caption=[r.dueDate?"К "+displayDate(r.dueDate):"",r.paid?"Внесено "+money(r.paid):"",
-       outstanding?"К оплате "+money(r.amount):""].filter(Boolean).join(" · ");
-     const checks=r.payments.map(p=>'<div class="payment-mark">'+paymentCheck(p,attrs)+
-       '<span>'+displayDate(p.date)+' · '+money(p.amount)+'</span></div>').join("");
-     const add=outstanding && !r.payments.some(p=>!p.done && p.amount===r.amount)?
-       button("record-payment","Внесено","secondary small",attrs+' data-period="'+esc(r.period)+'" aria-label="Отметить внесённый платёж"'):"";
-     return '<li class="'+(r.done?"paid":"")+'"><strong>'+esc(r.name)+'</strong><small>'+esc(caption)+'</small>'+checks+add+'</li>';
+       unpaidAmount?"К оплате "+money(unpaidAmount):""].filter(Boolean).join(" · ");
+     const attrs='data-key="'+esc(r.key)+'" data-day="'+day+'" data-token="'+esc(token)+'" aria-pressed="'+r.done+
+       '" title="'+(r.done?"Снять отметку об оплате":"Отметить оплату")+'"';
+     return '<li>'+button("check-installment",'<strong>'+esc(r.name)+'</strong><small>'+esc(caption)+'</small>',
+       "day-payment-row",attrs)+'</li>';
    }).join("")+'</ul>':"")+
    '<ul class="day-entries">'+rows+'</ul><div class="form-actions">'+button("entry",icon("plus")+"Добавить запись","primary",'data-day="'+day+'"')+'</div>');
+}
+async function checkInstallment(key,day,token){
+ const row=(monthReminders().get(day)||[]).find(r=>r.key===key && (r.period||r.payments[0]?.id)===token);
+ if(!row)return;
+ const rec=book.debts[key],d=structuredClone(rec.data);
+ const ids=new Set(row.payments.map(p=>p.id));
+ const payments=d.payments.filter(p=>ids.has(p.id));
+ if(row.done){
+   const applied=payments.filter(p=>p.done);
+   const latest=applied.reduce((last,p)=>(p.markedAt||p.date)>=(last.markedAt||last.date)?p:last);
+   latest.done=false;
+   if(d.closed)d.closed=false;
+ }else{
+   const planned=payments.filter(p=>!p.done);
+   const payment=planned.find(p=>p.amount===row.amount) || (!row.amount?planned[0]:null);
+   if(payment){
+     payment.done=true;
+     payment.markedAt=new Date().toISOString();
+   }else if(row.period && row.amount>0){
+     d.payments.push({id:id(),period:row.period,date:F.dateKey(),dueDate:row.dueDate,
+       periodAmount:row.paid+row.amount,amount:row.amount,done:true,note:"",markedAt:new Date().toISOString()});
+   }else return;
+ }
+ await persist("debts",key,rec.rev,d,()=>dayDetail(day));
 }
 function cleanProject(name){return (name||"").normalize("NFC").trim().replace(/\s+/g," ");}
 function projectCatalog(){
@@ -477,6 +500,7 @@ async function handleAction(el){
    if(book.debts[target].data.type==="recurring")recurringEditor(target);else debtEditor(target);
    return;
  }
+ if(action==="check-installment"){await checkInstallment(key,Number(el.dataset.day),el.dataset.token);return;}
  if(action==="record-payment"){editKey=key;paymentEditor(undefined,el.dataset.period,el.dataset.day);return;}
  if(action==="payment"){paymentEditor(item);return;}
  if(action==="move-debt"){await moveDebt(key,!book.debts[key].data.closed);return;}

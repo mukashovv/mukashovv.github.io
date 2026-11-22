@@ -70,6 +70,8 @@ const Finance = (() => {
       items.set(item.period,{...item,payments:[],paid:0});
     }
     for (const payment of debt.payments) {
+      // Off-schedule transactions belong to the ledger, not to a second calendar day.
+      if (!payment.period && (debt.schedule || payment.note==="Погашено до начала учёта")) continue;
       const key = payment.period || payment.id;
       const dueDate = payment.dueDate || dueForPeriod(debt.schedule,payment.period);
       const reminder = dueDate ? reminderDate(dueDate) : payment.date;
