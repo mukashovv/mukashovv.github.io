@@ -2,6 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<link rel="canonical" href="https://supertable.mukashov.com/">
+<script>
+if (location.hostname === "mukashov.com" && /^\/super_tablica(?:\/(?:index\.html)?)?$/.test(location.pathname)) {
+  location.replace("https://supertable.mukashov.com/" + location.search + location.hash);
+}
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script>
 if (navigator.maxTouchPoints > 0 && (navigator.standalone === true ||
@@ -16,14 +22,16 @@ if (navigator.maxTouchPoints > 0 && (navigator.standalone === true ||
 <link rel="icon" href="./brand.png">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./app.css?v=subscription-11">
-<script defer src="./install.js"></script>
-<script defer src="./config.js"></script><script defer src="./data.js?v=subscription-11"></script><script defer src="./app.js?v=subscription-11"></script>
+<link rel="stylesheet" href="./app.css?v=international-1">
+<script defer src="./translations.js"></script>
+<script defer src="./language.js"></script>
+<script defer src="./install.js?v=international-1"></script>
+<script defer src="./config.js"></script><script defer src="./data.js?v=international-1"></script><script defer src="./app.js?v=international-1"></script>
 </head>
 <body>
 <div class="status-bar-surface" aria-hidden="true"></div>
 <header class="mast"><div class="brand"><img src="./brand.png" alt="" width="35" height="35"><span>Супер Таблица</span></div>
-<div class="mast-actions"><button id="install-app" type="button" hidden aria-label="Установить Супер Таблицу"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg>Установить</button><div id="account"></div></div></header>
+<div class="mast-actions"><select id="language" aria-label="Язык / Тил" title="Язык / Тил"></select><button id="install-app" type="button" hidden aria-label="Установить Супер Таблицу"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg>Установить</button><div id="account"></div></div></header>
 <main id="main">
 <section class="welcome"><div class="welcome-inner">
 <img class="doodle" src="./doodle.svg" width="620" height="330" alt="Нарисованная от руки финансовая тетрадь с карандашом и монетами">
