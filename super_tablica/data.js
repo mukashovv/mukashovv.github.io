@@ -21,14 +21,28 @@ const Finance = (() => {
   function balance(debt) {
     return debt.principal + debt.interest - debt.payments.reduce((sum,p) => sum + (p.done ? p.amount : 0),0);
   }
+  function dueForPeriod(plan, period) {
+    if (!plan || !period) return "";
+    const date = dateOf(period);
+    date.setMonth(date.getMonth()+1,0);
+    date.setDate(Math.min(date.getDate(), Number(plan.firstDate.slice(-2))));
+    return dateKey(date);
+  }
+  function reminderDate(dueDate) {
+    const date = dateOf(dueDate);
+    date.setDate(Number(dueDate.slice(-2))-4);
+    return dateKey(date);
+  }
   function installments(debt, from, through) {
     const plan = debt.schedule;
     const recurring = debt.type === "recurring";
     let remaining = recurring ? Infinity : balance(debt);
     if (!plan || debt.closed || remaining <= 0) return [];
     const paid = new Map();
+    const periodAmounts = new Map();
     for (const payment of debt.payments) {
       if (payment.done && payment.period) paid.set(payment.period, (paid.get(payment.period) || 0) + payment.amount);
+      if (payment.period && payment.periodAmount) periodAmounts.set(payment.period,payment.periodAmount);
     }
     const firstPeriod = plan.firstDate.slice(0,7);
     const start = dateOf(recurring && from && from > firstPeriod ? from : firstPeriod);
@@ -37,23 +51,51 @@ const Finance = (() => {
       for (const period of paid.keys()) if (period > latest) latest = period;
       through = nextMonth(latest > firstPeriod ? latest : firstPeriod, 1);
     }
-    const day = Number(plan.firstDate.slice(-2));
     const items = [];
     for (let i = 0; (recurring || i < plan.months) && remaining > 0; i++) {
-      const due = new Date(start.getFullYear(), start.getMonth() + i + 1, 0, 12);
-      due.setDate(Math.min(day, due.getDate()));
+      const due = new Date(start.getFullYear(), start.getMonth() + i, 1, 12);
       const period = monthKey(due);
       if (recurring && (due.getFullYear() > 9999 || period > through)) break;
-      const amount = Math.min(remaining, plan.amount - (paid.get(period) || 0));
+      const amount = Math.min(remaining, (periodAmounts.get(period) || plan.amount) - (paid.get(period) || 0));
       if (amount <= 0) continue;
-      const dueDate = dateKey(due);
-      due.setDate(due.getDate() - 4);
-      items.push({period, dueDate, reminder:dateKey(due), amount});
+      const dueDate = dueForPeriod(plan,period);
+      items.push({period, dueDate, reminder:reminderDate(dueDate), amount});
       remaining -= amount;
     }
     return items;
   }
+  function calendarPayments(debt, month) {
+    const items = new Map();
+    for (const item of installments(debt,month,nextMonth(month,1))) {
+      items.set(item.period,{...item,payments:[],paid:0});
+    }
+    for (const payment of debt.payments) {
+      const key = payment.period || payment.id;
+      const dueDate = payment.dueDate || dueForPeriod(debt.schedule,payment.period);
+      const reminder = dueDate ? reminderDate(dueDate) : payment.date;
+      let item = items.get(key);
+      if (!item) {
+        if (!reminder.startsWith(month+"-")) continue;
+        item = {period:payment.period,dueDate,reminder,amount:0,payments:[],paid:0};
+        items.set(key,item);
+      }
+      if (!item.payments.length) {
+        item.dueDate = dueDate;
+        item.reminder = reminder;
+      }
+      item.payments.push(payment);
+      if (payment.done) item.paid += payment.amount;
+    }
+    return [...items.values()].filter(item=>item.reminder.startsWith(month+"-"))
+      .map(item=>({...item,done:item.amount===0 && item.paid>0}));
+  }
   function readLocal() { const raw=localStorage.getItem(localKey); return raw ? JSON.parse(raw) : null; }
+  function fullAccess(book) {
+    return Boolean(book?.paid && (!book.paid_until || Date.parse(book.paid_until)>Date.now()));
+  }
+  function visibleBook(book) {
+    return book && !fullAccess(book) ? {...book,paid:false,debts:{}} : book;
+  }
   function startLocal() {
     local = true; account = null;
     let book = readLocal();
@@ -62,7 +104,7 @@ const Finance = (() => {
       book.months[book.trial]={rev:1,data:emptyMonth()};
       localStorage.setItem(localKey,JSON.stringify(book));
     }
-    return book;
+    return visibleBook(book);
   }
   const configured = Boolean(config.supabaseUrl && config.supabasePublishableKey);
   async function connect() {
@@ -77,7 +119,7 @@ const Finance = (() => {
     if(error) throw new Error(error.message);
     return data;
   }
-  async function load() { return local ? readLocal() : rpc("st_book",{p_month:monthKey()}); }
+  async function load() { return visibleBook(local ? readLocal() : await rpc("st_book",{p_month:monthKey()})); }
   async function openSession() {
     await connect();
     const {data,error}=await client.auth.getSession();
@@ -107,7 +149,8 @@ const Finance = (() => {
     if(!local) return rpc("st_save",{p_kind:kind,p_key:key,p_revision:rev,p_data:data});
     const write = () => {
       const b=readLocal();
-      if(kind==="months" && !b.paid && key!==b.trial) throw new Error("MONTH_LIMIT");
+      if(kind==="debts" && !fullAccess(b)) throw new Error("SUBSCRIPTION_REQUIRED");
+      if(kind==="months" && !fullAccess(b) && key!==b.trial) throw new Error("MONTH_LIMIT");
       if((b[kind][key]?.rev || 0)!==rev) throw new Error("STALE_VERSION");
       const record={rev:rev+1,data};
       b[kind][key]=record;
@@ -121,6 +164,7 @@ const Finance = (() => {
     if (!local) return rpc("st_delete_debt", {p_key:key, p_revision:rev});
     const write = () => {
       const b = readLocal();
+      if (!fullAccess(b)) throw new Error("SUBSCRIPTION_REQUIRED");
       if (b.debts[key]?.rev !== rev) throw new Error("STALE_VERSION");
       delete b.debts[key];
       localStorage.setItem(localKey, JSON.stringify(b));
@@ -128,7 +172,7 @@ const Finance = (() => {
     return navigator.locks ? navigator.locks.request(localKey, write) : write();
   }
   async function grantMember(member,years){return rpc("st_grant_member",{p_member:member,p_years:years});}
-  return {configured, members, grantMember, startLocal, load, openSession, observeSession, authenticate, leave, save, deleteDebt,
-    monthKey,dateKey,dateOf,nextMonth,emptyMonth,totals,allocated,balance,installments,
+  return {configured, fullAccess, members, grantMember, startLocal, load, openSession, observeSession, authenticate, leave, save, deleteDebt,
+    monthKey,dateKey,dateOf,nextMonth,emptyMonth,totals,allocated,balance,installments,calendarPayments,dueForPeriod,
     get local(){return local;},get email(){return account?.email || "";}};
 })();

@@ -106,7 +106,8 @@ body.month-open {
   .sheet-day .mobile-day-info {display:flex;gap:5px;align-items:center}
   .mobile-day-info > span {min-width:0;overflow:hidden;text-overflow:ellipsis}
   .mobile-day-info > span:empty {display:none}
-  .mobile-day-payment {color:#765017;background:#fff1d6;padding-inline:3px;border-radius:2px}
+  .mobile-day-payment {color:#765017}
+  .mobile-day-payment .payment-badge:not(.paid) {background:#fff1d6}
   .mobile-day-note:has(+ .mobile-day-payment:not(:empty)) {max-width:48%}
   .sheet-day .mobile-day-net {display:block}
 }
@@ -287,3 +288,11 @@ body.month-open {
   #editor .field > span, #editor .entry-source > label {margin-bottom:5px}
   #editor form .form-actions {margin-top:10px}
 }
+
+.payment-badge {padding-inline:3px;border-radius:2px}
+.payment-badge.paid {color:#294b36;background:var(--done)}
+.day-payments {list-style:none;margin:6px 0 12px;padding:0}
+.day-payments li {padding:9px;border-bottom:1px solid var(--rule);overflow-wrap:anywhere}
+.day-payments li > small {display:block;margin:3px 0;color:var(--soft)}
+.payment-mark {display:flex;gap:8px;align-items:center;padding-block:3px;font-size:.87rem}
+.payment-mark .check {flex:none}

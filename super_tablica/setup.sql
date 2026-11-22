@@ -62,7 +62,7 @@ begin
     values(u,'months',a.trial,1,'{"entries":[],"goals":[{"name":"Подушка","rate":20}]}') on conflict do nothing;
   select coalesce(jsonb_object_agg(key,jsonb_build_object('rev',rev,'data',data)) filter(where kind='months'),'{}'),
          coalesce(jsonb_object_agg(key,jsonb_build_object('rev',rev,'data',data)) filter(where kind='debts'),'{}')
-    into m,d from st_private.records where owner=u;
+    into m,d from st_private.records where owner=u and (kind='months' or st_private.has_access(a));
   return jsonb_build_object('paid',st_private.has_access(a),'manager',st_private.is_manager(),'paid_until',a.paid_until,'trial',a.trial,'months',m,'debts',d);
 end $$;
 
@@ -85,6 +85,7 @@ begin
     if exists(select 1 from jsonb_array_elements(p_data->'entries') e where (e->>'day') is null
         or (e->>'day') !~ '^[1-9][0-9]?$' or (e->>'day')::integer > last_day) then raise exception 'BAD_DAY'; end if;
   elsif p_kind='debts' then
+    if not st_private.has_access(a) then raise exception 'SUBSCRIPTION_REQUIRED'; end if;
     if p_key is null or p_key !~ '^[0-9a-f-]{36}$' or jsonb_typeof(p_data->'payments') is distinct from 'array'
       then raise exception 'BAD_DEBT'; end if;
   else raise exception 'BAD_KIND'; end if;
@@ -105,8 +106,11 @@ create or replace function public.st_delete_debt(p_key text, p_revision integer)
 returns void language plpgsql security definer set search_path = '' as $$
 declare
   u uuid := auth.uid();
+  a st_private.accounts%rowtype;
 begin
   if u is null then raise exception 'AUTH_REQUIRED'; end if;
+  select * into a from st_private.accounts where owner=u for update;
+  if not coalesce(st_private.has_access(a),false) then raise exception 'SUBSCRIPTION_REQUIRED'; end if;
   delete from st_private.records
     where owner=u and kind='debts' and key=p_key and rev=p_revision;
   if not found then raise exception 'STALE_VERSION'; end if;
