@@ -290,10 +290,11 @@ body.month-open {
 }
 
 .payment-badge {padding-inline:3px;border-radius:2px}
-.payment-badge.paid {color:#294b36;background:var(--done)}
+.payment-badge.paid {color:#237236;background:transparent}
 .day-payments {list-style:none;margin:6px 0 12px;padding:0}
 .day-payments li {padding:2px 0;border-bottom:1px solid var(--rule)}
-.day-payment-row {display:block;width:100%;min-height:44px;padding:9px;text-align:left;border-radius:5px;overflow-wrap:anywhere}
+.day-payment-row {display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:9px;text-align:left;border-radius:5px;overflow-wrap:anywhere}
 .day-payment-row[aria-pressed=true] {background:var(--done);color:#294b36}
+.day-payment-row .check {flex:none}
 .day-payment-row small {display:block;margin:3px 0;color:var(--soft)}
 .day-payment-row[aria-pressed=true] small {color:inherit}

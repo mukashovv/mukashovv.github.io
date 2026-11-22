@@ -163,7 +163,8 @@ function dayDetail(day){
        unpaidAmount?"К оплате "+money(unpaidAmount):""].filter(Boolean).join(" · ");
      const attrs='data-key="'+esc(r.key)+'" data-day="'+day+'" data-token="'+esc(token)+'" aria-pressed="'+r.done+
        '" title="'+(r.done?"Снять отметку об оплате":"Отметить оплату")+'"';
-     return '<li>'+button("check-installment",'<strong>'+esc(r.name)+'</strong><small>'+esc(caption)+'</small>',
+     return '<li>'+button("check-installment",'<span class="check" aria-hidden="true">'+(r.done?icon("check"):"")+'</span>'+
+       '<span><strong>'+esc(r.name)+'</strong><small>'+esc(caption)+'</small></span>',
        "day-payment-row",attrs)+'</li>';
    }).join("")+'</ul>':"")+
    '<ul class="day-entries">'+rows+'</ul><div class="form-actions">'+button("entry",icon("plus")+"Добавить запись","primary",'data-day="'+day+'"')+'</div>');
@@ -359,13 +360,13 @@ function paymentCheck(payment,attrs){
 function paymentHistory(){
  const rows=[];
  for(const [key,{data}] of Object.entries(book.debts)){
-   for(const p of data.payments)rows.push({key,name:data.name,p});
+   for(const p of data.payments)if(p.done)rows.push({key,name:data.name,p});
  }
  rows.sort((a,b)=>b.p.date.localeCompare(a.p.date));
  modal("История платежей",rows.length?'<ul class="payments">'+rows.map(({key,name,p})=>
-   '<li class="'+(p.done?"paid":"")+'">'+paymentCheck(p,'data-key="'+esc(key)+'" data-history="1"')+
+   '<li class="paid">'+paymentCheck(p,'data-key="'+esc(key)+'" data-history="1"')+
    '<span>'+esc(name)+'<small>'+displayDate(p.date)+(p.period?' · за '+esc(monthName(p.period)):'')+
-   ' · '+(p.done?"Внесено":"Без отметки")+'</small></span><b>'+money(p.amount)+'</b></li>').join("")+'</ul>':'<p class="muted">Пока нет записанных платежей.</p>');
+   '</small></span><b>'+money(p.amount)+'</b></li>').join("")+'</ul>':'<p class="muted">Пока нет внесённых платежей.</p>');
 }
 function detail(key){
  const rec=book.debts[key],d=rec.data; editKey=key;editRev=rec.rev;
