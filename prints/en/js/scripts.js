@@ -921,7 +921,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (scrollLeft) waypoint.querySelector(".filter-waypoint__inner").scrollLeft = scrollLeft;
     };
 
+    let aboutOwner;
+    const showArtistAbout = (owner) => {
+        if (owner === aboutOwner) return;
+        aboutOwner = owner;
+        import("../../build/js/artist-data.js").then(({ renderArtistAbout }) => {
+            if (owner === aboutOwner) renderArtistAbout(document.querySelector("[data-artist-about]"), owner);
+        }).catch(() => {});
+    };
+
     const renderCatalogGrid = (state) => {
+        showArtistAbout(publicArtist?.artistId || state.artistId);
         const grid = document.querySelector("#printsGrid");
         const results = document.querySelector("#catalogResults");
 
@@ -1239,6 +1249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const slug = params.get("slug");
         const requestedSizeId = params.get("size");
         const product = getProductBySlug(slug);
+        if (product?.slug === slug) showArtistAbout(product.artistId);
         const gallery = document.querySelector("#productGallery");
         const summary = document.querySelector("#productSummary");
         const footerMenu = document.querySelector("#productFooterMenu");

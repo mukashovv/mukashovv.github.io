@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="build/css/styles.css">
     <link rel="stylesheet" href="build/css/artists.css">
     <script src="build/js/data.js"></script>
-    <script type="module" src="build/js/artists.js?v=5"></script>
+    <script type="module" src="build/js/artists.js?v=7"></script>
     <script type="module" src="build/js/profile-menu.js"></script>
 </head>
 <body>
@@ -66,6 +66,13 @@
                     <label>Имя художника или псевдоним <input name="artist_name" maxlength="80" required></label>
                     <label>Город <input name="city" maxlength="80" autocomplete="address-level2" required></label>
                     <label>WhatsApp <input name="whatsapp" type="tel" autocomplete="tel" placeholder="+996 700 123 456" maxlength="25" required></label>
+                    <label>Фото автора <input name="portrait" type="file" accept="image/jpeg,image/png,image/webp">
+                        <small>Публичный портрет. До 280 px по длинной стороне.</small>
+                    </label>
+                    <img id="artist-portrait" width="96" alt="Ваш портрет" hidden>
+                    <label>Об авторе <textarea name="bio" maxlength="2000" rows="5" placeholder="Расскажите о себе, своих темах и технике."></textarea>
+                        <small>Этот текст увидят посетители галереи.</small>
+                    </label>
                     <label>Короткий адрес профиля
                         <span class="artist-profile-address">
                             <span aria-hidden="true">mukashov.com/</span>

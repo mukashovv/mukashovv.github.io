@@ -145,3 +145,44 @@ export async function orderPhone(product) {
     if (!phone && (product.isArtistWork || product.artistId)) throw new Error("Missing artist phone");
     return phone;
 }
+
+export function portraitUrl(owner, version) {
+    return projectUrl + "/storage/v1/object/public/prints-portraits/" + encodeURIComponent(owner)
+        + "?v=" + encodeURIComponent(version);
+}
+
+export async function renderArtistAbout(section, owner) {
+    if (!section || section.dataset.owner === owner) return;
+    section.dataset.owner = owner || "";
+    section.replaceChildren();
+    section.hidden = true;
+    if (!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(owner)) return;
+    try {
+        const client = await createPrintsClient();
+        const info = unwrap(await client.rpc("prints_artist_about", { author_id: owner })
+            .abortSignal(AbortSignal.timeout(8000)));
+        if (section.dataset.owner !== owner || (!info?.bio && !info?.version)) return;
+        const copy = document.createElement("div");
+        const heading = document.createElement("h2");
+        heading.textContent = document.documentElement.lang === "en" ? "About the artist" : "Об авторе";
+        const name = document.createElement("strong");
+        name.textContent = info.name;
+        copy.append(heading, name);
+        if (info.bio) {
+            const bio = document.createElement("p");
+            bio.textContent = info.bio;
+            copy.append(bio);
+        }
+        if (info.version) {
+            const img = document.createElement("img");
+            img.src = portraitUrl(owner, info.version);
+            img.loading = "lazy";
+            img.alt = info.name;
+            section.append(img);
+        }
+        section.append(copy);
+        section.hidden = false;
+    } catch {
+        if (section.dataset.owner === owner) delete section.dataset.owner;
+    }
+}

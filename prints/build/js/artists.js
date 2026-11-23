@@ -1,5 +1,5 @@
-import { applyCatalogueAssignment, createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, unwrap } from "./artist-data.js";
-import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js?v=4";
+import { applyCatalogueAssignment, createPrintsClient, fetchWorks, loadCatalogArtistAssignments, photoPath, portraitUrl, unwrap } from "./artist-data.js";
+import { PhotoPreparationError, photoTypes, preparePhoto } from "./image-compression.js?v=5";
 
 const slugCooldownMs = 14 * 24 * 60 * 60 * 1000;
 const authForm = document.querySelector("#artist-auth");
@@ -99,6 +99,7 @@ function initDashboard(client, storage) {
     authForm.querySelector("button").textContent = isRegistration ? "Получить ссылку для регистрации" : "Получить ссылку для входа";
     authPanel.querySelector(`[data-auth-mode="${authMode}"]`).setAttribute("aria-current", "page");
     const profileForm = document.querySelector("#artist-profile-form");
+    const portraitImage = document.querySelector("#artist-portrait");
     const addressInput = profileForm.elements.namedItem("profile_slug");
     const addressHint = document.querySelector("#artist-address-hint");
     const profileLink = document.querySelector("#artist-profile-link");
@@ -135,7 +136,7 @@ function initDashboard(client, storage) {
 
     async function loadProfile(owner) {
         const saved = unwrap(await client.from("prints_artist_profiles")
-            .select("artist_name,city,whatsapp,profile_slug,profile_slug_changed_at").eq("artist_id", owner).maybeSingle());
+            .select("artist_name,city,whatsapp,profile_slug,profile_slug_changed_at,bio,portrait_version").eq("artist_id", owner).maybeSingle());
         if (owner !== userId) return;
         profile = saved;
         if (saved) {
@@ -143,6 +144,9 @@ function initDashboard(client, storage) {
                 profileForm.elements.namedItem(field).value = saved[field];
             }
         }
+        profileForm.elements.bio.value = saved?.bio || "";
+        portraitImage.hidden = !saved?.portrait_version;
+        if (saved?.portrait_version) portraitImage.src = portraitUrl(owner, saved.portrait_version);
         addressInput.value = saved?.profile_slug || "";
         const availableAt = Date.parse(saved?.profile_slug_changed_at) + slugCooldownMs;
         addressInput.disabled = availableAt > Date.now();
@@ -425,7 +429,7 @@ function initDashboard(client, storage) {
                 setStatus("Укажите имя, город и номер WhatsApp в международном формате, например +996 700 123 456.");
                 return;
             }
-            const details = { artist_id: owner, artist_name, city, whatsapp };
+            const details = { artist_id: owner, artist_name, city, whatsapp, bio: fields.get("bio").trim() };
             if (fields.has("profile_slug")) {
                 const slug = fields.get("profile_slug").trim().toLowerCase();
                 if (slug && !/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(slug)) {
@@ -434,6 +438,9 @@ function initDashboard(client, storage) {
                 }
                 details.profile_slug = slug || null;
             }
+            const portrait = fields.get("portrait");
+            const prepared = portrait?.size ? await preparePhoto(portrait, { maxEdge: 280 }) : null;
+            if (owner !== userId) return;
             const response = await client.from("prints_artist_profiles").upsert(details);
             if (response.error?.code === "23505" || response.error?.code === "23514") {
                 setStatus("Этот адрес недоступен. Выберите другой.");
@@ -448,6 +455,20 @@ function initDashboard(client, storage) {
             }
             unwrap(response);
             if (owner !== userId) return;
+            if (prepared) {
+                setStatus("Загружаем портрет…");
+                try {
+                    unwrap(await client.storage.from("prints-portraits").upload(owner, prepared.blob,
+                        { upsert: true, contentType: prepared.blob.type, cacheControl: "0" }));
+                    unwrap(await client.from("prints_artist_profiles").update({ portrait_version: crypto.randomUUID() })
+                        .eq("artist_id", owner).select("artist_id").single());
+                } catch {
+                    setStatus("Текст профиля сохранён. Не удалось подтвердить сохранение портрета. Попробуйте ещё раз.");
+                    return;
+                }
+                if (owner !== userId) return;
+                profileForm.elements.portrait.value = "";
+            }
             await loadProfile(owner);
             if (owner !== userId) return;
             const nextSection = requestedSection() === "new-work" ? "new-work" : "works";
@@ -506,6 +527,8 @@ function initDashboard(client, storage) {
         email.textContent = session?.user.email || "";
         worksList.replaceChildren();
         profile = null;
+        portraitImage.hidden = true;
+        portraitImage.removeAttribute("src");
         profileForm.reset();
         workForm.reset();
         syncNewOffer();

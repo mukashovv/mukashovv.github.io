@@ -53,8 +53,7 @@ async function measureOutput(blob, maxEdge) {
     }
 }
 
-export async function preparePhoto(photo, { interior = false } = {}) {
-    const maxEdge = interior ? 1120 : 700;
+export async function preparePhoto(photo, { interior = false, maxEdge = interior ? 1120 : 700 } = {}) {
     if (!photo?.size || !photoTypes.includes(photo.type)) {
         throw new PhotoPreparationError("Выберите изображение JPEG, PNG или WebP.");
     }

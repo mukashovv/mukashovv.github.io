@@ -1937,3 +1937,10 @@ select {
     .gallery-feature[data-layout="edition"] .gallery-feature__works { height: auto; }
     .gallery-feature[data-layout="edition"] .gallery-feature__copy { grid-area: 2 / 1; }
 }
+
+.artist-about:not([hidden]) { display: flex; flex-direction: column; align-items: center; gap: clamp(16px, 4vw, 48px); padding-block: 40px; border-top: 1px solid #dedbd6; }
+.artist-about img { width: min(100%, 212px); height: auto; aspect-ratio: 1; border-radius: 50%; object-fit: cover; }
+.artist-about h2 { margin: 0 0 12px; }
+.artist-about p { max-width: 64ch; white-space: pre-line; overflow-wrap: anywhere; line-height: 1.65; }
+.artist-about > div { text-align: center; }
+.artist-about p { text-align: start; }
