@@ -61,11 +61,28 @@ function mountOfferFields(container, work = {}) {
         }
     }
 
+    for (const kind of kinds) {
+        const picker = container.querySelector(`[name="${kind}_size"]`);
+        const sizes = window.printsShared.sizes;
+        for (const size of sizes) picker.add(new Option(size.label, size.id), picker.options.length - 1);
+        const width = work[`${kind}_width`];
+        const height = work[`${kind}_height`];
+        if (width && height) {
+            const id = `${width}x${height}`;
+            picker.value = sizes.some(size => size.id === id) ? id : "custom";
+        }
+        picker.addEventListener("change", sync);
+    }
+
     function sync() {
         for (const fieldset of container.querySelectorAll("[data-offer-kind]")) {
             const enabled = select.value === "both" || select.value === fieldset.dataset.offerKind;
             fieldset.hidden = !enabled;
             fieldset.disabled = !enabled;
+            const custom = fieldset.querySelector("[data-size-selector]").value === "custom";
+            const dimensions = fieldset.querySelector("[data-dimensions]");
+            dimensions.hidden = !custom;
+            for (const input of dimensions.querySelectorAll("input")) input.disabled = !custom;
         }
     }
 
@@ -79,7 +96,17 @@ function readOfferFields(formData) {
         const value = formData.get(name);
         return value == null || value === "" ? null : Number(value);
     };
+    const dimensions = {};
+    for (const kind of ["original", "print"]) {
+        const selected = formData.get(`${kind}_size`);
+        const [width, height] = selected === "custom"
+            ? [number(`${kind}_width`), number(`${kind}_height`)]
+            : selected ? selected.split("x").map(Number) : [null, null];
+        dimensions[`${kind}_width`] = width;
+        dimensions[`${kind}_height`] = height;
+    }
     return {
+        ...dimensions,
         original_price: number("original_price"),
         original_sold: formData.has("original_sold"),
         print_price: number("print_price"),

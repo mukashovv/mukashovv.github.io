@@ -316,12 +316,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         productViewportEventsBound = true;
     };
 
+    const offerSize = (offer) => {
+        if (!offer?.width || !offer.height) return null;
+        const id = `${Number(offer.width)}x${Number(offer.height)}`;
+        const shortLabel = `${Number(offer.width)} × ${Number(offer.height)}`;
+        return findSize(id) || { id, shortLabel, label: `${shortLabel} cm`, note: "" };
+    };
+
     const orderDetails = (item) => {
         const product = catalog.find((work) => work.slug === item.slug);
         if (!product) return null;
-        const size = findSize(item.sizeId) || findSize(defaultSizeId);
         const frame = findFrame(item.frameId) || findFrame(defaultFrameId);
         const offer = product.offers?.find((entry) => entry.type === item.offerType);
+        const size = offerSize(offer) || findSize(item.sizeId) || findSize(defaultSizeId);
         const unitPrice = product.isArtistWork ? (offer?.price ?? 0)
             : getBasePrice(product, item.sizeId) + (frame?.surcharge || 0);
 
@@ -1204,6 +1211,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         const frameSelect = summary.querySelector("[data-role='frame-select']");
         const sizeHint = summary.querySelector("[data-role='size-hint']");
         const frameHint = summary.querySelector("[data-role='frame-hint']");
+        const syncOfferSize = () => {
+            const offer = offers.find(entry => entry.type === offerSelector?.value) || initialOffer;
+            const fixed = offerSize(offer);
+            const choices = fixed ? [fixed] : shared.sizes;
+            const previous = sizeSelect.value;
+            sizeSelect.replaceChildren(...choices.map(size => new Option(size.label, size.id)));
+            sizeSelect.value = fixed?.id || (findSize(previous)?.id ?? initialSizeId);
+            sizeHint.textContent = findSize(sizeSelect.value)?.note || "";
+        };
+        syncOfferSize();
+        offerSelector?.addEventListener("change", syncOfferSize);
         const updateSize = (sizeId) => {
             sizeHint.textContent = findSize(sizeId)?.note || "";
         };
@@ -1231,7 +1249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             updateFrame(frameSelect.value);
         });
         bindFrameSwatches(summary, frameSelect);
-        updateSize(initialSizeId);
+        updateSize(sizeSelect.value);
         updateFrame(defaultFrameId);
         const profileLink = summary.querySelector("[data-author-profile]");
         import("../../build/js/artist-data.js").then(async ({ loadPublicArtistProfile }) => {

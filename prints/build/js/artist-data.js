@@ -2,7 +2,7 @@ import { projectUrl, publishableKey } from "./supabase-config.js";
 
 const artworkFields = "id,artist_id,artist_name,city,title,description,is_published,created_at";
 const categoryFields = artworkFields + ",category,orientation";
-const offerFields = categoryFields + ",original_price,original_sold,print_price,print_stock";
+const offerFields = categoryFields + ",original_price,original_sold,original_width,original_height,print_price,print_stock,print_width,print_height";
 export const photoPath = (work, interior = false) =>
     `${work.artist_id}/${work.id}${interior ? "-interior" : ""}`;
 
@@ -79,6 +79,8 @@ export async function fetchWorks(client, { owner, signal } = {}) {
 function publicOffers(work) {
     return ["original", "print"].filter((type) => work[`${type}_price`] != null).map((type) => ({
         type,
+        width: work[`${type}_width`],
+        height: work[`${type}_height`],
         price: work[`${type}_price`],
         available: type === "original" ? !work.original_sold : work.print_stock !== 0,
         stock: type === "print" ? work.print_stock : null
