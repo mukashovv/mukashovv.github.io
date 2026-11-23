@@ -96,7 +96,13 @@ function initDashboard(client, storage) {
     const isRegistration = authMode === "register";
     const authTitle = document.querySelector("#artist-auth-title");
     authTitle.textContent = isRegistration ? "Регистрация" : "Вход в кабинет";
-    authForm.querySelector("button").textContent = isRegistration ? "Получить ссылку для регистрации" : "Получить ссылку для входа";
+    if (isRegistration) {
+        authForm.elements.password.disabled = true;
+        document.querySelector("#login-password").hidden = true;
+        authForm.querySelector('[value="password"]').hidden = true;
+        authForm.querySelector('[value="recover"]').hidden = true;
+        authForm.querySelector('[value="link"]').textContent = "Получить ссылку для регистрации";
+    }
     authPanel.querySelector(`[data-auth-mode="${authMode}"]`).setAttribute("aria-current", "page");
     const profileForm = document.querySelector("#artist-profile-form");
     const portraitImage = document.querySelector("#artist-portrait");
@@ -407,13 +413,28 @@ function initDashboard(client, storage) {
 
     authForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        run(event.submitter, async () => {
-            unwrap(await client.auth.signInWithOtp({
-                email: new FormData(authForm).get("email").trim(),
+        const action = isRegistration ? "link" : event.submitter?.value || "password";
+        const emailField = authForm.elements.email;
+        if (!emailField.reportValidity()) return;
+        const email = emailField.value.trim();
+        run(event.submitter || authForm.querySelector("button"), async () => {
+            if (action === "password") {
+                unwrap(await client.auth.signInWithPassword({ email, password: authForm.elements.password.value }));
+                authForm.elements.password.value = "";
+                return;
+            }
+            if (action === "recover") {
+                unwrap(await client.auth.resetPasswordForEmail(email, {
+                    redirectTo: new URL("./reset-password.html", callback).href
+                }));
+                setStatus("Если аккаунт существует, на эту почту придёт ссылка для смены пароля.");
+                return;
+            }
+            unwrap(await client.auth.signInWithOtp({ email,
                 options: { emailRedirectTo: callback.href, shouldCreateUser: isRegistration }
             }));
             setStatus("Проверьте почту. Откройте ссылку из письма, чтобы продолжить.");
-        }, "Не удалось отправить ссылку. Проверьте адрес и попробуйте ещё раз.");
+        }, action === "password" ? "Не удалось войти. Проверьте почту и пароль." : "Не удалось отправить письмо. Попробуйте ещё раз.");
     });
 
     profileForm.addEventListener("submit", (event) => {

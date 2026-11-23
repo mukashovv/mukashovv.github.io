@@ -81,10 +81,59 @@ retry.addEventListener("click", () => location.reload());
 
 try {
     const client = await createPrintsClient({ account: true });
+    const form = document.querySelector("#author-account");
+    const result = document.querySelector("#account-result");
+    function updateAccountForm() {
+        const creating = form.elements.actionType.value === "create";
+        for (const key of ["artist_name", "city", "whatsapp"]) {
+            const input = form.elements[key];
+            input.disabled = !creating;
+            input.closest("label").hidden = !creating;
+        }
+        form.querySelector("button").textContent = creating ? "Создать автора" : "Изменить пароль";
+    }
+    form.elements.actionType.addEventListener("change", updateAccountForm);
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+        const button = event.submitter;
+        if (button.disabled) return;
+        const current = generation;
+        const values = Object.fromEntries(new FormData(form));
+        button.disabled = true;
+        result.textContent = "Сохраняем…";
+        try {
+            const { data, error } = await client.functions.invoke("prints-manage-author", { body: {
+                action: values.actionType, name: values.artist_name, city: values.city,
+                whatsapp: values.whatsapp, email: values.email, password: values.password
+            } });
+            if (current !== generation) return;
+            if (error) {
+                const response = await error.context?.json?.().catch(() => null);
+                if (current === generation) result.textContent = response?.message || "Не удалось сохранить. Проверьте подключение и настройки серверной функции.";
+                return;
+            }
+            form.reset();
+            updateAccountForm();
+            result.textContent = data.message;
+            if (values.actionType === "create") {
+                const stats = await client.rpc("prints_admin_statistics");
+                if (current !== generation || stats.error) return;
+                for (const node of [metrics, table, trend, leaders]) node.replaceChildren();
+                render(stats.data);
+            }
+        } catch {
+            if (current === generation) result.textContent = "Не удалось подтвердить результат. Обновите страницу.";
+        } finally {
+            button.disabled = false;
+        }
+    });
     let sessionOwner;
     client.auth.onAuthStateChange((_event, session) => {
         if (session && session.user.id === sessionOwner && !report.hidden) return;
         sessionOwner = session?.user.id;
+        form.reset();
+        updateAccountForm();
+        result.textContent = "";
         resetEditor();
         const current = ++generation;
         report.hidden = true;

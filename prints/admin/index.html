@@ -36,6 +36,19 @@
                 </table>
             </div>
             <section class="feature-editor">
+                <h2>Аккаунты авторов</h2>
+                <form id="author-account">
+                    <label>Действие <select name="actionType"><option value="create">Добавить автора</option><option value="password">Установить новый пароль</option></select></label>
+                    <label>Почта автора <input name="email" type="email" required></label>
+                    <label>Новый пароль <input name="password" type="password" autocomplete="new-password" minlength="10" maxlength="72" required></label>
+                    <label>Имя автора <input name="artist_name" maxlength="80" required></label>
+                    <label>Город <input name="city" maxlength="80" required></label>
+                    <label>WhatsApp <input name="whatsapp" type="tel" placeholder="+996 700 123 456" required></label>
+                    <button>Создать автора</button>
+                </form>
+                <p id="account-result" role="status"></p>
+            </section>
+            <section class="feature-editor">
                 <h2>Первый экран галереи</h2>
                 <p id="feature-status" role="status"></p>
                 <form id="feature-form" hidden>

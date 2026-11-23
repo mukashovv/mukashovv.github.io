@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="build/css/styles.css">
     <link rel="stylesheet" href="build/css/artists.css">
     <script src="build/js/data.js"></script>
-    <script type="module" src="build/js/artists.js?v=7"></script>
+    <script type="module" src="build/js/artists.js?v=8"></script>
     <script type="module" src="build/js/profile-menu.js"></script>
 </head>
 <body>
@@ -48,7 +48,10 @@
             <h2 id="artist-auth-title">Войти</h2>
             <form id="artist-auth" class="artist-form">
                 <label>Электронная почта <input type="email" name="email" autocomplete="email" required></label>
-                <button class="button button--solid">Получить ссылку для входа</button>
+                <label id="login-password">Пароль <input type="password" name="password" autocomplete="current-password" required></label>
+                <button class="button button--solid" value="password">Войти</button>
+                <button class="button button--line" value="link" formnovalidate>Войти по ссылке из письма</button>
+                <button class="button button--line" value="recover" formnovalidate>Забыли пароль?</button>
             </form>
         </section>
         <section id="artist-dashboard" class="artist-dashboard" hidden>
