@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="build/css/styles.css">
     <link rel="stylesheet" href="build/css/artists.css">
     <script src="build/js/data.js"></script>
-    <script type="module" src="build/js/artists.js?v=8"></script>
+    <script type="module" src="build/js/artists.js?v=9"></script>
     <script type="module" src="build/js/profile-menu.js"></script>
 </head>
 <body>
@@ -102,12 +102,13 @@
                     </label>
                     <label>Название работы <input name="title" maxlength="120" required></label>
                     <label>Описание <textarea name="description" rows="4" maxlength="2000"></textarea></label>
-                    <label>Фото работы (JPEG, PNG или WebP)
-                        <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+                    <label>Фото работ (до 50 файлов JPEG, PNG или WebP)
+                        <input name="photo" multiple type="file" accept="image/jpeg,image/png,image/webp" required>
                     </label>
                     <label>Фото работы в интерьере (необязательно)
                         <input name="interior" type="file" accept="image/jpeg,image/png,image/webp">
                     </label>
+                    <p id="upload-batch-note" hidden>Каждый файл станет отдельной работой с названием из имени файла. Категория, описание и условия продажи применятся ко всей партии.</p>
                     <p>Фото работы — до 700 px по длинной стороне, фото в интерьере — до 1120 px.</p>
                     <div data-offer-fields></div>
                     <button class="button button--solid">Сохранить черновик</button>
@@ -116,7 +117,15 @@
             <section class="artist-surface" data-artist-panel="works" aria-labelledby="my-artworks-title" hidden>
                 <div class="artist-works-header">
                     <h2 id="my-artworks-title">Мои работы</h2>
-                    <a class="button button--solid" href="#new-work">Добавить работу</a>
+                    <div class="works-tools"><a href="#new-work">Добавить работу</a>
+                        <div role="group" aria-label="Вид работ"><button type="button" data-layout="grid">Сетка</button>
+                        <button type="button" data-layout="list">Список</button></div></div>
+                </div>
+                <div class="works-tools" id="batch-tools" hidden>
+                    <label><input type="checkbox" id="select-all-works"> Выбрать все</label>
+                    <span id="selected-count"></span>
+                    <button type="button" data-publish="yes">Опубликовать</button>
+                    <button type="button" data-publish="no">Скрыть</button>
                 </div>
                 <p id="artist-works-status" role="status"></p>
                 <div id="artist-works" class="artist-grid"></div>

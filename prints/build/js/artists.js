@@ -193,9 +193,54 @@ function initDashboard(client, storage) {
     }
 
     async function uploadPhoto(work, { blob, width, height }, interior = false) {
-        unwrap(await storage.upload(photoPath(work, interior), blob, { contentType: blob.type, upsert: interior }));
+        if (!interior && work.imageUrl) {
+            unwrap(await storage.update(photoPath(work), blob, { contentType: blob.type, cacheControl: "0" }));
+        } else unwrap(await storage.upload(photoPath(work, interior), blob, { contentType: blob.type, upsert: interior }));
         return `${width} × ${height} пикс., ${Math.ceil(blob.size / 1024)} КБ`;
     }
+
+    const layoutButtons = dashboard.querySelectorAll("[data-layout]");
+    function setLayout(value) {
+        worksList.dataset.layout = value;
+        for (const button of layoutButtons) button.setAttribute("aria-pressed", String(button.dataset.layout === value));
+    }
+    setLayout(localStorage.getItem("prints-works-layout") === "list" ? "list" : "grid");
+    for (const button of layoutButtons) button.onclick = () => {
+        setLayout(button.dataset.layout);
+        localStorage.setItem("prints-works-layout", button.dataset.layout);
+    };
+    const batchTools = document.querySelector("#batch-tools");
+    const selectAll = document.querySelector("#select-all-works");
+    const boxes = () => Array.from(worksList.querySelectorAll("[data-work-select]"));
+    function updateSelection() {
+        const all = boxes();
+        const selected = all.filter(box => box.checked);
+        batchTools.hidden = !all.length;
+        selectAll.checked = all.length > 0 && selected.length === all.length;
+        selectAll.indeterminate = selected.length > 0 && !selectAll.checked;
+        document.querySelector("#selected-count").textContent = selected.length ? `Выбрано: ${selected.length}` : "";
+        for (const button of batchTools.querySelectorAll("button")) button.disabled = !selected.length;
+    }
+    selectAll.onchange = () => {
+        for (const box of boxes()) box.checked = selectAll.checked;
+        updateSelection();
+    };
+    for (const button of batchTools.querySelectorAll("button")) button.onclick = () => run(button, async () => {
+        const owner = userId;
+        const publish = button.dataset.publish === "yes";
+        const selected = boxes().filter(box => box.checked);
+        const ids = selected.filter(box => !publish || box.dataset.ready === "true").map(box => box.value);
+        let count = 0;
+        for (let i = 0; i < ids.length && owner === userId; i += 50) {
+            const rows = unwrap(await client.from("prints_artworks").update({ is_published: publish })
+                .eq("artist_id", owner).in("id", ids.slice(i, i + 50)).select("id"));
+            count += rows.length;
+        }
+        if (owner !== userId) return;
+        setStatus(`Обработано: ${count} из ${selected.length}.` + (ids.length < selected.length ? " Для публикации нужны фото, категория и цена." : ""));
+        await refreshWorks(owner);
+        queueMicrotask(updateSelection);
+    }, "Не удалось обработать все работы. Обновите список и проверьте статусы.");
 
     async function refreshWorks(owner) {
         try {
@@ -210,6 +255,7 @@ function initDashboard(client, storage) {
                 .map((work) => applyCatalogueAssignment(work, assigned.get(work.slug)));
             worksStatus.textContent = entries.length || catalogueWorks.length ? "" : "У вас пока нет работ.";
             worksList.replaceChildren(...entries.map(dashboardCard), ...catalogueWorks.map(catalogueCard));
+            updateSelection();
         } catch {
             if (owner === userId) worksStatus.textContent = "Не удалось обновить список работ. Перезагрузите страницу.";
         }
@@ -232,7 +278,7 @@ function initDashboard(client, storage) {
     function catalogueCard(work) {
         const card = workCard({ ...work, imageUrl: work.image, artist_name: work.artist, city: profile?.city || "" });
         const status = element("p", "Опубликовано в основном каталоге", "artist-card__status");
-        const link = element("a", "Открыть страницу работы", "button button--line");
+        const link = element("a", "Открыть", "button button--line");
         link.href = `./product.html?slug=${encodeURIComponent(work.slug)}`;
         card.append(status, link);
         if (!work.canEditCatalogue) return card;
@@ -255,7 +301,7 @@ function initDashboard(client, storage) {
         }
         const save = element("button", "Сохранить изменения", "button button--line");
         editForm.append(save);
-        editor.append(element("summary", "Редактировать работу"), editForm);
+        editor.append(element("summary", "Изменить"), editForm);
         card.append(editor);
 
         editForm.addEventListener("submit", (event) => {
@@ -285,24 +331,32 @@ function initDashboard(client, storage) {
 
     function dashboardCard(work) {
         const card = workCard(work);
+        const box = element("input");
+        box.type = "checkbox";
+        box.value = work.id;
+        box.dataset.workSelect = "";
+        box.dataset.ready = String(Boolean(work.imageUrl && work.category && (work.original_price != null || work.print_price != null)));
+        box.setAttribute("aria-label", "Выбрать " + work.title);
+        box.onchange = updateSelection;
+        card.prepend(box);
         card.append(element("p", work.is_published ? "Опубликовано" : "Черновик", "artist-card__status"));
         const actions = element("div", "", "artist-card__actions");
         const editor = element("details", "", "artwork-offer-editor");
-        editor.append(element("summary", "Редактировать работу"));
+        editor.append(element("summary", "Изменить"));
         if (work.is_published) {
-            const link = element("a", "Открыть страницу работы", "button button--line");
+            const link = element("a", "Открыть", "button button--line");
             link.href = `./product.html?slug=artist-${work.id}`;
             actions.append(link);
         }
 
         function photoForm(interior) {
             const form = element("form", "", "artist-form");
-            const label = element("label", interior ? "Фото в интерьере" : "Загрузите фото работы");
+            const label = element("label", interior ? "Фото в интерьере" : "Основное фото");
             const input = element("input");
             input.type = "file";
             input.accept = photoTypes.join(",");
             input.required = true;
-            const button = element("button", interior && work.interiorUrl ? "Заменить фото в интерьере" : "Загрузить фото", "button button--solid");
+            const button = element("button", (interior ? work.interiorUrl : work.imageUrl) ? "Заменить фото" : "Загрузить фото", "button button--solid");
             label.append(input);
             form.append(label, button);
             form.addEventListener("submit", (event) => {
@@ -312,12 +366,12 @@ function initDashboard(client, storage) {
                     const photo = await preparePhoto(input.files[0], { interior });
                     if (work.artist_id !== userId) return;
                     try {
+                        setStatus("Загружаем изображение…");
+                        const size = await uploadPhoto(work, photo, interior);
                         if (!interior) {
                             unwrap(await client.from("prints_artworks")
                                 .update({ orientation: photo.orientation }).eq("id", work.id));
                         }
-                        setStatus("Загружаем изображение…");
-                        const size = await uploadPhoto(work, photo, interior);
                         setStatus(`Фото загружено · ${size}.`);
                     } finally {
                         await refreshWorks(work.artist_id);
@@ -327,7 +381,7 @@ function initDashboard(client, storage) {
             return form;
         }
 
-        if (!work.imageUrl) editor.append(photoForm(false));
+        editor.append(photoForm(false));
         if (work.imageUrl || work.interiorUrl) editor.append(photoForm(true));
 
         const editForm = artworkDetailsForm(work);
@@ -384,7 +438,7 @@ function initDashboard(client, storage) {
             }, "Не удалось изменить статус работы. Попробуйте ещё раз."));
             actions.append(button);
         }
-        const remove = element("button", "Удалить работу", "button button--line");
+        const remove = element("button", "Удалить", "button button--line");
         remove.type = "button";
         const confirmation = element("div", "", "artist-card__actions");
         confirmation.hidden = true;
@@ -527,41 +581,57 @@ function initDashboard(client, storage) {
         }, "Не удалось сохранить профиль. Попробуйте ещё раз.");
     });
 
+    function syncUploadFields() {
+        const count = workForm.elements.photo.files.length;
+        workForm.elements.photo.setCustomValidity(count > 50 ? "Выберите не более 50 файлов." : "");
+        for (const field of [workForm.elements.title, workForm.elements.interior]) {
+            field.disabled = count > 1;
+            field.closest("label").hidden = count > 1;
+        }
+        document.querySelector("#upload-batch-note").hidden = count < 2;
+    }
+    workForm.elements.photo.onchange = syncUploadFields;
     workForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const owner = userId;
-        const formData = new FormData(workForm);
-        const photo = formData.get("photo");
-        const interior = formData.get("interior");
-        const details = Object.fromEntries(["title", "description", "category"]
-            .map((field) => [field, formData.get(field).trim()]));
+        const fields = new FormData(workForm);
+        const files = fields.getAll("photo");
+        if (!profile || !files.length || files.length > 50) return;
+        const details = { category: fields.get("category"), description: fields.get("description").trim(), ...readOfferFields(fields) };
+        const interior = fields.get("interior");
         run(event.submitter, async () => {
-            if (!profile || !details.title || !details.category) {
-                setStatus("Сохраните профиль и заполните название и категорию работы.");
-                return;
-            }
-            setStatus("Подготавливаем изображения…");
-            const preparedPhoto = await preparePhoto(photo);
-            const preparedInterior = interior?.size ? await preparePhoto(interior, { interior: true }) : null;
-            details.orientation = preparedPhoto.orientation;
-            if (owner !== userId) return;
-            setStatus("Загружаем изображения…");
-            const work = unwrap(await client.from("prints_artworks").insert({ ...details, ...readOfferFields(formData) })
-                .select("id,artist_id").single());
-            workForm.reset();
-            syncNewOffer();
-            try {
-                const sizes = [`Работа · ${await uploadPhoto(work, preparedPhoto)}`];
-                if (preparedInterior) sizes.push(`Интерьер · ${await uploadPhoto(work, preparedInterior, true)}`);
-                setStatus(`Черновик сохранён. ${sizes.join(". ")}. Теперь его можно опубликовать.`);
-            } finally {
-                if (owner === userId) {
-                    window.history.replaceState(null, "", "#works");
-                    showSection("works");
-                    await refreshWorks(owner);
+            const failures = [];
+            let completed = 0;
+            for (const [index, file] of files.entries()) {
+                if (owner !== userId) return;
+                setStatus(`Обработка ${index + 1} из ${files.length}: ${file.name}`);
+                let work;
+                try {
+                    const title = files.length === 1 ? fields.get("title").trim()
+                        : file.name.replace(/\.[^.]+$/, "").trim().slice(0, 120) || `Работа ${index + 1}`;
+                    const photo = await preparePhoto(file);
+                    const room = interior?.size ? await preparePhoto(interior, { interior: true }) : null;
+                    if (owner !== userId) return;
+                    work = unwrap(await client.from("prints_artworks").insert({ ...details, title, orientation: photo.orientation })
+                        .select("id,artist_id").single());
+                    await uploadPhoto(work, photo);
+                    if (room) await uploadPhoto(work, room, true);
+                    completed++;
+                } catch {
+                    failures.push(file.name + (work ? " (добавьте фото в сохранённом черновике)" : " (проверьте список перед повтором)"));
                 }
             }
-        }, "Не удалось сохранить работу полностью. Если черновик появился в «Моих работах», недостающие фото можно добавить там.");
+            if (owner !== userId) return;
+            if (completed || files.length > 1) {
+                workForm.reset();
+                syncUploadFields();
+                syncNewOffer();
+                window.history.replaceState(null, "", "#works");
+                showSection("works");
+            }
+            await refreshWorks(owner);
+            setStatus(`Готово: ${completed} из ${files.length}.` + (failures.length ? " Не удалось завершить: " + failures.join(", ") : " Работы сохранены в черновиках."));
+        }, "Не удалось завершить загрузку. Проверьте список работ.");
     });
 
     const authError = new URLSearchParams(window.location.hash.slice(1)).has("error")
@@ -579,6 +649,8 @@ function initDashboard(client, storage) {
         portraitImage.removeAttribute("src");
         profileForm.reset();
         workForm.reset();
+        syncUploadFields();
+        updateSelection();
         syncNewOffer();
         for (const section of sections) section.hidden = true;
         setStatus(authError && !userId && event === "INITIAL_SESSION"

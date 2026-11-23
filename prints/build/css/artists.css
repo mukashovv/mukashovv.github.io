@@ -363,3 +363,22 @@
     margin: .15rem 0 .6rem;
     color: var(--muted);
 }
+
+.works-tools { display:flex; flex-wrap:wrap; align-items:center; gap:.65rem; font-size:.85rem }
+.works-tools button, .works-tools a, .artist-card .button, .artist-card summary {
+    background:transparent; color:inherit; border:1px solid var(--line); border-radius:4px;
+    padding:.3rem .55rem; min-height:0; font:inherit; font-size:.8rem; text-decoration:none; cursor:pointer;
+}
+.works-tools [aria-pressed="true"] { background:var(--surface-soft); border-color:currentColor }
+.works-tools button:disabled { opacity:.45; cursor:default }
+#batch-tools { margin-top:1rem }
+.artist-card { position:relative; padding:.65rem }
+.artist-card > [data-work-select] { position:absolute; top:.8rem; left:.8rem; width:1.1rem; height:1.1rem; cursor:pointer }
+.artist-card h3, .artist-card p { margin:.3rem 0 }
+.artist-card .artwork-offer-editor { border:0; padding:0; margin:.35rem 0 }
+.artist-card summary { width:fit-content }
+.artist-card details[open] > form { margin-block:.8rem }
+.artist-grid[data-layout="list"] { grid-template-columns:minmax(0,1fr); gap:.45rem }
+.artist-grid[data-layout="list"] .artist-card { display:flow-root; padding-left:2.5rem }
+.artist-grid[data-layout="list"] .artist-card > img { float:left; width:4.5rem; height:4.5rem; margin-right:.85rem }
+.artist-grid[data-layout="list"] details[open] { clear:both }
